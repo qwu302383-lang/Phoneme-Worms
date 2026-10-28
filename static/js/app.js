@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ApexEnglish_生字本_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `PhonemeWorms_生字本_${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     showToast("📥 生字本已成功匯出為純文字檔！");

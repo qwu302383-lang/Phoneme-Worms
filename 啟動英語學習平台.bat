@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
-title ApexEnglish 頂尖英語學習平台
+title Phoneme-Worms 英語學習平台
 echo ========================================================
-echo   ⚡ 正在啟動 ApexEnglish 頂尖英語學習平台...
+echo   🐛 正在啟動 Phoneme-Worms 英語學習平台...
 echo ========================================================
 
 cd /d "%~dp0"

@@ -203,7 +203,7 @@ Be encouraging, professional, and pedagogically insightful.
 if __name__ == "__main__":
     port = 5050
     print("\n" + "=" * 62)
-    print(" 🚀 ApexEnglish 頂尖英語學習平台已啟動！")
+    print(" 🚀 Phoneme-Worms 英語學習平台已啟動！")
     print(f" 🌐 電腦瀏覽器請打開: http://localhost:{port}")
     print("=" * 62 + "\n")
     app.run(host="0.0.0.0", port=port, debug=False)
