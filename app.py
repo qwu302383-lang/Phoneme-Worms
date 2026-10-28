@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import json
 import logging
@@ -25,6 +25,8 @@ app = Flask(
     template_folder=os.path.join(BASE_DIR, "templates"),
     static_folder=os.path.join(BASE_DIR, "static")
 )
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # 載入 API KEY 與 MODEL 設定
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
@@ -206,4 +208,4 @@ if __name__ == "__main__":
     print(" 🚀 Phoneme-Worms 英語學習平台已啟動！")
     print(f" 🌐 電腦瀏覽器請打開: http://localhost:{port}")
     print("=" * 62 + "\n")
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=True)
