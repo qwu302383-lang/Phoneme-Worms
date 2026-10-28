@@ -1,0 +1,109 @@
+[
+  {
+    "id": "art-1",
+    "title": "The Evolution of Remote Work and Future Workforce",
+    "category": "TOEIC / 職場趨勢",
+    "difficulty": "Intermediate (TOEIC 750+)",
+    "readTime": "3 min",
+    "summary": "探討遠距辦公與混合工作模式如何深刻重塑現代企業組織架構、溝通協作與員工生產力。",
+    "content": "The global transition toward remote and hybrid work environments has fundamentally transformed organizational dynamics across diverse industries. Initially adopted as an emergency measure, decentralized employment has now evolved into a cornerstone of contemporary talent acquisition. Recent corporate surveys indicate that flexibility in scheduling significantly enhances employee morale and retention rates. However, modern enterprises encounter notable hurdles in preserving corporate culture and maintaining synchronous communication. Leaders must proactively implement sophisticated digital collaboration tools to bridge geographical divides without causing virtual meeting fatigue. Moving forward, the most prosperous firms will likely be those that strike an optimal equilibrium between autonomy and accountability.",
+    "translation": "全球向遠距與混合辦公模式的過渡，從根本上改變了各行業的組織運作動態。最初作為應急手段的去中心化就業模式，如今已演變為當代人才招募的基石。近期的企業調查顯示，彈性的工作時間安排能顯著提升員工士氣與留任率。然而，現代企業在維護企業文化與保持即時溝通方面面臨顯著挑戰。領導層必須積極實施先進的數位協作工具，以跨越地理隔閡，同時避免造成視訊會議疲勞。展望未來，最成功的企業將是那些在自主權與問責制之間取得最佳平衡的企業。",
+    "vocabulary": {
+      "transition": "過渡；轉變",
+      "fundamentally": "根本上；從本質上",
+      "dynamics": "動態；互動關係",
+      "decentralized": "去中心化的；分散的",
+      "cornerstone": "基石；重要基石",
+      "acquisition": "收購；獲取；取得",
+      "retention": "保留；留任",
+      "enterprises": "企業；公司",
+      "hurdles": "障礙；困難",
+      "synchronous": "同步的；同時發生的",
+      "proactively": "主動地；積極地",
+      "sophisticated": "先進的；精密複雜的",
+      "collaboration": "合作；協同工作",
+      "equilibrium": "平衡；均勢",
+      "autonomy": "自主權；獨立性",
+      "accountability": "問責性；負責任"
+    },
+    "questions": [
+      {
+        "id": "q1-1",
+        "question": "According to the passage, what was the initial motivation for adopting remote work?",
+        "options": [
+          "A strategic plan to reduce office rental expenses",
+          "An emergency measure that later became a talent acquisition strategy",
+          "A government mandate enforced globally without corporate consent",
+          "A response to the widespread introduction of virtual reality headsets"
+        ],
+        "answer": 1,
+        "explanation": "文中第二句明確指出：'Initially adopted as an emergency measure, decentralized employment has now evolved into a cornerstone of contemporary talent acquisition.' 因此選項 (B) 正確。"
+      },
+      {
+        "id": "q1-2",
+        "question": "What challenge do companies face regarding remote collaboration?",
+        "options": [
+          "A sharp drop in digital tool availability",
+          "The legal impossibility of hiring cross-border contractors",
+          "Preserving corporate culture and avoiding virtual meeting fatigue",
+          "Extreme decline in technological literacy among junior employees"
+        ],
+        "answer": 2,
+        "explanation": "文中第四與第五句提到企業面臨的挑戰是 'preserving corporate culture' 以及避免 'virtual meeting fatigue'，對應選項 (C)。"
+      }
+    ]
+  },
+  {
+    "id": "art-2",
+    "title": "Artificial Intelligence in Modern Medical Diagnostics",
+    "category": "学测 / 托福科技",
+    "difficulty": "Upper-Intermediate (学测頂標 / TOEFL 85+)",
+    "readTime": "4 min",
+    "summary": "解析深度學習與人工智慧在醫療影像判讀、早期疾病篩檢以及輔助醫師診斷中的劃時代進展與倫理考量。",
+    "content": "Artificial intelligence algorithms are rapidly revolutionizing the landscape of diagnostic medicine. By analyzing complex biomedical data, neural networks can detect minute anomalies in radiographic imagery with unprecedented precision. Early detection of malignant tumors, which historically relied heavily on the subjective scrutiny of radiologists, is now significantly augmented by automated pattern recognition. Nonetheless, medical ethicists emphasize that automated diagnostics should serve as complementary aids rather than autonomous substitutes for human judgment. Ethical dilemmas surrounding algorithmic transparency, patient privacy, and liability in misdiagnoses demand rigorous regulatory frameworks before these breakthrough technologies can be universally integrated into clinical practice.",
+    "translation": "人工智慧演算法正在迅速革新診斷醫學的版圖。透過分析複雜的生物醫學數據，神經網絡能夠以前所未有的精準度檢測放射影像中的細微異常。過去高度依賴放射科醫師主觀審查的惡性腫瘤早期篩檢，如今因自動化模式識別而獲得顯著增強。儘管如此，醫學倫理學家強調，自動化診斷應作為輔助工具，而非取代人類專業判斷的自主替代品。圍繞演算法透明度、患者隱私以及誤診責任歸屬的倫理困境，需要建立嚴格的法規監管架構，之後這些突破性技術才能被普遍整合至臨床實踐中。",
+    "vocabulary": {
+      "algorithms": "演算法",
+      "revolutionizing": "徹底變革；產生革命性巨變",
+      "biomedical": "生物醫學的",
+      "anomalies": "異常；反常事物",
+      "radiographic": "X光攝影的；放射線照相的",
+      "unprecedented": "史無前例的；空前的",
+      "malignant": "惡性的；有害的",
+      "scrutiny": "仔細檢查；審查",
+      "augmented": "增強的；擴充的",
+      "complementary": "互補的；補充的",
+      "autonomous": "自主的；獨立運行的",
+      "transparency": "透明度；坦率",
+      "liability": "責任；賠償責任",
+      "regulatory": "監管的；管理的",
+      "integrated": "整合的；一體化的"
+    },
+    "questions": [
+      {
+        "id": "q2-1",
+        "question": "What is the primary role that medical ethicists advocate for AI diagnostics?",
+        "options": [
+          "Complete replacement of human physicians in emergency wards",
+          "Exclusive application in cosmetic and elective surgery",
+          "Serving as complementary aids rather than autonomous substitutes",
+          "Restricting AI usage to financial billing in hospitals"
+        ],
+        "answer": 2,
+        "explanation": "第四句提到：'automated diagnostics should serve as complementary aids rather than autonomous substitutes for human judgment'，明確指出倫理學者認為 AI 應為輔助工具而非完全取代醫生。"
+      },
+      {
+        "id": "q2-2",
+        "question": "What must be established before universal clinical integration occurs?",
+        "options": [
+          "Cheaper smartphones for all patients",
+          "Rigorous regulatory frameworks addressing transparency and liability",
+          "Global ban on neural network research",
+          "Elimination of all human radiologists from medical schools"
+        ],
+        "answer": 1,
+        "explanation": "最後一句提到 'demand rigorous regulatory frameworks before these breakthrough technologies can be universally integrated'，故選 (B)。"
+      }
+    ]
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "scenario-job-interview",
+    "name": "多益職場：外商英語求職面試 (Job Interview)",
+    "category": "TOEIC / 職場英語",
+    "icon": "💼",
+    "role": "Senior Hiring Manager at Global Tech",
+    "avatar": "👩‍💼",
+    "greeting": "Hello and welcome! Thank you for taking the time to speak with us today. To start off, could you briefly introduce yourself and share what motivated you to apply for this position?",
+    "promptGuidance": "請先用 2~3 句話簡單自我介紹，說明你的專業背景或長處，以及你對這份職位感興趣的原因。",
+    "targetVocab": ["strengths", "accomplish", "collaborative", "adaptable", "passion"],
+    "sampleAnswers": [
+      "I have a strong background in digital communication and problem-solving. I am passionate about leveraging new technologies to drive team performance, which is why your innovative culture strongly appeals to me."
+    ]
+  },
+  {
+    "id": "scenario-ielts-speaking",
+    "name": "雅思口說 Part 3：人工智慧與未來社會",
+    "category": "IELTS / 學術思辨",
+    "icon": "🎓",
+    "role": "IELTS Senior Examiner",
+    "avatar": "👨‍🏫",
+    "greeting": "Good afternoon. In this part, we will explore deeper societal implications. In your view, do you believe the rapid adoption of AI will create more career opportunities, or will it exacerbate unemployment?",
+    "promptGuidance": "嘗試使用舉例 (For instance...) 或對比 (On one hand... on the other hand...) 深入陳述正反觀點，展現學術詞彙與連貫性。",
+    "targetVocab": ["unemployment", "automation", "inevitable", "reskilling", "innovation"],
+    "sampleAnswers": [
+      "While repetitive tasks will certainly be automated, I firmly believe AI will catalyze new industries and spawn roles that we haven't even conceived yet, provided governments invest in reskilling the workforce."
+    ]
+  },
+  {
+    "id": "scenario-gsat-campus",
+    "name": "高中學測：校園生活與國際志工心得分享",
+    "category": "学测 / 校園情境",
+    "icon": "🏫",
+    "role": "Exchange Student Coordinator",
+    "avatar": "🎒",
+    "greeting": "Hi there! We are excited to hear about your volunteer experience during summer vacation. What was the most meaningful lesson or challenge you encountered while working in the community?",
+    "promptGuidance": "試著敘述一件讓你印象深刻的志工經驗、遇到的難題以及你如何與夥伴合作克服它。",
+    "targetVocab": ["meaningful", "cooperation", "challenge", "perseverance", "valuable"],
+    "sampleAnswers": [
+      "The most memorable challenge was organizing an outdoor workshop under heavy rain. Through team coordination and quick adjustments, we managed to engage everyone and learned the true meaning of adaptability."
+    ]
+  },
+  {
+    "id": "scenario-business-meeting",
+    "name": "商務談判：產品交期與報價協商",
+    "category": "TOEIC / 商務談判",
+    "icon": "🤝",
+    "role": "Purchasing Director (Client)",
+    "avatar": "👔",
+    "greeting": "Thank you for the detailed proposal. We are quite impressed with your quality standards, but your proposed delivery timeline is three weeks later than what our management requires. Is there any room for expediting the process?",
+    "promptGuidance": "以專業有禮貌的商務口吻回應，提出可能的折衷方案 (例如分批交貨或加班趕工) 同時保持利潤。",
+    "targetVocab": ["expedite", "timeline", "compromise", "feasibility", "deliverables"],
+    "sampleAnswers": [
+      "We fully understand the urgency of your launch schedule. While producing the entire batch earlier poses logistical challenges, we can arrange an initial partial shipment within two weeks to keep your operations running seamlessly."
+    ]
+  }
+]

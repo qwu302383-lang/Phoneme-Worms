@@ -1,0 +1,96 @@
+[
+  {
+    "id": "quiz-1",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 詞性與文法",
+    "difficulty": "Medium",
+    "question": "The newly appointed CEO stressed that every department must submit its quarterly budget proposal ______ by Friday afternoon.",
+    "options": [
+      "prompt",
+      "promptly",
+      "promptness",
+      "prompting"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：副詞修飾動詞】\n句中動詞為 submit（提交），此處需要副詞 promptly（迅速地、準時地）來修飾動詞片語 submit ... by Friday afternoon。\n(A) prompt (adj. 迅速的 / v. 促使)\n(B) promptly (adv. 準時地、即刻地) 👉 正確答案\n(C) promptness (n. 敏捷、及時)\n(D) prompting (n. 激勵、提示)"
+  },
+  {
+    "id": "quiz-2",
+    "type": "grammar",
+    "category": "学测文法 / 關係代名詞與介系詞",
+    "difficulty": "Hard",
+    "question": "The renewable energy project, ______ the municipal government invested millions of dollars, has finally reached full operational capacity.",
+    "options": [
+      "in which",
+      "to which",
+      "with that",
+      "which"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：介系詞 + 關係代名詞】\n還原後方子句為：'The municipal government invested millions of dollars IN the renewable energy project.'\n由於先行詞是 the renewable energy project，且動詞 invest 的固定搭配為 invest in sth，移到關係代名詞前面時形成 'in which'。\n注意：逗號後的非限定子句不可使用 that。"
+  },
+  {
+    "id": "quiz-3",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 假設語氣與動詞時態",
+    "difficulty": "Medium-Hard",
+    "question": "Had the shipment ______ inspected before leaving the warehouse, the defective components would not have reached the overseas retailers.",
+    "options": [
+      "been",
+      "being",
+      "be",
+      "has been"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：與過去事實相反的假設語氣倒裝】\n原句為：'If the shipment had been inspected..., the defective components would not have reached...'\n省略連接詞 If 時，助動詞 Had 需移至主詞 the shipment 前形成倒裝：'Had the shipment been inspected'。\n因此空格應填入過去分詞 been。"
+  },
+  {
+    "id": "quiz-4",
+    "type": "cloze",
+    "category": "学测克漏字題組 / 科技與環境",
+    "passage": "Urban greening initiatives have gained momentum worldwide as cities grapple with the 'urban heat island' effect. By planting rooftop gardens and preserving native flora, municipalities can significantly mitigate ambient temperatures. (1)______, these vegetative barriers act as natural sponges during torrential downpours, reducing the risk of catastrophic flash floods. Environmental planners emphasize that urban ecosystems (2)______ foster biodiversity, but also tangibly enhance residents' psychological well-being.",
+    "questions": [
+      {
+        "subId": 1,
+        "label": "空格 (1)",
+        "question": "Choose the most appropriate transition word for blank (1):",
+        "options": [
+          "Furthermore",
+          "Conversely",
+          "Otherwise",
+          "Nonetheless"
+        ],
+        "answer": 0,
+        "explanation": "前句說明植被能降低溫度，後句補充說明植被還能在暴雨時吸收水分防洪，語意為「遞進補充關係」，因此應選 Furthermore（此外；而且）。"
+      },
+      {
+        "subId": 2,
+        "label": "空格 (2)",
+        "question": "Choose the correct correlative conjunction for blank (2):",
+        "options": [
+          "either",
+          "neither",
+          "not only",
+          "whether"
+        ],
+        "answer": 2,
+        "explanation": "後方出現 'but also tangibly enhance...'，對應英語常見關聯對等連接詞片語 'not only A but also B'（不僅…而且…），故選 not only。"
+      }
+    ]
+  },
+  {
+    "id": "quiz-5",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 主謂一致與不定代名詞",
+    "difficulty": "Medium",
+    "question": "Neither the head of the marketing team nor any of the junior analysts ______ willing to take full responsibility for the delayed campaign.",
+    "options": [
+      "is",
+      "was",
+      "were",
+      "has"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：Neither A nor B 主謂就近一致原則】\n使用 'Neither A nor B' 連接兩個主詞時，動詞的單複數形態應與靠近動詞的後方主詞 (B) 一致。\n此處靠近動詞的主詞為 'any of the junior analysts'（複數），因此動詞需用複數形式 were (be willing to 樂意做某事)。"
+  }
+]

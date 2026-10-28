@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexEnglish 頂尖英語學習平台 | 學測・多益・雅思備考中心</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-light">
+  <!-- 頂部導航列 -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <span class="brand-title">ApexEnglish</span>
+          <span class="brand-subtitle">頂尖英語學習平台</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">學習總覽</span>
+        </button>
+        <button class="nav-btn" data-tab="vocab">
+          <span class="nav-icon">🗂️</span>
+          <span class="nav-label">單字卡背誦</span>
+        </button>
+        <button class="nav-btn" data-tab="ai-tutor">
+          <span class="nav-icon">🎙️</span>
+          <span class="nav-label">AI 口說導師</span>
+        </button>
+        <button class="nav-btn" data-tab="reading">
+          <span class="nav-icon">📖</span>
+          <span class="nav-label">閱讀即查</span>
+        </button>
+        <button class="nav-btn" data-tab="quiz">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">文法克漏字</span>
+        </button>
+        <button class="nav-btn" data-tab="wordbook">
+          <span class="nav-icon">⭐</span>
+          <span class="nav-label">生字本 (<span id="starredCountBadge">0</span>)</span>
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <!-- 發音腔調切換 -->
+        <div class="voice-selector" title="切換英語發音腔調">
+          <span class="voice-label">口音:</span>
+          <select id="accentSelect" class="accent-dropdown">
+            <option value="en-US">🇺🇸 美式英語</option>
+            <option value="en-GB">🇬🇧 英式英語</option>
+          </select>
+        </div>
+
+        <!-- 主題切換 -->
+        <button id="themeToggleBtn" class="action-btn" title="切換深淺模式">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="app-main">
+    
+    <!-- 1. 學習總覽 (Dashboard) -->
+    <section id="tab-dashboard" class="tab-pane active">
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <div class="badge-tag">🎯 檢定・大考突破加速器</div>
+          <h1 class="hero-title">今天也要向英語巔峰邁進一步！</h1>
+          <p class="hero-desc">結合學測 7000 單、多益高頻商務情境與 AI 語音即時診斷，隨時隨地開啟沉浸式高效學習。</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="switchTab('ai-tutor')">🚀 開始今日 AI 口說練習</button>
+            <button class="btn btn-outline" onclick="switchTab('vocab')">🗂️ 複習單字記憶卡</button>
+          </div>
+        </div>
+        
+        <div class="daily-quote-card">
+          <div class="quote-header">
+            <span class="quote-tag">💡 今日勵志金句</span>
+            <button class="icon-speak-btn" id="playQuoteBtn" title="朗讀金句">🔊</button>
+          </div>
+          <p class="quote-en" id="dailyQuoteEn">"Success is the sum of small efforts, repeated day in and day out."</p>
+          <p class="quote-zh" id="dailyQuoteZh">「成功是每一天無數細微努力積累的總和。」</p>
+          <span class="quote-author">— Robert Collier</span>
+        </div>
+      </div>
+
+      <!-- 統計數據卡片 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-blue">📚</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statLearnedWords">0</div>
+            <div class="stat-label">已掌握詞彙</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-purple">🎙️</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statOralSessions">0</div>
+            <div class="stat-label">口說對話回合</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-green">📝</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statQuizFinished">0</div>
+            <div class="stat-label">完成測驗題目</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-amber">🔥</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statStreak">1 天</div>
+            <div class="stat-label">連續學習天數</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快速入口功能矩陣 -->
+      <div class="section-heading">
+        <h2>🔥 核心學習模組推薦</h2>
+        <p>為學測、多益與出國留學打造的四位一體全方位訓練</p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card" onclick="switchTab('vocab')">
+          <div class="feature-icon bg-blue">🗂️</div>
+          <h3>互動式單字卡</h3>
+          <p>高頻大考單字、音標、例句、美英雙發音與記憶翻轉卡，科學抗遺忘。</p>
+          <span class="feature-link">進入單字庫 &rarr;</span>
+        </div>
+
+        <div class="feature-card" onclick="switchTab('ai-tutor')">
+          <div class="feature-icon bg-purple">🎙️</div>
+          <h3>AI 口說與情境導師</h3>
+          <p>語音辨識 + 智慧對話，即時診斷文法錯誤並推薦母語人士高級表達。</p>
+          <span class="feature-link">啟動 AI 對話 &rarr;</span>
+        </div>
+
+        <div class="feature-card" onclick="switchTab('reading')">
+          <div class="feature-icon bg-teal">📖</div>
+          <h3>長文精讀與點詞即查</h3>
+          <p>內建學術與商務精選閱讀，滑鼠點擊任意單詞浮現釋義並加入生字本。</p>
+          <span class="feature-link">閱讀精選文章 &rarr;</span>
+        </div>
+
+        <div class="feature-card" onclick="switchTab('quiz')">
+          <div class="feature-icon bg-amber">📝</div>
+          <h3>文法與克漏字模擬測驗</h3>
+          <p>模擬大考及多益 Part 5/6 題型，即時核對作答並提供深度考點詳解。</p>
+          <span class="feature-link">開始文法模擬 &rarr;</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 單字卡背誦庫 (Flashcards) -->
+    <section id="tab-vocab" class="tab-pane">
+      <div class="view-header">
+        <div>
+          <h2>🗂️ 互動式單字記憶庫</h2>
+          <p class="subtitle">涵蓋高中學測 4-6 級、多益核心商業、托福雅思高頻字彙</p>
+        </div>
+        <div class="vocab-mode-switch">
+          <button class="mode-btn active" id="btnModeCard">翻卡學習模式</button>
+          <button class="mode-btn" id="btnModeQuiz">快速抽考模式</button>
+        </div>
+      </div>
+
+      <!-- 分類篩選標籤 -->
+      <div class="filter-bar">
+        <button class="filter-chip active" data-filter="all">全部單字</button>
+        <button class="filter-chip" data-filter="TOEIC">💼 多益必備</button>
+        <button class="filter-chip" data-filter="学测">🏫 高中學測</button>
+        <button class="filter-chip" data-filter="托福">🎓 托福/雅思</button>
+        <button class="filter-chip" data-filter="unmastered">⏳ 學習中 (<span id="unmasteredCount">0</span>)</button>
+        <button class="filter-chip" data-filter="mastered">✅ 已掌握 (<span id="masteredCount">0</span>)</button>
+      </div>
+
+      <!-- 翻卡學習區域 -->
+      <div id="flashcardContainer" class="flashcard-wrapper">
+        <div class="flashcard-progress-bar">
+          <div class="progress-info">
+            <span>單字進度: <strong id="cardIndexText">1 / 15</strong></span>
+            <span id="cardCategoryBadge" class="category-pill">TOEIC / 学测</span>
+          </div>
+          <div class="progress-track">
+            <div id="cardProgressFill" class="progress-fill" style="width: 10%;"></div>
+          </div>
+        </div>
+
+        <div class="flashcard" id="mainFlashcard">
+          <!-- 正面 -->
+          <div class="card-face card-front">
+            <div class="card-header-actions">
+              <span class="pos-badge" id="cardPos">adj.</span>
+              <button class="btn-star" id="cardStarBtn" title="加入生字本">⭐</button>
+            </div>
+            <div class="card-center">
+              <h2 class="card-word" id="cardWord">comprehensive</h2>
+              <div class="card-phonetic-wrap">
+                <span class="card-phonetic" id="cardPhonetic">/ˌkɑːm.prəˈhen.sɪv/</span>
+                <button class="card-audio-btn" id="cardAudioBtn" title="朗讀發音">🔊</button>
+              </div>
+              <p class="flip-hint">點擊卡片或按「空白鍵」翻轉看釋義 ↺</p>
+            </div>
+            <div class="card-footer-tip">快捷鍵：[空白鍵] 翻卡 | [←] 稍後複習 | [→] 標記已掌握</div>
+          </div>
+
+          <!-- 背面 -->
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="card-def-title" id="cardBackWord">comprehensive</span>
+              <button class="btn-star" id="cardStarBackBtn" title="加入生字本">⭐</button>
+            </div>
+            <div class="card-definitions">
+              <div class="def-block">
+                <div class="def-zh" id="cardZhDef">全面的；綜合的；包羅萬象的</div>
+                <div class="def-en" id="cardEnDef">Complete and including everything that is necessary.</div>
+              </div>
+              <div class="collocations-block">
+                <span class="colloc-label">常見搭配:</span>
+                <div class="colloc-tags" id="cardCollocations"></div>
+              </div>
+              <div class="example-block">
+                <div class="example-en-row">
+                  <p class="example-en" id="cardExample">The company offered a comprehensive training program for all incoming interns.</p>
+                  <button class="card-audio-btn-sm" id="cardExampleAudioBtn" title="朗讀例句">🔊</button>
+                </div>
+                <p class="example-zh" id="cardExampleZh">該公司為所有新進實習生提供了全面的培訓計畫。</p>
+              </div>
+            </div>
+            <p class="flip-hint">再點擊一次即可翻回正面 ↺</p>
+          </div>
+        </div>
+
+        <!-- 記憶控制按鈕組 -->
+        <div class="flashcard-controls">
+          <button class="btn btn-review" id="btnMarkReview" title="標記為未熟並排入複習 (快捷鍵 ←)">
+            <span class="ctrl-icon">⏳</span> 稍後再複習 (不熟)
+          </button>
+          <button class="btn btn-flip" id="btnFlipCard">
+            <span class="ctrl-icon">🔄</span> 翻轉卡片 [Space]
+          </button>
+          <button class="btn btn-master" id="btnMarkMaster" title="標記為已完全掌握 (快捷鍵 →)">
+            <span class="ctrl-icon">✅</span> 記住了 (已掌握)
+          </button>
+        </div>
+      </div>
+
+      <!-- 單字測驗模式區域 (隱藏/切換) -->
+      <div id="vocabQuizContainer" class="vocab-quiz-wrapper" style="display: none;">
+        <div class="quiz-card-box">
+          <div class="quiz-badge">💡 單字四選一快問快答</div>
+          <h3 class="quiz-target-word" id="vQuizWord">implement</h3>
+          <p class="quiz-target-phonetic" id="vQuizPhonetic">/ˈɪm.plə.ment/</p>
+          <div class="quiz-options-list" id="vQuizOptions"></div>
+          <div class="quiz-result-feedback" id="vQuizFeedback"></div>
+          <button class="btn btn-primary" id="vQuizNextBtn" style="display: none;">下一題 &rarr;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. AI 口說與情境導師 (AI Tutor) -->
+    <section id="tab-ai-tutor" class="tab-pane">
+      <div class="ai-tutor-layout">
+        <!-- 側邊：情境選擇 -->
+        <aside class="scenario-sidebar">
+          <div class="scenario-header">
+            <h3>🎭 口說情境選擇</h3>
+            <p>選擇您想模擬考題或職場演練的真實場景</p>
+          </div>
+          <div class="scenario-list" id="scenarioList"></div>
+          
+          <div class="scenario-info-card" id="currentScenarioInfo">
+            <h4 id="scInfoTitle">💼 多益求職面試</h4>
+            <p class="sc-role" id="scInfoRole">Role: Senior Hiring Manager</p>
+            <p class="sc-guidance" id="scInfoGuidance">請用 2~3 句話簡單自我介紹，說明你的長處與申請動機。</p>
+            <div class="target-vocab-box">
+              <span class="tv-label">🎯 本情境推薦運用高頻詞彙：</span>
+              <div class="tv-chips" id="scInfoVocabChips"></div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- 主視窗：對話與即時語音練習 -->
+        <div class="chat-main-window">
+          <div class="chat-top-bar">
+            <div class="chat-status">
+              <span class="status-dot online"></span>
+              <span class="chat-tutor-name" id="chatTutorName">Apex AI English Coach</span>
+              <span class="chat-badge" id="chatModelBadge">Gemini AI Powered</span>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btnResetChat">🔄 重新開始本情境</button>
+          </div>
+
+          <!-- 對話訊息列表 -->
+          <div class="chat-messages" id="chatMessages"></div>
+
+          <!-- 語音波形指示器 (錄音中時顯示) -->
+          <div class="voice-recording-indicator" id="recordingIndicator" style="display: none;">
+            <div class="wave-bars">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span class="rec-text">正在聆聽您的發音... 請直接以英語說話</span>
+            <button class="btn-stop-rec" id="btnStopRec">完成說話 ⏹️</button>
+          </div>
+
+          <!-- 輸入列 -->
+          <div class="chat-input-bar">
+            <button class="btn-mic" id="btnVoiceRecord" title="點擊開啟麥克風 (Web Speech API 英語語音輸入)">
+              <span class="mic-icon">🎙️</span>
+            </button>
+            <textarea id="chatInputText" class="chat-textarea" placeholder="以英文輸入回答，或點擊左側麥克風直接說話... (Enter 發送，Shift+Enter 換行)" rows="1"></textarea>
+            <button class="btn btn-primary btn-send" id="btnSendChat">
+              <span>送出</span>
+              <span class="send-icon">➤</span>
+            </button>
+          </div>
+          <div class="chat-sub-hint">
+            💡 系統將即時為您的每一句話進行<strong>文法糾錯</strong>、<strong>地道表達推薦</strong>與<strong>得分診斷</strong>！
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 閱讀精讀與點詞即查 (Reading) -->
+    <section id="tab-reading" class="tab-pane">
+      <div class="view-header">
+        <div>
+          <h2>📖 英語文章精讀與即查</h2>
+          <p class="subtitle">滑鼠點擊文章中任意單字即可浮現中英文釋義、音標發音，並一鍵加入生字本</p>
+        </div>
+        <div class="reading-controls">
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleBilingual">
+            <span class="slider"></span>
+            <span class="toggle-text">開啟中文對照</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 文章選擇卡 -->
+      <div class="article-selector-row" id="articleSelector"></div>
+
+      <!-- 文章主閱讀區 -->
+      <div class="article-reader-container">
+        <div class="article-header">
+          <span class="article-tag" id="artCategory">TOEIC / 職場趨勢</span>
+          <h2 class="article-title" id="artTitle">載入中...</h2>
+          <div class="article-meta">
+            <span id="artDifficulty">難度: Intermediate</span> • 
+            <span id="artReadTime">預估閱讀: 3 min</span>
+          </div>
+          <p class="article-summary" id="artSummary"></p>
+        </div>
+
+        <!-- 英文主文 (單字皆可點擊) -->
+        <div class="article-content-box" id="artContentEnglish"></div>
+
+        <!-- 中文翻譯區 (切換展開) -->
+        <div class="article-translation-box" id="artContentChinese" style="display: none;">
+          <h4>🌏 全文中譯參考</h4>
+          <p id="artTranslationText"></p>
+        </div>
+
+        <!-- 文末閱讀理解測驗 -->
+        <div class="article-quiz-section">
+          <h3>🎯 篇章閱讀理解測驗</h3>
+          <div id="artQuestionsList"></div>
+        </div>
+      </div>
+
+      <!-- 點擊單字浮動字典卡片 (Popup Card) -->
+      <div class="dict-popup" id="dictPopup" style="display: none;">
+        <div class="popup-header">
+          <span class="popup-word" id="popWord">word</span>
+          <span class="popup-phonetic" id="popPhonetic"></span>
+          <button class="card-audio-btn-sm" id="popAudioBtn">🔊</button>
+          <button class="popup-close-btn" id="popCloseBtn">&times;</button>
+        </div>
+        <div class="popup-body">
+          <p class="popup-def" id="popDef">釋義載入中...</p>
+        </div>
+        <div class="popup-footer">
+          <button class="btn btn-sm btn-outline" id="popAddStarBtn">⭐ 加入生字本</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 文法與克漏字模擬測驗 (Quiz) -->
+    <section id="tab-quiz" class="tab-pane">
+      <div class="view-header">
+        <div>
+          <h2>📝 大考與檢定文法模擬測驗</h2>
+          <p class="subtitle">涵蓋多益 Part 5 關鍵考點、關係代名詞、假設語氣倒裝及學測克漏字題組</p>
+        </div>
+        <div class="quiz-stat-pill">
+          <span>測驗正確率：<strong id="quizAccuracy">0%</strong> (<span id="quizScoreText">0/0</span>)</span>
+        </div>
+      </div>
+
+      <!-- 題型切換 -->
+      <div class="filter-bar">
+        <button class="filter-chip active" data-qfilter="all">全部題型</button>
+        <button class="filter-chip" data-qfilter="grammar">單句文法 (Part 5)</button>
+        <button class="filter-chip" data-qfilter="cloze">克漏字題組 (Cloze)</button>
+      </div>
+
+      <!-- 題目展示區 -->
+      <div class="quiz-list-container" id="quizContainer"></div>
+    </section>
+
+    <!-- 6. 我的生字筆記本 (Wordbook) -->
+    <section id="tab-wordbook" class="tab-pane">
+      <div class="view-header">
+        <div>
+          <h2>⭐ 個人生字收藏筆記本</h2>
+          <p class="subtitle">集中管理在單字卡、文章閱讀與測驗中標記的生詞，支援隨機自我抽考</p>
+        </div>
+        <div class="wordbook-actions">
+          <button class="btn btn-primary" id="btnDrillStarred">🎯 抽考收藏生字</button>
+          <button class="btn btn-outline" id="btnExportWordbook">📥 匯出單字本</button>
+          <button class="btn btn-danger-outline" id="btnClearWordbook">🗑️ 清空所有收藏</button>
+        </div>
+      </div>
+
+      <div class="wordbook-search-bar">
+        <input type="text" id="wbSearchInput" class="form-input" placeholder="🔍 搜尋收藏的生字或中文解釋...">
+      </div>
+
+      <!-- 生字列表 -->
+      <div class="wordbook-grid" id="wordbookGrid"></div>
+      
+      <!-- 空狀態提示 -->
+      <div class="empty-state" id="wbEmptyState" style="display: none;">
+        <div class="empty-icon">📖</div>
+        <h3>生字本目前是空的！</h3>
+        <p>在單字卡庫或文章閱讀中點擊 ⭐ 星號，即可將生字收藏到此處進行深度複習。</p>
+        <button class="btn btn-primary" onclick="switchTab('vocab')">前往單字卡庫探索</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 浮動通知提示 (Toast) -->
+  <div id="toast" class="toast-notice"></div>
+
+  <!-- 前端核心 JavaScript 模組 -->
+  <script src="/static/js/speech.js"></script>
+  <script src="/static/js/vocab.js"></script>
+  <script src="/static/js/ai_tutor.js"></script>
+  <script src="/static/js/reading.js"></script>
+  <script src="/static/js/quiz.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
