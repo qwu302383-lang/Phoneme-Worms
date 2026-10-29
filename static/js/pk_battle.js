@@ -928,7 +928,13 @@ const PKBattleModule = {
   // 自創題庫建立與管理
   openCreateDeckModal() {
     const modal = document.getElementById('pkCreateDeckModal');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+      modal.style.display = 'flex';
+      setTimeout(() => {
+        const input = document.getElementById('pkNewDeckName');
+        if (input) input.focus();
+      }, 50);
+    }
   },
 
   closeCreateDeckModal() {
@@ -939,15 +945,19 @@ const PKBattleModule = {
   saveNewCustomDeck() {
     const nameInput = document.getElementById('pkNewDeckName');
     const wordsInput = document.getElementById('pkNewDeckWordsText');
+    if (!nameInput || !wordsInput) return;
+
     const name = nameInput.value.trim();
     const rawText = wordsInput.value.trim();
 
     if (!name) {
       alert("請輸入題庫名稱！");
+      nameInput.focus();
       return;
     }
     if (!rawText) {
       alert("請輸入至少 2 筆單字！");
+      wordsInput.focus();
       return;
     }
 
@@ -1016,18 +1026,38 @@ const PKBattleModule = {
       this.exitToLobby();
     });
 
-    // 創立題庫彈窗
-    document.getElementById('btnPkOpenCreateDeck')?.addEventListener('click', () => {
-      this.openCreateDeckModal();
+    // 創立題庫彈窗（支援多個按鈕、遮罩點擊）
+    document.querySelectorAll('.btn-open-create-deck, #btnPkOpenCreateDeck, #btnPkOpenCreateDeck2').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openCreateDeckModal();
+      });
     });
-    document.getElementById('btnPkCloseModal')?.addEventListener('click', () => {
+
+    document.querySelectorAll('#btnPkCloseModal, #btnPkCancelDeck').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.closeCreateDeckModal();
+      });
+    });
+
+    document.querySelector('#pkCreateDeckModal .modal-overlay')?.addEventListener('click', () => {
       this.closeCreateDeckModal();
     });
-    document.getElementById('btnPkCancelDeck')?.addEventListener('click', () => {
-      this.closeCreateDeckModal();
-    });
-    document.getElementById('btnPkSaveDeck')?.addEventListener('click', () => {
+
+    document.getElementById('btnPkSaveDeck')?.addEventListener('click', (e) => {
+      e.preventDefault();
       this.saveNewCustomDeck();
+    });
+
+    // ESC 快捷鍵關閉
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('pkCreateDeckModal');
+        if (modal && modal.style.display !== 'none') {
+          this.closeCreateDeckModal();
+        }
+      }
     });
   }
 };

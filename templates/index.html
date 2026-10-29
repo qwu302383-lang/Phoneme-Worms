@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -885,7 +885,7 @@
             <p class="subtitle">挑選專屬英雄出戰，配置或自創對決題庫，在回合制問答中與 AI 展開攻防決策！</p>
           </div>
           <div class="pk-lobby-actions">
-            <button class="btn btn-outline" id="btnPkOpenCreateDeck">
+            <button class="btn btn-outline btn-open-create-deck" id="btnPkOpenCreateDeck" onclick="PKBattleModule.openCreateDeckModal()">
               <span>➕ 創立專屬 PK 題庫</span>
             </button>
           </div>
@@ -923,7 +923,7 @@
             <div class="deck-select-row">
               <label>當前題庫來源：</label>
               <select id="pkDeckSelect" class="form-input pk-deck-dropdown"></select>
-              <button class="btn btn-outline" id="btnPkOpenCreateDeck">➕ 創立新題庫</button>
+              <button class="btn btn-outline btn-open-create-deck" id="btnPkOpenCreateDeck2" onclick="PKBattleModule.openCreateDeckModal()">➕ 創立新題庫</button>
             </div>
             <p class="pk-deck-info" id="pkDeckInfoText">包含全面性、實施、永續性等核心大考字彙，戰力均衡。</p>
           </div>
@@ -1072,11 +1072,11 @@
 
       <!-- 彈窗：創立專屬 PK 題庫 (Create Deck Modal) -->
       <div class="cq-modal" id="pkCreateDeckModal" style="display: none;">
-        <div class="modal-overlay"></div>
+        <div class="modal-overlay" onclick="PKBattleModule.closeCreateDeckModal()"></div>
         <div class="modal-card modal-card-lg">
           <div class="modal-header">
             <h4>➕ 創立專屬 PK 對戰單字庫</h4>
-            <button class="btn-close-modal" id="btnPkCloseModal">&times;</button>
+            <button class="btn-close-modal" id="btnPkCloseModal" onclick="PKBattleModule.closeCreateDeckModal()">&times;</button>
           </div>
           <div class="modal-body">
             <div class="form-group" style="margin-bottom: 1rem;">
@@ -1096,8 +1096,8 @@ resilient - 具韌性的
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-outline" id="btnPkCancelDeck">取消</button>
-            <button class="btn btn-primary" id="btnPkSaveDeck">確認建立題庫</button>
+            <button class="btn btn-outline" id="btnPkCancelDeck" onclick="PKBattleModule.closeCreateDeckModal()">取消</button>
+            <button class="btn btn-primary" id="btnPkSaveDeck" onclick="PKBattleModule.saveNewCustomDeck()">確認建立題庫</button>
           </div>
         </div>
       </div>
