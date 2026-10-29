@@ -203,7 +203,7 @@ Be encouraging, professional, and pedagogically insightful.
     return jsonify({"success": True, "result": fallback_result, "offlineFallback": True})
 
 if __name__ == "__main__":
-    port = 5050
+    port = int(os.environ.get('PORT', 5050))
     print("\n" + "=" * 62)
     print(" 🚀 Phoneme-Worms 英語學習平台已啟動！")
     print(f" 🌐 電腦瀏覽器請打開: http://localhost:{port}")
