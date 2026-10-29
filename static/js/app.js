@@ -133,6 +133,7 @@ function switchTab(tabId) {
 
   // 特殊分頁啟動回呼
   if (tabId === 'custom-quiz' && window.CustomQuizModule) { CustomQuizModule.renderWordGrid(); }
+  if (tabId === 'pk-battle' && window.PKBattleModule) { PKBattleModule.renderDeckSelector(); }
   if (tabId === 'wordbook') {
     renderWordbook();
   }
@@ -267,6 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await ReadingModule.init();
   await QuizModule.init();
   if (window.CustomQuizModule) await CustomQuizModule.init();
+  if (window.PKBattleModule) await PKBattleModule.init();
 
   // 7. 更新統計與生字徽章
   const stats = AppState.getStats();

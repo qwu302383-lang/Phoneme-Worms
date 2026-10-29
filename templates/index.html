@@ -49,6 +49,11 @@
             <span class="nav-icon">📝</span>
             <span class="nav-label">文法與克漏字</span>
           </button>
+                    <button class="nav-btn" data-tab="pk-battle">
+            <span class="nav-icon">⚔️</span>
+            <span class="nav-label">單字 PK 對決</span>
+            <span class="nav-badge" style="background:#ef4444; color:#fff;">HOT</span>
+          </button>
           <button class="nav-btn" data-tab="custom-quiz">
             <span class="nav-icon">🎯</span>
             <span class="nav-label">自訂圖文出題</span>
@@ -190,6 +195,13 @@
           <h3>長文精讀與點詞即查</h3>
           <p>內建學術與商務精選閱讀，滑鼠點擊任意單詞浮現釋義並加入生字本。</p>
           <span class="feature-link">閱讀精選文章 &rarr;</span>
+        </div>
+
+        <div class="feature-card" onclick="switchTab('pk-battle')">
+          <div class="feature-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">⚔️</div>
+          <h3>單字 PK 對決競技場</h3>
+          <p>挑選專屬英雄、自創題庫，在回合問答中發動普攻/技能或防禦/硬抗！</p>
+          <span class="feature-link" style="color: #ef4444;">進入競技場 &rarr;</span>
         </div>
 
         <div class="feature-card" onclick="switchTab('custom-quiz')">
@@ -862,6 +874,235 @@
       </div>
 
     </section>
+
+    <!-- 8. 單字 PK 對決競技場 (Battle Arena) -->
+    <section id="tab-pk-battle" class="tab-pane">
+      <!-- 畫面 A：大廳與出戰配置 (Lobby) -->
+      <div id="pkLobbyScreen" class="pk-lobby-container">
+        <div class="view-header">
+          <div>
+            <h2>⚔️ 單字 PK 對決競技場</h2>
+            <p class="subtitle">挑選專屬英雄出戰，配置或自創對決題庫，在回合制問答中與 AI 展開攻防決策！</p>
+          </div>
+          <div class="pk-lobby-actions">
+            <button class="btn btn-outline" id="btnPkOpenCreateDeck">
+              <span>➕ 創立專屬 PK 題庫</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 步驟 1：選擇英雄角色 (右上角清楚標記偏向) -->
+        <div class="pk-setup-card">
+          <div class="step-card-header">
+            <div class="step-title">
+              <span class="step-number">1</span>
+              <div>
+                <h3>選擇出戰英雄角色</h3>
+                <p>每位角色擁有專屬戰鬥數值、絕招技能與天賦偏向（請查看卡片右上角標記）</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 角色選擇清單 (右上角標記偏向) -->
+          <div class="pk-char-grid" id="pkCharList"></div>
+        </div>
+
+        <!-- 步驟 2：選擇或創立單字庫 -->
+        <div class="pk-setup-card">
+          <div class="step-card-header">
+            <div class="step-title">
+              <span class="step-number">2</span>
+              <div>
+                <h3>選擇對戰單字庫</h3>
+                <p>挑選即將在回合對答中登場的詞彙題庫，或創立專屬於您的自訂字彙庫！</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pk-deck-selector-box">
+            <div class="deck-select-row">
+              <label>當前題庫來源：</label>
+              <select id="pkDeckSelect" class="form-input pk-deck-dropdown"></select>
+              <button class="btn btn-outline" id="btnPkOpenCreateDeck">➕ 創立新題庫</button>
+            </div>
+            <p class="pk-deck-info" id="pkDeckInfoText">包含全面性、實施、永續性等核心大考字彙，戰力均衡。</p>
+          </div>
+        </div>
+
+        <!-- 步驟 3：進入戰場行動卡 -->
+        <div class="pk-launch-bar">
+          <div class="launch-summary">
+            <span>戰局規則：<strong>答對者</strong>可選擇【普通攻擊】或【釋放技能】；<strong>答錯者</strong>可選擇【採取防禦減傷】或【硬抗扣血累積怒氣】！</span>
+          </div>
+          <button class="btn btn-primary btn-lg" id="btnStartPKBattle">
+            <span>⚔️ 進入競技場，開始對戰！</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 畫面 B：對戰競技舞台 (Arena) -->
+      <div id="pkArenaScreen" class="pk-arena-container" style="display: none;">
+        <!-- 頂部資訊列 -->
+        <div class="arena-top-bar">
+          <div class="arena-round-pill" id="pkRoundNotice">第 1 回合</div>
+          <div class="arena-timer-wrap">
+            <span class="timer-label">答題倒數：</span>
+            <strong class="timer-sec" id="pkRoundTimer">10s</strong>
+          </div>
+          <button class="btn btn-sm btn-danger-outline" id="btnPkFlee">🏳️ 棄賽退出</button>
+        </div>
+
+        <!-- 倒數時間條 -->
+        <div class="timer-bar-track">
+          <div class="timer-bar-fill" id="pkTimerBarFill" style="width: 100%;"></div>
+        </div>
+
+        <!-- 雙方對戰決鬥舞台 (Versus Stage) -->
+        <div class="versus-stage">
+          <!-- 玩家英雄卡片 -->
+          <div class="fighter-card player-fighter" id="pkPlayerCard">
+            <div class="fighter-tag player-tag">PLAYER 玩家英雄</div>
+            <div class="fighter-avatar-wrap">
+              <span class="fighter-avatar" id="pkPlayerAvatar">🧝‍♀️</span>
+            </div>
+            <h3 class="fighter-name" id="pkPlayerName">疾風遊俠・艾莉亞</h3>
+
+            <!-- 玩家血條 -->
+            <div class="vitals-group">
+              <div class="vital-label-row">
+                <span>❤️ 生命值 HP</span>
+                <span id="pkPlayerHpText">100 / 100</span>
+              </div>
+              <div class="vital-bar-track hp-track">
+                <div class="vital-bar-fill hp-fill" id="pkPlayerHpFill" style="width: 100%;"></div>
+              </div>
+            </div>
+
+            <!-- 玩家魔力條 -->
+            <div class="vitals-group">
+              <div class="vital-label-row">
+                <span>💧 能量 MP</span>
+                <span id="pkPlayerMpText">30 / 100</span>
+              </div>
+              <div class="vital-bar-track mp-track">
+                <div class="vital-bar-fill mp-fill" id="pkPlayerMpFill" style="width: 30%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 中央 VS 徽章 -->
+          <div class="vs-center-emblem">
+            <div class="vs-circle">VS</div>
+            <span class="vs-sparks">⚔️</span>
+          </div>
+
+          <!-- 敵方 AI 挑戰者卡片 -->
+          <div class="fighter-card enemy-fighter" id="pkEnemyCard">
+            <div class="fighter-tag enemy-tag">AI 挑戰者</div>
+            <div class="fighter-avatar-wrap">
+              <span class="fighter-avatar" id="pkEnemyAvatar">😈</span>
+            </div>
+            <h3 class="fighter-name" id="pkEnemyName">詞根暗影・噬語魔</h3>
+
+            <!-- 敵方血條 -->
+            <div class="vitals-group">
+              <div class="vital-label-row">
+                <span>❤️ 生命值 HP</span>
+                <span id="pkEnemyHpText">120 / 120</span>
+              </div>
+              <div class="vital-bar-track hp-track">
+                <div class="vital-bar-fill hp-fill enemy-hp" id="pkEnemyHpFill" style="width: 100%;"></div>
+              </div>
+            </div>
+
+            <!-- 敵方魔力條 -->
+            <div class="vitals-group">
+              <div class="vital-label-row">
+                <span>💧 能量 MP</span>
+                <span id="pkEnemyMpText">20 / 100</span>
+              </div>
+              <div class="vital-bar-track mp-track">
+                <div class="vital-bar-fill mp-fill" id="pkEnemyMpFill" style="width: 20%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 階段一：答題看板 (Question Board) -->
+        <div class="pk-question-section" id="pkQuestionSection">
+          <div class="pk-q-header">
+            <span class="pk-q-hint-pill" id="pkQuestionHint">請選出正確的中文解釋：</span>
+            <button class="card-audio-btn-sm" id="pkQuestionAudioBtn" title="朗讀發音">🔊</button>
+          </div>
+          <h2 class="pk-q-stem-word" id="pkQuestionStem">comprehensive</h2>
+          <div class="pk-options-grid" id="pkQuestionOptions"></div>
+        </div>
+
+        <!-- 階段二：攻防決策看板 (Decision Board - 贏家攻 / 輸家守) -->
+        <div class="pk-decision-section" id="pkDecisionSection" style="display: none;">
+          <div class="decision-prompt-box">
+            <h3 class="decision-title" id="pkDecisionPromptTitle">🎉 本回合答對獲勝！請選擇您的攻勢：</h3>
+            <p class="decision-desc" id="pkDecisionPromptDesc">對手露出破綻！您可發動普通攻擊或消耗能量施展絕招！</p>
+          </div>
+          <div class="decision-buttons-grid" id="pkDecisionButtons"></div>
+        </div>
+
+        <!-- 戰鬥實況日誌 (Battle Log) -->
+        <div class="pk-battle-log-card">
+          <div class="log-header">
+            <span>📜 競技場戰鬥實況</span>
+          </div>
+          <div class="log-scroll-area" id="pkBattleLog"></div>
+        </div>
+      </div>
+
+      <!-- 畫面 C：戰鬥結算報告 (Result Screen) -->
+      <div id="pkResultScreen" class="pk-result-container" style="display: none;">
+        <div class="pk-result-card">
+          <div class="pk-res-icon" id="pkResIcon">🏆</div>
+          <h2 class="pk-res-title" id="pkResTitle">VICTORY 戰鬥大獲全勝！</h2>
+          <p class="pk-res-desc" id="pkResDesc">您在本次單字攻防決鬥中以過人的智慧與決策力力克強敵！</p>
+
+          <div class="pk-result-actions">
+            <button class="btn btn-primary" id="btnPkReplay">🔄 再戰一場</button>
+            <button class="btn btn-outline" id="btnPkBackToLobby">🏠 返回競技場大廳</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 彈窗：創立專屬 PK 題庫 (Create Deck Modal) -->
+      <div class="cq-modal" id="pkCreateDeckModal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-card modal-card-lg">
+          <div class="modal-header">
+            <h4>➕ 創立專屬 PK 對戰單字庫</h4>
+            <button class="btn-close-modal" id="btnPkCloseModal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>題庫名稱 <span class="required">*</span></label>
+              <input type="text" id="pkNewDeckName" class="form-input" placeholder="例如: 高中學測高頻 100 單 / 多益決勝詞庫">
+            </div>
+
+            <div class="form-group">
+              <label>批次輸入單字與中文 (每行一個單字與解釋) <span class="required">*</span></label>
+              <textarea id="pkNewDeckWordsText" class="form-input pk-deck-textarea" rows="8" placeholder="每行一筆單字，格式支援：
+apple - 蘋果
+perseverance - 毅力；堅持不懈
+innovation - 創新；革新
+resilient - 具韌性的
+..."></textarea>
+              <span class="upload-tip">💡 提示：使用減號 - 、逗號 , 或冒號 : 分隔英文單字與中文解釋即可！</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" id="btnPkCancelDeck">取消</button>
+            <button class="btn btn-primary" id="btnPkSaveDeck">確認建立題庫</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
       </main>
     </div> <!-- end .app-main-content -->
   </div> <!-- end .app-layout -->
@@ -875,7 +1116,8 @@
   <script src="/static/js/ai_tutor.js"></script>
   <script src="/static/js/reading.js"></script>
   <script src="/static/js/quiz.js"></script>
-    <script src="/static/js/custom_quiz.js"></script>
+        <script src="/static/js/custom_quiz.js"></script>
+    <script src="/static/js/pk_battle.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>
