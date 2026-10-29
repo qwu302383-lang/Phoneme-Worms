@@ -30,7 +30,7 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # 載入 API KEY 與 MODEL 設定
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
