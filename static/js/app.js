@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AppState: 本地存儲與全域狀態管理
  */
 const AppState = {
@@ -132,6 +132,7 @@ function switchTab(tabId) {
   }
 
   // 特殊分頁啟動回呼
+  if (tabId === 'custom-quiz' && window.CustomQuizModule) { CustomQuizModule.renderWordGrid(); }
   if (tabId === 'wordbook') {
     renderWordbook();
   }
@@ -238,6 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await AITutorModule.init();
   await ReadingModule.init();
   await QuizModule.init();
+  if (window.CustomQuizModule) await CustomQuizModule.init();
 
   // 7. 更新統計與生字徽章
   const stats = AppState.getStats();

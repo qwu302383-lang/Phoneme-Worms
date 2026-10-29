@@ -42,6 +42,10 @@
           <span class="nav-icon">📝</span>
           <span class="nav-label">文法克漏字</span>
         </button>
+                <button class="nav-btn" data-tab="custom-quiz">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">自訂圖文出題</span>
+        </button>
         <button class="nav-btn" data-tab="wordbook">
           <span class="nav-icon">⭐</span>
           <span class="nav-label">生字本 (<span id="starredCountBadge">0</span>)</span>
@@ -151,6 +155,13 @@
           <h3>長文精讀與點詞即查</h3>
           <p>內建學術與商務精選閱讀，滑鼠點擊任意單詞浮現釋義並加入生字本。</p>
           <span class="feature-link">閱讀精選文章 &rarr;</span>
+        </div>
+
+        <div class="feature-card" onclick="switchTab('custom-quiz')">
+          <div class="feature-icon bg-purple">🎯</div>
+          <h3>自訂圖文出題工坊</h3>
+          <p>自由挑選單字、上傳情境圖片，自選看圖選詞、看圖拼字與例句克漏字出題！</p>
+          <span class="feature-link">開始自訂出題 &rarr;</span>
         </div>
 
         <div class="feature-card" onclick="switchTab('quiz')">
@@ -449,6 +460,373 @@
       </div>
     </section>
 
+
+    <!-- 7. 自訂圖文出題測驗 (Custom Quiz Builder) -->
+    <section id="tab-custom-quiz" class="tab-pane">
+      <!-- 畫面 A：出題工坊配置區 -->
+      <div id="cqBuilderScreen" class="cq-builder-container">
+        <div class="view-header">
+          <div>
+            <h2>🎯 自訂圖文出題測驗工坊</h2>
+            <p class="subtitle">自由勾選/載入單字、配置情境圖片，自選出題題型並立即生成客製化測驗！</p>
+          </div>
+          <div class="cq-header-actions">
+            <button class="btn btn-outline" id="btnToggleCustomWordForm">
+              <span>➕ 手動新增單字與圖片</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 手動新增單字與上傳圖片摺疊面板 -->
+        <div id="cqCustomWordPanel" class="cq-custom-word-panel" style="display: none;">
+          <div class="panel-header">
+            <h4>✏️ 手動新增單字與自訂圖片</h4>
+            <button class="btn-close-panel" id="btnCloseCustomWordPanel">&times;</button>
+          </div>
+          <div class="cq-form-grid">
+            <div class="form-group">
+              <label>英文單字 <span class="required">*</span></label>
+              <input type="text" id="cqInputWord" class="form-input" placeholder="例如: innovation">
+            </div>
+            <div class="form-group">
+              <label>中文釋義 <span class="required">*</span></label>
+              <input type="text" id="cqInputDef" class="form-input" placeholder="例如: 創新；革新">
+            </div>
+            <div class="form-group">
+              <label>音標 (可選)</label>
+              <input type="text" id="cqInputPhonetic" class="form-input" placeholder="例如: /ˌɪn.əˈveɪ.ʃən/">
+            </div>
+            <div class="form-group">
+              <label>詞性 (可選)</label>
+              <select id="cqInputPos" class="form-input">
+                <option value="n.">n. 名詞</option>
+                <option value="v.">v. 動詞</option>
+                <option value="adj.">adj. 形容詞</option>
+                <option value="adv.">adv. 副詞</option>
+                <option value="phrase">片語</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label>實用例句 (可選)</label>
+              <input type="text" id="cqInputExample" class="form-input" placeholder="例如: Technological innovation drives economic growth.">
+            </div>
+            
+            <!-- 圖片配置區 -->
+            <div class="form-group full-width">
+              <label>單字情境圖片 (支援上傳本機圖片或填入網址)</label>
+              <div class="image-upload-box">
+                <div class="image-preview-area" id="cqNewImagePreview">
+                  <span class="preview-placeholder">📷 尚未設定圖片</span>
+                </div>
+                <div class="image-upload-controls">
+                  <div class="upload-btn-wrap">
+                    <label class="btn btn-sm btn-outline">
+                      📁 選擇本機圖片
+                      <input type="file" id="cqFileInput" accept="image/*" style="display: none;">
+                    </label>
+                    <span class="upload-tip">支援 JPG、PNG、WebP，最大 5MB</span>
+                  </div>
+                  <div class="url-input-wrap">
+                    <input type="text" id="cqImageUrlInput" class="form-input" placeholder="或貼上線上圖片 URL (例如 Unsplash 等)...">
+                    <button class="btn btn-sm btn-outline" id="btnApplyImageUrl">預覽網址</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-footer">
+            <button class="btn btn-primary" id="btnSaveCustomWord">💾 儲存並加入出題庫</button>
+          </div>
+        </div>
+
+        <!-- 步驟 1：單字載入與選取清單 -->
+        <div class="cq-step-card">
+          <div class="step-card-header">
+            <div class="step-title">
+              <span class="step-number">1</span>
+              <div>
+                <h3>挑選與載入測驗單字</h3>
+                <p>勾選欲納入題庫的單字，點擊單字縮圖可更換自訂圖片</p>
+              </div>
+            </div>
+
+            <!-- 載入來源與快捷工具 -->
+            <div class="step-actions">
+              <div class="cq-source-tabs">
+                <button class="cq-tab-btn active" data-source="library">📚 內建單字庫</button>
+                <button class="cq-tab-btn" data-source="wordbook">⭐ 我的生字本</button>
+              </div>
+              <div class="cq-batch-btns">
+                <button class="btn btn-sm btn-outline" id="btnCqSelectAll">全選</button>
+                <button class="btn btn-sm btn-outline" id="btnCqDeselectAll">取消全選</button>
+                <button class="btn btn-sm btn-outline" id="btnCqRandom5">隨機挑 5 題</button>
+                <button class="btn btn-sm btn-outline" id="btnCqRandom10">隨機挑 10 題</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 已勾選數量指示 -->
+          <div class="cq-selection-bar">
+            <span>已選擇：<strong id="cqSelectedCount" class="text-primary">0</strong> / <span id="cqTotalAvailableCount">0</span> 個單字</span>
+            <span class="cq-hint-pill">💡 提示：點擊任一單字卡右上角的 📷 圖示可自由上傳或更換圖片！</span>
+          </div>
+
+          <!-- 單字展示卡片網格 -->
+          <div class="cq-word-grid" id="cqWordGrid"></div>
+        </div>
+
+        <!-- 步驟 2：選擇測驗題型 -->
+        <div class="cq-step-card">
+          <div class="step-card-header">
+            <div class="step-title">
+              <span class="step-number">2</span>
+              <div>
+                <h3>選擇要生成的題型 (可複選)</h3>
+                <p>系統將根據您勾選的題型，動態組合出一份多樣化、圖文並茂的測驗卷</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 題型選擇網格 -->
+          <div class="cq-type-grid">
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="image_to_word" checked>
+              <div class="type-icon-box bg-blue">🖼️</div>
+              <div class="type-info">
+                <h4>看圖選單字 (Image to Word)</h4>
+                <p>展示情境圖片與中文定義，四選一選出正確英文單字</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="spelling" checked>
+              <div class="type-icon-box bg-purple">⌨️</div>
+              <div class="type-info">
+                <h4>看圖拼字填空 (Image Spelling)</h4>
+                <p>觀察圖片與中文提示，打字拼出正確單字（提供字母長度格子）</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="def_to_word" checked>
+              <div class="type-icon-box bg-teal">🔠</div>
+              <div class="type-info">
+                <h4>釋義四選一 (Definition to Word)</h4>
+                <p>檢定核心題型，根據中英文定義選出正確單字</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="listen_image" checked>
+              <div class="type-icon-box bg-amber">🎧</div>
+              <div class="type-info">
+                <h4>看圖聽音辨義 (Audio & Image)</h4>
+                <p>播放單字道地發音，配合圖片選出對應詞彙</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="sentence_cloze" checked>
+              <div class="type-icon-box bg-blue">📝</div>
+              <div class="type-info">
+                <h4>情境例句克漏字 (Sentence Cloze)</h4>
+                <p>將單字挖空置入真實例句，結合圖片情境選填正確單字</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+          </div>
+
+          <!-- 題卷額外設定 -->
+          <div class="cq-quiz-settings-row">
+            <div class="setting-item">
+              <label>題目數量上限：</label>
+              <select id="cqQuizCountSelect" class="form-input-sm">
+                <option value="5">5 題</option>
+                <option value="10" selected>10 題</option>
+                <option value="15">15 題</option>
+                <option value="all">全部所選單字</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="cqShuffleCheck" checked>
+                <span>隨機打亂題目順序</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="cqTimerCheck" checked>
+                <span>開啟作答計時器</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 步驟 3：開始測驗行動卡 -->
+        <div class="cq-launch-bar">
+          <div class="launch-summary">
+            <span>即將生成：<strong id="cqFinalWordCount">0</strong> 個單字、<strong id="cqFinalTypeCount">5</strong> 種題型的客製化測驗</span>
+          </div>
+          <button class="btn btn-primary btn-lg" id="btnStartCustomQuiz">
+            <span>🚀 生成題目並開始測驗</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 畫面 B：測驗答題視窗 (Runner Screen) -->
+      <div id="cqRunnerScreen" class="cq-runner-container" style="display: none;">
+        <!-- 頂部即時統計與進度 -->
+        <div class="runner-top-bar">
+          <div class="runner-left-info">
+            <span class="runner-q-progress">題目：<strong id="cqRunnerCurrentQ">1</strong> / <span id="cqRunnerTotalQ">10</span></span>
+            <span class="runner-score-badge">得分：<strong id="cqRunnerScore">0</strong></span>
+            <span class="runner-timer" id="cqRunnerTimerWrap">⏱️ <span id="cqRunnerTimer">00:00</span></span>
+          </div>
+          <button class="btn btn-sm btn-outline" id="btnCqExitQuiz">✕ 退出測驗</button>
+        </div>
+
+        <!-- 進度條 -->
+        <div class="progress-track" style="margin-bottom: 2rem;">
+          <div class="progress-fill" id="cqRunnerProgressFill" style="width: 10%;"></div>
+        </div>
+
+        <!-- 題目主要卡片 -->
+        <div class="cq-question-card" id="cqQuestionCard">
+          <div class="cq-q-header">
+            <span class="category-pill" id="cqQTypePill">🖼️ 看圖選單字</span>
+            <button class="card-audio-btn-sm" id="cqQAudioBtn" title="朗讀題目/單字發音">🔊</button>
+          </div>
+
+          <!-- 情境圖片區 (若該題目有圖片) -->
+          <div class="cq-q-image-wrap" id="cqQImageWrap" style="display: none;">
+            <img id="cqQImage" src="" alt="Question Image" class="cq-q-image">
+            <div class="image-zoom-hint">🔍 點擊可放大檢視圖片</div>
+          </div>
+
+          <!-- 題幹主文字 -->
+          <h3 class="cq-q-stem" id="cqQStem">Question stem here...</h3>
+          <p class="cq-q-substem" id="cqQSubstem"></p>
+
+          <!-- 動態選項區 (選擇題) -->
+          <div class="cq-options-grid" id="cqOptionsGrid"></div>
+
+          <!-- 動態拼字區 (拼字填空題) -->
+          <div class="cq-spelling-area" id="cqSpellingArea" style="display: none;">
+            <div class="spelling-length-boxes" id="cqSpellBoxes"></div>
+            <div class="spelling-input-row">
+              <input type="text" id="cqSpellInput" class="form-input cq-spell-input" placeholder="在此輸入完整英文單字 (Enter 提交)..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <button class="btn btn-primary" id="btnSubmitSpell">送出答案 ↵</button>
+            </div>
+            <div class="spelling-hints-row">
+              <button class="btn btn-sm btn-outline" id="btnCqHintLetter">💡 提示一個字母 (<span id="cqHintsLeft">3</span>)</button>
+            </div>
+          </div>
+
+          <!-- 即時詳解與回饋面板 (答題後展開) -->
+          <div class="cq-explanation-panel" id="cqExpPanel" style="display: none;">
+            <div class="exp-status-bar" id="cqExpStatus"></div>
+            <div class="exp-content">
+              <div class="exp-word-row">
+                <span class="exp-word" id="cqExpWord">word</span>
+                <span class="exp-phonetic" id="cqExpPhonetic">/phonetic/</span>
+                <span class="exp-pos" id="cqExpPos">pos</span>
+              </div>
+              <p class="exp-def" id="cqExpDef">中文釋義</p>
+              <div class="exp-example-box" id="cqExpExampleBox">
+                <p class="exp-example-en" id="cqExpExEn">Example sentence in English</p>
+                <p class="exp-example-zh" id="cqExpExZh">例句中譯</p>
+              </div>
+            </div>
+            <div class="exp-footer-actions">
+              <button class="btn btn-sm btn-outline" id="btnCqExpAddStar">⭐ 加入生字本</button>
+              <button class="btn btn-primary" id="btnCqNextQuestion">下一題 &rarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 畫面 C：測驗成績結算 (Result Screen) -->
+      <div id="cqResultScreen" class="cq-result-container" style="display: none;">
+        <div class="cq-result-card">
+          <div class="result-badge-icon" id="cqResultBadgeIcon">🏆</div>
+          <h2 class="result-title" id="cqResultTitle">測驗完成！</h2>
+          <p class="result-subtitle" id="cqResultSubtitle">您在本次圖文測驗中表現出色！</p>
+
+          <div class="result-stats-row">
+            <div class="result-stat-box">
+              <div class="stat-big-val" id="cqResScore">100%</div>
+              <div class="stat-small-label">測驗得分</div>
+            </div>
+            <div class="result-stat-box">
+              <div class="stat-big-val" id="cqResCorrectCount">10 / 10</div>
+              <div class="stat-small-label">答對題數</div>
+            </div>
+            <div class="result-stat-box">
+              <div class="stat-big-val" id="cqResTime">01:45</div>
+              <div class="stat-small-label">總耗時</div>
+            </div>
+          </div>
+
+          <!-- 錯題清單回顧 (若有錯題) -->
+          <div class="wrong-questions-section" id="cqWrongSection" style="display: none;">
+            <h3>🔍 錯題複習專區</h3>
+            <p class="subtitle">將需要加強的單字一鍵加入生字本，隨時翻卡複習！</p>
+            <div class="wrong-list-grid" id="cqWrongListGrid"></div>
+            <div style="margin-top: 1rem;">
+              <button class="btn btn-sm btn-outline" id="btnCqAddAllWrongToStar">⭐ 將全部錯題加入生字本</button>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn btn-primary" id="btnCqRetryQuiz">🔄 重新挑戰本題卷</button>
+            <button class="btn btn-outline" id="btnCqBackToBuilder">⚙️ 返回出題工坊</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 圖片放大預覽 Lightbox Modal -->
+      <div class="cq-image-lightbox" id="cqImageLightbox" style="display: none;">
+        <div class="lightbox-overlay"></div>
+        <div class="lightbox-content">
+          <button class="lightbox-close" id="btnCqCloseLightbox">&times;</button>
+          <img id="cqLightboxImg" src="" alt="Enlarged Image">
+          <p id="cqLightboxCaption" class="lightbox-caption"></p>
+        </div>
+      </div>
+
+      <!-- 獨立單字圖片更換 Modal -->
+      <div class="cq-modal" id="cqChangeImageModal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+          <div class="modal-header">
+            <h4 id="cqChangeImgTitle">📷 更換單字圖片</h4>
+            <button class="btn-close-modal" id="btnCqCloseChangeImgModal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="current-img-preview" id="cqCurrentImgPreview">
+              <img id="cqModalImgPreview" src="" alt="Preview">
+            </div>
+            <div class="modal-upload-controls">
+              <label class="btn btn-outline btn-full">
+                📁 從電腦上傳新圖片
+                <input type="file" id="cqModalFileInput" accept="image/*" style="display: none;">
+              </label>
+              <div style="margin: 0.75rem 0; text-align: center; color: var(--text-muted); font-size: 0.85rem;">或</div>
+              <input type="text" id="cqModalUrlInput" class="form-input" placeholder="貼上網路圖片網址 (URL)...">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" id="btnCqCancelChangeImg">取消</button>
+            <button class="btn btn-primary" id="btnCqSaveChangeImg">確認套用圖片</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
   </main>
 
   <!-- 浮動通知提示 (Toast) -->
@@ -460,6 +838,7 @@
   <script src="/static/js/ai_tutor.js"></script>
   <script src="/static/js/reading.js"></script>
   <script src="/static/js/quiz.js"></script>
+    <script src="/static/js/custom_quiz.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>

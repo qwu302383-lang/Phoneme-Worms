@@ -9,8 +9,17 @@
     "englishDef": "Complete and including everything that is necessary.",
     "example": "The company offered a comprehensive training program for all incoming interns.",
     "exampleTranslation": "該公司為所有新進實習生提供了全面的培訓計畫。",
-    "collocations": ["comprehensive review", "comprehensive guide", "comprehensive insurance"],
-    "synonyms": ["thorough", "exhaustive", "complete"]
+    "collocations": [
+      "comprehensive review",
+      "comprehensive guide",
+      "comprehensive insurance"
+    ],
+    "synonyms": [
+      "thorough",
+      "exhaustive",
+      "complete"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop"
   },
   {
     "id": 2,
@@ -22,8 +31,17 @@
     "englishDef": "To start using a plan or system.",
     "example": "The committee decided to implement new safety regulations across the factory.",
     "exampleTranslation": "委員會決定在整個工廠內實施新的安全法規。",
-    "collocations": ["implement a strategy", "implement changes", "implement policies"],
-    "synonyms": ["execute", "enforce", "apply"]
+    "collocations": [
+      "implement a strategy",
+      "implement changes",
+      "implement policies"
+    ],
+    "synonyms": [
+      "execute",
+      "enforce",
+      "apply"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&auto=format&fit=crop"
   },
   {
     "id": 3,
@@ -35,8 +53,17 @@
     "englishDef": "Continued effort and determination despite difficulties or delay in achieving success.",
     "example": "Through sheer perseverance and hard work, she overcame all academic hurdles.",
     "exampleTranslation": "憑藉堅定不移的毅力與努力，她克服了所有的學業難關。",
-    "collocations": ["great perseverance", "show perseverance", "reward of perseverance"],
-    "synonyms": ["persistence", "tenacity", "dedication"]
+    "collocations": [
+      "great perseverance",
+      "show perseverance",
+      "reward of perseverance"
+    ],
+    "synonyms": [
+      "persistence",
+      "tenacity",
+      "dedication"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=600&auto=format&fit=crop"
   },
   {
     "id": 4,
@@ -48,8 +75,17 @@
     "englishDef": "Happening or coming after something else.",
     "example": "The initial trial was a failure, but subsequent experiments yielded promising results.",
     "exampleTranslation": "最初的試驗失敗了，但隨後的實驗產生了令人鼓舞的結果。",
-    "collocations": ["subsequent events", "subsequent to", "in subsequent years"],
-    "synonyms": ["following", "consequent", "succeeding"]
+    "collocations": [
+      "subsequent events",
+      "subsequent to",
+      "in subsequent years"
+    ],
+    "synonyms": [
+      "following",
+      "consequent",
+      "succeeding"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=600&auto=format&fit=crop"
   },
   {
     "id": 5,
@@ -61,8 +97,17 @@
     "englishDef": "To work jointly on an activity or project, especially to produce something.",
     "example": "Engineers and marketing teams must collaborate closely to ensure product success.",
     "exampleTranslation": "工程師與行銷團隊必須密切合作，以確保產品成功。",
-    "collocations": ["collaborate with", "collaborate on", "collaborative effort"],
-    "synonyms": ["cooperate", "team up", "partner"]
+    "collocations": [
+      "collaborate with",
+      "collaborate on",
+      "collaborative effort"
+    ],
+    "synonyms": [
+      "cooperate",
+      "team up",
+      "partner"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop"
   },
   {
     "id": 6,
@@ -74,8 +119,17 @@
     "englishDef": "Able to be maintained at a certain rate or level without depleting natural resources.",
     "example": "Investing in sustainable energy sources is crucial for combating global warming.",
     "exampleTranslation": "投資永續能源對於應對全球暖化至關重要。",
-    "collocations": ["sustainable development", "sustainable energy", "sustainable growth"],
-    "synonyms": ["renewable", "maintainable", "eco-friendly"]
+    "collocations": [
+      "sustainable development",
+      "sustainable energy",
+      "sustainable growth"
+    ],
+    "synonyms": [
+      "renewable",
+      "maintainable",
+      "eco-friendly"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&auto=format&fit=crop"
   },
   {
     "id": 7,
@@ -87,8 +141,17 @@
     "englishDef": "To provide lodging or sufficient space for; to fit wishes or needs in with.",
     "example": "The conference hall can easily accommodate up to five hundred attendees.",
     "exampleTranslation": "該會議廳可輕鬆容納多達五百位與會者。",
-    "collocations": ["accommodate needs", "accommodate guests", "accommodate requests"],
-    "synonyms": ["house", "lodge", "adapt to"]
+    "collocations": [
+      "accommodate needs",
+      "accommodate guests",
+      "accommodate requests"
+    ],
+    "synonyms": [
+      "house",
+      "lodge",
+      "adapt to"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop"
   },
   {
     "id": 8,
@@ -100,8 +163,17 @@
     "englishDef": "To rise and fall irregularly in number or amount.",
     "example": "Vegetable prices tend to fluctuate dramatically depending on seasonal weather conditions.",
     "exampleTranslation": "蔬菜價格往往會根據季節天氣狀況而劇烈波動。",
-    "collocations": ["fluctuate wildly", "prices fluctuate", "fluctuate between"],
-    "synonyms": ["oscillate", "vary", "shift"]
+    "collocations": [
+      "fluctuate wildly",
+      "prices fluctuate",
+      "fluctuate between"
+    ],
+    "synonyms": [
+      "oscillate",
+      "vary",
+      "shift"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop"
   },
   {
     "id": 9,
@@ -113,8 +185,17 @@
     "englishDef": "Open to more than one interpretation; having a double meaning.",
     "example": "His ambiguous statement left everyone wondering about the true intentions of the board.",
     "exampleTranslation": "他那模稜兩可的發言讓所有人都對董事會的真正意圖感到困惑。",
-    "collocations": ["ambiguous statement", "ambiguous wording", "morally ambiguous"],
-    "synonyms": ["vague", "equivocal", "obscure"]
+    "collocations": [
+      "ambiguous statement",
+      "ambiguous wording",
+      "morally ambiguous"
+    ],
+    "synonyms": [
+      "vague",
+      "equivocal",
+      "obscure"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop"
   },
   {
     "id": 10,
@@ -126,8 +207,17 @@
     "englishDef": "To discuss something in order to have someone agree with an offer or plan.",
     "example": "The union representatives met with management to negotiate better overtime wages.",
     "exampleTranslation": "工會代表與管理層會面，協商爭取更好的加班工資待遇。",
-    "collocations": ["negotiate a contract", "negotiate terms", "successfully negotiate"],
-    "synonyms": ["bargain", "mediate", "confer"]
+    "collocations": [
+      "negotiate a contract",
+      "negotiate terms",
+      "successfully negotiate"
+    ],
+    "synonyms": [
+      "bargain",
+      "mediate",
+      "confer"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=600&auto=format&fit=crop"
   },
   {
     "id": 11,
@@ -139,8 +229,17 @@
     "englishDef": "To become progressively worse.",
     "example": "Relations between the two countries deteriorated rapidly following the trade disputes.",
     "exampleTranslation": "在貿易爭端發生後，兩國之間的關係迅速惡化。",
-    "collocations": ["deteriorate rapidly", "health deteriorates", "conditions deteriorate"],
-    "synonyms": ["worsen", "degenerate", "decline"]
+    "collocations": [
+      "deteriorate rapidly",
+      "health deteriorates",
+      "conditions deteriorate"
+    ],
+    "synonyms": [
+      "worsen",
+      "degenerate",
+      "decline"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584483766114-2cea6facdf57?w=600&auto=format&fit=crop"
   },
   {
     "id": 12,
@@ -152,8 +251,17 @@
     "englishDef": "Coming before a more important action or event; preparatory.",
     "example": "Preliminary findings suggest that the new vaccine is safe and highly effective.",
     "exampleTranslation": "初步研究結果顯示，該新型疫苗安全且高度有效。",
-    "collocations": ["preliminary results", "preliminary stage", "preliminary round"],
-    "synonyms": ["introductory", "preparatory", "initial"]
+    "collocations": [
+      "preliminary results",
+      "preliminary stage",
+      "preliminary round"
+    ],
+    "synonyms": [
+      "introductory",
+      "preparatory",
+      "initial"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&auto=format&fit=crop"
   },
   {
     "id": 13,
@@ -165,8 +273,17 @@
     "englishDef": "Able to recoil or spring back into shape; able to withstand or recover quickly from difficult conditions.",
     "example": "The local community proved remarkably resilient in the wake of the devastating typhoon.",
     "exampleTranslation": "在毀滅性颱風襲擊之後，當地社區展現出了非凡的韌性。",
-    "collocations": ["resilient economy", "highly resilient", "resilient nature"],
-    "synonyms": ["tough", "adaptable", "hardy"]
+    "collocations": [
+      "resilient economy",
+      "highly resilient",
+      "resilient nature"
+    ],
+    "synonyms": [
+      "tough",
+      "adaptable",
+      "hardy"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&auto=format&fit=crop"
   },
   {
     "id": 14,
@@ -178,8 +295,17 @@
     "englishDef": "A thing that motivates or encourages one to do something.",
     "example": "The government introduced tax incentives to encourage companies to adopt green technology.",
     "exampleTranslation": "政府推出了稅務減免誘因，以鼓勵企業採用環保科技。",
-    "collocations": ["financial incentive", "tax incentive", "provide an incentive"],
-    "synonyms": ["stimulus", "motivation", "inducement"]
+    "collocations": [
+      "financial incentive",
+      "tax incentive",
+      "provide an incentive"
+    ],
+    "synonyms": [
+      "stimulus",
+      "motivation",
+      "inducement"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&auto=format&fit=crop"
   },
   {
     "id": 15,
@@ -191,7 +317,16 @@
     "englishDef": "Certain to happen; unavoidable.",
     "example": "With increasing automation, significant changes in the labor market are inevitable.",
     "exampleTranslation": "隨著自動化程度的提高，勞動市場的重大變革是不可避免的。",
-    "collocations": ["inevitable outcome", "inevitable delay", "an inevitable part of life"],
-    "synonyms": ["unavoidable", "inescapable", "destined"]
+    "collocations": [
+      "inevitable outcome",
+      "inevitable delay",
+      "an inevitable part of life"
+    ],
+    "synonyms": [
+      "unavoidable",
+      "inescapable",
+      "destined"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=600&auto=format&fit=crop"
   }
 ]
