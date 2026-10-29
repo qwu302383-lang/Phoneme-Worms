@@ -11,9 +11,13 @@
 </head>
 <body class="theme-light">
   <!-- 頂部導航列 -->
-  <header class="app-header">
-    <div class="header-container">
-      <div class="brand">
+    <!-- 整體側邊欄雙欄佈局 (Left Sidebar Layout) -->
+  <div class="app-layout">
+    
+    <!-- 現代化左側側邊導覽欄 -->
+    <aside class="app-sidebar" id="appSidebar">
+      <!-- 品牌 Logo 區 -->
+      <div class="sidebar-brand" onclick="switchTab('dashboard')">
         <div class="brand-icon">🐛</div>
         <div class="brand-text">
           <span class="brand-title">Phoneme-Worms</span>
@@ -21,54 +25,85 @@
         </div>
       </div>
 
-      <nav class="nav-tabs">
-        <button class="nav-btn active" data-tab="dashboard">
-          <span class="nav-icon">📊</span>
-          <span class="nav-label">學習總覽</span>
-        </button>
-        <button class="nav-btn" data-tab="vocab">
-          <span class="nav-icon">🗂️</span>
-          <span class="nav-label">單字卡背誦</span>
-        </button>
-        <button class="nav-btn" data-tab="ai-tutor">
-          <span class="nav-icon">🎙️</span>
-          <span class="nav-label">AI 口說導師</span>
-        </button>
-        <button class="nav-btn" data-tab="reading">
-          <span class="nav-icon">📖</span>
-          <span class="nav-label">閱讀即查</span>
-        </button>
-        <button class="nav-btn" data-tab="quiz">
-          <span class="nav-icon">📝</span>
-          <span class="nav-label">文法克漏字</span>
-        </button>
-                <button class="nav-btn" data-tab="custom-quiz">
-          <span class="nav-icon">🎯</span>
-          <span class="nav-label">自訂圖文出題</span>
-        </button>
-        <button class="nav-btn" data-tab="wordbook">
-          <span class="nav-icon">⭐</span>
-          <span class="nav-label">生字本 (<span id="starredCountBadge">0</span>)</span>
-        </button>
-      </nav>
+      <!-- 導覽分類與垂直項目選單 -->
+      <div class="sidebar-menu-wrap">
+        <div class="sidebar-section-title">核心學習模組</div>
+        <nav class="nav-tabs vertical">
+          <button class="nav-btn active" data-tab="dashboard">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">學習總覽</span>
+          </button>
+          <button class="nav-btn" data-tab="vocab">
+            <span class="nav-icon">🗂️</span>
+            <span class="nav-label">單字卡背誦</span>
+          </button>
+          <button class="nav-btn" data-tab="ai-tutor">
+            <span class="nav-icon">🎙️</span>
+            <span class="nav-label">AI 口說導師</span>
+          </button>
+          <button class="nav-btn" data-tab="reading">
+            <span class="nav-icon">📖</span>
+            <span class="nav-label">長文閱讀即查</span>
+          </button>
+          <button class="nav-btn" data-tab="quiz">
+            <span class="nav-icon">📝</span>
+            <span class="nav-label">文法與克漏字</span>
+          </button>
+          <button class="nav-btn" data-tab="custom-quiz">
+            <span class="nav-icon">🎯</span>
+            <span class="nav-label">自訂圖文出題</span>
+          </button>
+          <button class="nav-btn" data-tab="wordbook">
+            <span class="nav-icon">⭐</span>
+            <span class="nav-label">個人生字本</span>
+            <span class="nav-badge" id="starredCountBadge">0</span>
+          </button>
+        </nav>
+      </div>
 
-      <div class="header-actions">
-        <!-- 發音腔調切換 -->
-        <div class="voice-selector" title="切換英語發音腔調">
-          <span class="voice-label">口音:</span>
-          <select id="accentSelect" class="accent-dropdown">
-            <option value="en-US">🇺🇸 美式英語</option>
-            <option value="en-GB">🇬🇧 英式英語</option>
-          </select>
+      <!-- 側邊欄底部設定區 -->
+      <div class="sidebar-footer">
+        <div class="footer-control-row">
+          <div class="voice-selector" title="切換英語發音腔調">
+            <span class="voice-label">發音:</span>
+            <select id="accentSelect" class="accent-dropdown">
+              <option value="en-US">🇺🇸 美式英語</option>
+              <option value="en-GB">🇬🇧 英式英語</option>
+            </select>
+          </div>
+
+          <button id="themeToggleBtn" class="action-btn" title="切換深淺模式">
+            <span class="theme-icon">🌙</span>
+          </button>
         </div>
 
-        <!-- 主題切換 -->
-        <button id="themeToggleBtn" class="action-btn" title="切換深淺模式">
-          <span class="theme-icon">🌙</span>
-        </button>
+        <div class="sidebar-streak-card">
+          <span class="streak-icon">🔥</span>
+          <div class="streak-info">
+            <span class="streak-title">連續學習進行中</span>
+            <span class="streak-sub">每天堅持進步一點點</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </header>
+    </aside>
+
+    <!-- 側邊欄遮罩 (手機端) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- 右側主要內容容器 -->
+    <div class="app-main-content">
+      <!-- 手機端頂部漢堡選單條 -->
+      <header class="mobile-top-bar">
+        <button class="btn-menu-toggle" id="btnToggleSidebar" title="打開選單">
+          <span class="hamburger-icon">☰</span>
+        </button>
+        <div class="mobile-brand" onclick="switchTab('dashboard')">
+          <span>🐛 Phoneme-Worms</span>
+        </div>
+        <div class="mobile-actions">
+          <button id="mobileThemeToggle" class="action-btn-sm" title="切換主題">🌙</button>
+        </div>
+      </header>
 
   <!-- 主內容容器 -->
   <main class="app-main">
@@ -827,7 +862,9 @@
       </div>
 
     </section>
-  </main>
+      </main>
+    </div> <!-- end .app-main-content -->
+  </div> <!-- end .app-layout -->
 
   <!-- 浮動通知提示 (Toast) -->
   <div id="toast" class="toast-notice"></div>

@@ -137,6 +137,12 @@ function switchTab(tabId) {
     renderWordbook();
   }
 
+    // 在手機端切換分頁後自動收合側邊欄
+  const sidebar = document.getElementById('appSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('active');
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -199,6 +205,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 2. 導航分頁點擊綁定
   document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+    // 手機端側邊欄抽屜開關
+  const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+  const appSidebar = document.getElementById('appSidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+
+  btnToggleSidebar?.addEventListener('click', () => {
+    appSidebar?.classList.toggle('open');
+    sidebarOverlay?.classList.toggle('active');
+  });
+
+  sidebarOverlay?.addEventListener('click', () => {
+    appSidebar?.classList.remove('open');
+    sidebarOverlay?.classList.remove('active');
+  });
+
+  mobileThemeToggle?.addEventListener('click', () => {
+    document.getElementById('themeToggleBtn')?.click();
+    mobileThemeToggle.textContent = document.body.classList.contains('theme-dark') ? '☀️' : '🌙';
   });
 
   // 3. 深色/淺色主題管理
