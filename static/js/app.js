@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AppState: 本地存儲與全域狀態管理
  */
 const AppState = {
@@ -41,6 +41,29 @@ const AppState = {
   isWordStarred(word) {
     const list = this.getStarredWords();
     return list.some(item => item.word.toLowerCase() === word.toLowerCase());
+  },
+
+  addCustomWordToWordbook(wordObj) {
+    let list = this.getStarredWords();
+    const existingIndex = list.findIndex(item => item.word.toLowerCase() === wordObj.word.toLowerCase());
+    const newEntry = {
+      word: wordObj.word.trim(),
+      phonetic: (wordObj.phonetic || '').trim(),
+      pos: (wordObj.pos || 'n.').trim(),
+      definition: (wordObj.definition || '').trim(),
+      example: (wordObj.example || '').trim(),
+      exampleTranslation: (wordObj.exampleTranslation || '').trim(),
+      dateAdded: new Date().toLocaleDateString()
+    };
+
+    if (existingIndex >= 0) {
+      list[existingIndex] = { ...list[existingIndex], ...newEntry };
+    } else {
+      list.unshift(newEntry);
+    }
+    localStorage.setItem(this.STARRED_KEY, JSON.stringify(list));
+    this.updateStarredBadge();
+    return true;
   },
 
   toggleStarWord(wordObj) {
@@ -132,6 +155,7 @@ function switchTab(tabId) {
   }
 
   // 特殊分頁啟動回呼
+  if (tabId === 'vocab' && window.VocabModule) { VocabModule.applyFilter(VocabModule.currentFilter); }
   if (tabId === 'custom-quiz' && window.CustomQuizModule) { CustomQuizModule.renderWordGrid(); }
   if (tabId === 'pk-battle' && window.PKBattleModule) { PKBattleModule.renderDeckSelector(); }
   if (tabId === 'wordbook') {
@@ -191,12 +215,199 @@ function renderWordbook(filterText = '') {
     card.querySelector('.btn-remove-wb').onclick = () => {
       AppState.toggleStarWord(item);
       renderWordbook(document.getElementById('wbSearchInput')?.value || '');
-      showToast(`已從生字本移除【${item.word}】`);
+      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast(`已從生字本移除【${item.word}】（已自動恢復至每日單字卡）`);
     };
 
     grid.appendChild(card);
   });
 }
+
+/**
+ * WordbookModule: 個人生字本手動新增與智慧查詞管理
+ */
+const WordbookModule = {
+  currentAddMode: 'single',
+
+  openAddModal() {
+    const modal = document.getElementById('addWordbookModal');
+    if (!modal) return;
+    this.switchAddMode('single');
+
+    const inputWord = document.getElementById('wbInputWord');
+    const inputDef = document.getElementById('wbInputDef');
+    const inputPhonetic = document.getElementById('wbInputPhonetic');
+    const inputExample = document.getElementById('wbInputExample');
+    const inputExampleZh = document.getElementById('wbInputExampleZh');
+    const batchText = document.getElementById('wbBatchText');
+
+    if (inputWord) inputWord.value = '';
+    if (inputDef) inputDef.value = '';
+    if (inputPhonetic) inputPhonetic.value = '';
+    if (inputExample) inputExample.value = '';
+    if (inputExampleZh) inputExampleZh.value = '';
+    if (batchText) batchText.value = '';
+
+    modal.style.display = 'flex';
+    setTimeout(() => inputWord?.focus(), 50);
+  },
+
+  closeAddModal() {
+    const modal = document.getElementById('addWordbookModal');
+    if (modal) modal.style.display = 'none';
+  },
+
+  switchAddMode(mode) {
+    this.currentAddMode = mode;
+    const tabSingle = document.getElementById('wbTabSingle');
+    const tabBatch = document.getElementById('wbTabBatch');
+    const areaSingle = document.getElementById('wbSingleAddArea');
+    const areaBatch = document.getElementById('wbBatchAddArea');
+
+    if (mode === 'single') {
+      tabSingle?.classList.add('active');
+      tabBatch?.classList.remove('active');
+      if (areaSingle) areaSingle.style.display = 'block';
+      if (areaBatch) areaBatch.style.display = 'none';
+      document.getElementById('wbInputWord')?.focus();
+    } else {
+      tabSingle?.classList.remove('active');
+      tabBatch?.classList.add('active');
+      if (areaSingle) areaSingle.style.display = 'none';
+      if (areaBatch) areaBatch.style.display = 'block';
+      document.getElementById('wbBatchText')?.focus();
+    }
+  },
+
+  async autoLookupWord() {
+    const wordInput = document.getElementById('wbInputWord');
+    const word = wordInput ? wordInput.value.trim() : '';
+    if (!word) {
+      alert("請先輸入要查詢的英文單字！");
+      wordInput?.focus();
+      return;
+    }
+
+    const btn = document.getElementById('btnWbLookup');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '⏳ 查詢中...';
+    }
+
+    try {
+      const res = await fetch('/api/dict/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word: word })
+      });
+      const data = await res.json();
+      if (data.success && data.found) {
+        const inputDef = document.getElementById('wbInputDef');
+        const inputPhonetic = document.getElementById('wbInputPhonetic');
+        const inputPos = document.getElementById('wbInputPos');
+        const inputExample = document.getElementById('wbInputExample');
+        const inputExampleZh = document.getElementById('wbInputExampleZh');
+
+        if (inputDef && data.definition) inputDef.value = data.definition;
+        if (inputPhonetic && data.phonetic) inputPhonetic.value = data.phonetic;
+        if (inputPos && data.pos) inputPos.value = data.pos;
+        if (inputExample && data.example) inputExample.value = data.example;
+        if (inputExampleZh && data.exampleTranslation) inputExampleZh.value = data.exampleTranslation;
+
+        showToast(`🔍 已自動帶入【${word}】的釋義與例句！`);
+      } else {
+        showToast(`💡 詞庫未收錄此字，您可以直接在下方手動輸入中文釋義！`);
+      }
+    } catch (e) {
+      showToast(`⚠️ 查詞時發生錯誤，請直接手動輸入`);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🔍 智慧查單字';
+      }
+    }
+  },
+
+  saveWord() {
+    if (this.currentAddMode === 'single') {
+      const word = document.getElementById('wbInputWord')?.value.trim();
+      const def = document.getElementById('wbInputDef')?.value.trim();
+      const pos = document.getElementById('wbInputPos')?.value;
+      const phonetic = document.getElementById('wbInputPhonetic')?.value.trim();
+      const example = document.getElementById('wbInputExample')?.value.trim();
+      const exampleZh = document.getElementById('wbInputExampleZh')?.value.trim();
+
+      if (!word) {
+        alert("請輸入英文單字！");
+        document.getElementById('wbInputWord')?.focus();
+        return;
+      }
+      if (!def) {
+        alert("請輸入中文解釋！");
+        document.getElementById('wbInputDef')?.focus();
+        return;
+      }
+
+      AppState.addCustomWordToWordbook({
+        word: word,
+        definition: def,
+        pos: pos,
+        phonetic: phonetic,
+        example: example,
+        exampleTranslation: exampleZh
+      });
+
+      this.closeAddModal();
+      renderWordbook();
+      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast(`⭐ 成功新增【${word}】至生字本！（已自動從每日單字卡排除）`);
+
+    } else {
+      const text = document.getElementById('wbBatchText')?.value.trim();
+      if (!text) {
+        alert("請輸入至少一筆單字與解釋！");
+        document.getElementById('wbBatchText')?.focus();
+        return;
+      }
+
+      const lines = text.split('\n');
+      let count = 0;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        const match = trimmed.split(/[\-\,\:\t]+/);
+        if (match.length >= 2) {
+          AppState.addCustomWordToWordbook({
+            word: match[0].trim(),
+            definition: match.slice(1).join(' ').trim(),
+            pos: 'n.'
+          });
+          count++;
+        } else {
+          AppState.addCustomWordToWordbook({
+            word: trimmed,
+            definition: '自訂詞彙',
+            pos: 'n.'
+          });
+          count++;
+        }
+      });
+
+      if (count === 0) {
+        alert("未解析出任何有效單字！格式如：apple - 蘋果");
+        return;
+      }
+
+      this.closeAddModal();
+      renderWordbook();
+      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast(`⭐ 成功批次新增 ${count} 筆單字至個人生字本！（已自動從每日單字卡排除）`);
+    }
+  }
+};
+
+window.WordbookModule = WordbookModule;
 
 // 主程式初始化
 document.addEventListener('DOMContentLoaded', async () => {
@@ -284,7 +495,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (confirm("確定要清空生字本中的所有單字嗎？")) {
       AppState.clearAllStarred();
       renderWordbook();
-      showToast("生字本已清空！");
+      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast("生字本已清空！所有單字已自動恢復至每日單字卡。");
     }
   });
 

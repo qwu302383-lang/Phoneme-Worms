@@ -33,15 +33,20 @@ const VocabModule = {
   applyFilter(filterType) {
     this.currentFilter = filterType;
     const masteredIds = AppState.getMasteredIds();
+    const starredWords = AppState.getStarredWords();
+    const starredWordSet = new Set(starredWords.map(w => w.word.toLowerCase()));
+
+    // 自動過濾已在個人生字本中的單字（有出現在單字本的單字就不出現在每日單字卡）
+    const unstarredList = this.vocabList.filter(v => !starredWordSet.has(v.word.toLowerCase()));
 
     if (filterType === 'all') {
-      this.filteredList = [...this.vocabList];
+      this.filteredList = [...unstarredList];
     } else if (filterType === 'mastered') {
-      this.filteredList = this.vocabList.filter(v => masteredIds.includes(v.id));
+      this.filteredList = unstarredList.filter(v => masteredIds.includes(v.id));
     } else if (filterType === 'unmastered') {
-      this.filteredList = this.vocabList.filter(v => !masteredIds.includes(v.id));
+      this.filteredList = unstarredList.filter(v => !masteredIds.includes(v.id));
     } else {
-      this.filteredList = this.vocabList.filter(v => (v.category || '').includes(filterType));
+      this.filteredList = unstarredList.filter(v => (v.category || '').includes(filterType));
     }
 
     this.currentIndex = 0;
@@ -53,11 +58,21 @@ const VocabModule = {
     if (!cardEl) return;
 
     if (this.filteredList.length === 0) {
-      document.getElementById('cardWord').textContent = "無匹配單字";
-      document.getElementById('cardPhonetic').textContent = "";
-      document.getElementById('cardPos').textContent = "-";
+      const starredWords = AppState.getStarredWords();
+      const hasStarred = this.vocabList.length > 0 && starredWords.length > 0;
+      document.getElementById('cardWord').textContent = hasStarred ? "🎉 本類別單字皆已收藏至生字本！" : "無匹配單字";
+      document.getElementById('cardPhonetic').textContent = hasStarred ? "已收藏單字自動自每日單字卡排除" : "";
+      document.getElementById('cardPos').textContent = "★";
+      document.getElementById('cardCategoryBadge').textContent = "生字本已收錄";
       document.getElementById('cardIndexText').textContent = "0 / 0";
-      document.getElementById('cardProgressFill').style.width = "0%";
+      document.getElementById('cardProgressFill').style.width = "100%";
+      document.getElementById('cardZhDef').textContent = "這些單字已在您的「個人生字本」中收藏管理。若將其從生字本移除，單字會自動重新回到每日單字卡！";
+      document.getElementById('cardEnDef').textContent = "";
+      const collocWrap = document.getElementById('cardCollocations');
+      if (collocWrap) collocWrap.innerHTML = "";
+      document.getElementById('cardExample').textContent = "";
+      document.getElementById('cardExampleZh').textContent = "";
+      this.updateStats();
       return;
     }
 
@@ -147,14 +162,19 @@ const VocabModule = {
     if (this.filteredList.length === 0) return;
     const item = this.filteredList[this.currentIndex];
     const isNowStarred = AppState.toggleStarWord(item);
-    this.renderCard();
-    showToast(isNowStarred ? `⭐ 已將【${item.word}】加入生字本` : `已從生字本移除【${item.word}】`);
+    showToast(isNowStarred ? `⭐ 已將【${item.word}】加入生字本（已自動從每日單字卡排除）` : `已從生字本移除【${item.word}】`);
+    // 當單字被加入生字本後，立即重新過濾每日單字卡，移出該字並跳至下一個
+    this.applyFilter(this.currentFilter);
   },
 
   updateStats() {
     const masteredIds = AppState.getMasteredIds();
-    const masteredCount = this.vocabList.filter(v => masteredIds.includes(v.id)).length;
-    const unmasteredCount = this.vocabList.length - masteredCount;
+    const starredWords = AppState.getStarredWords();
+    const starredSet = new Set(starredWords.map(w => w.word.toLowerCase()));
+    const unstarredVocab = this.vocabList.filter(v => !starredSet.has(v.word.toLowerCase()));
+
+    const masteredCount = unstarredVocab.filter(v => masteredIds.includes(v.id)).length;
+    const unmasteredCount = unstarredVocab.length - masteredCount;
 
     const elM = document.getElementById('masteredCount');
     const elU = document.getElementById('unmasteredCount');

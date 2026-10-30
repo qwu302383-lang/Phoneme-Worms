@@ -4182,4 +4182,40 @@ body.theme-dark .quiz-choice-btn.selected-incorrect {
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
+/* 生字本手動新增彈窗模式切換頁籤 */
+.wb-add-mode-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg-body);
+  padding: 0.35rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border-color);
+}
+
+.wb-tab-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.wb-tab-btn:hover {
+  color: var(--text-color);
+}
+
+.wb-tab-btn.active {
+  background: var(--bg-card);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+
 
