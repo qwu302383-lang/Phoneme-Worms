@@ -882,7 +882,7 @@
         <div class="view-header">
           <div>
             <h2>⚔️ 單字 PK 對決競技場</h2>
-            <p class="subtitle">挑選專屬英雄出戰，配置或自創對決題庫，在回合制問答中與 AI 展開攻防決策！</p>
+            <p class="subtitle">挑選專屬英雄出戰，配置或自創對決題庫，展開緊張刺激的攻防策略！</p>
           </div>
           <div class="pk-lobby-actions">
             <button class="btn btn-outline btn-open-create-deck" id="btnPkOpenCreateDeck" onclick="PKBattleModule.openCreateDeckModal()">
@@ -891,15 +891,38 @@
           </div>
         </div>
 
-        <!-- 步驟 1：選擇英雄角色 (右上角清楚標記偏向) -->
+        <!-- 對決模式切換列 (Solo VS PvP) -->
+        <div class="pk-mode-switch-bar">
+          <button class="pk-mode-btn active" id="btnPkModeSolo" onclick="PKBattleModule.switchMode('solo')">
+            <span class="mode-icon">🤖</span>
+            <div class="mode-info">
+              <span class="mode-title">單人 AI 挑戰模式</span>
+              <span class="mode-desc">與詞根暗影魔、機械蟲進行實戰推演</span>
+            </div>
+          </button>
+          <button class="pk-mode-btn" id="btnPkModePvP" onclick="PKBattleModule.switchMode('pvp')">
+            <span class="mode-icon">👥</span>
+            <div class="mode-info">
+              <span class="mode-title">雙人線上 PK (邀請碼對戰)</span>
+              <span class="mode-desc">自創房間發送代碼，與好友真人即時對答決鬥</span>
+            </div>
+            <span class="mode-pill-badge">HOT 推薦</span>
+          </button>
+        </div>
+
+        <!-- 步驟 1：選擇英雄角色與設定暱稱 (雙模式共用) -->
         <div class="pk-setup-card">
           <div class="step-card-header">
             <div class="step-title">
               <span class="step-number">1</span>
               <div>
-                <h3>選擇出戰英雄角色</h3>
+                <h3>選擇出戰英雄角色與暱稱</h3>
                 <p>每位角色擁有專屬戰鬥數值、絕招技能與天賦偏向（請查看卡片右上角標記）</p>
               </div>
+            </div>
+            <div class="pk-nickname-box">
+              <label>玩家暱稱：</label>
+              <input type="text" id="pkPlayerNickname" class="form-input" placeholder="例如: 英語戰神 / Alex" value="戰神玩家" maxlength="12">
             </div>
           </div>
 
@@ -907,36 +930,124 @@
           <div class="pk-char-grid" id="pkCharList"></div>
         </div>
 
-        <!-- 步驟 2：選擇或創立單字庫 -->
-        <div class="pk-setup-card">
-          <div class="step-card-header">
-            <div class="step-title">
-              <span class="step-number">2</span>
-              <div>
-                <h3>選擇對戰單字庫</h3>
-                <p>挑選即將在回合對答中登場的詞彙題庫，或創立專屬於您的自訂字彙庫！</p>
+        <!-- 單人模式專屬區域 (Solo Area) -->
+        <div id="pkSoloArea">
+          <!-- 步驟 2：選擇或創立單字庫 -->
+          <div class="pk-setup-card">
+            <div class="step-card-header">
+              <div class="step-title">
+                <span class="step-number">2</span>
+                <div>
+                  <h3>選擇對戰單字庫</h3>
+                  <p>挑選即將在回合對答中登場的詞彙題庫，或創立專屬於您的自訂字彙庫！</p>
+                </div>
               </div>
+            </div>
+
+            <div class="pk-deck-selector-box">
+              <div class="deck-select-row">
+                <label>當前題庫來源：</label>
+                <select id="pkDeckSelect" class="form-input pk-deck-dropdown"></select>
+                <button class="btn btn-outline btn-open-create-deck" id="btnPkOpenCreateDeck2" onclick="PKBattleModule.openCreateDeckModal()">➕ 創立新題庫</button>
+              </div>
+              <p class="pk-deck-info" id="pkDeckInfoText">包含全面性、實施、永續性等核心大考字彙，戰力均衡。</p>
             </div>
           </div>
 
-          <div class="pk-deck-selector-box">
-            <div class="deck-select-row">
-              <label>當前題庫來源：</label>
-              <select id="pkDeckSelect" class="form-input pk-deck-dropdown"></select>
-              <button class="btn btn-outline btn-open-create-deck" id="btnPkOpenCreateDeck2" onclick="PKBattleModule.openCreateDeckModal()">➕ 創立新題庫</button>
+          <!-- 步驟 3：進入戰場行動卡 -->
+          <div class="pk-launch-bar">
+            <div class="launch-summary">
+              <span>戰局規則：<strong>答對者</strong>可選擇【普通攻擊】或【釋放技能】；<strong>答錯者</strong>可選擇【採取防禦減傷】或【硬抗扣血累積怒氣】！</span>
             </div>
-            <p class="pk-deck-info" id="pkDeckInfoText">包含全面性、實施、永續性等核心大考字彙，戰力均衡。</p>
+            <button class="btn btn-primary btn-lg" id="btnStartPKBattle">
+              <span>⚔️ 進入競技場，開始對戰！</span>
+            </button>
           </div>
         </div>
 
-        <!-- 步驟 3：進入戰場行動卡 -->
-        <div class="pk-launch-bar">
-          <div class="launch-summary">
-            <span>戰局規則：<strong>答對者</strong>可選擇【普通攻擊】或【釋放技能】；<strong>答錯者</strong>可選擇【採取防禦減傷】或【硬抗扣血累積怒氣】！</span>
+        <!-- 雙人連線模式專屬區域 (PvP Area) -->
+        <div id="pkPvPArea" style="display: none;">
+          <div class="pvp-hub-grid">
+            <!-- 卡片 A：創建房間 (Host) -->
+            <div class="pvp-hub-card">
+              <div class="pvp-card-header">
+                <span class="hub-icon">👑</span>
+                <div>
+                  <h4>創建專屬對戰房間</h4>
+                  <p>挑選題庫建立新戰局，並生成邀請碼分享給好友加入</p>
+                </div>
+              </div>
+              
+              <div class="pvp-deck-row">
+                <label>選擇對戰題庫：</label>
+                <select id="pkPvPDeckSelect" class="form-input pk-deck-dropdown"></select>
+              </div>
+
+              <button class="btn btn-primary btn-block" id="btnCreatePvPRoom" onclick="PKBattleModule.createPvPRoom()">
+                <span>✨ 建立房間並獲取邀請碼</span>
+              </button>
+
+              <!-- 房間建立後的資訊卡 -->
+              <div class="pvp-room-display-box" id="pvpHostRoomBox" style="display: none;">
+                <div class="pvp-code-header">
+                  <span>房間邀請碼：</span>
+                  <strong class="pvp-code-text" id="pvpDisplayRoomCode">PW-____</strong>
+                </div>
+                <div class="pvp-code-actions">
+                  <button class="btn btn-sm btn-outline" id="btnCopyRoomCode" onclick="PKBattleModule.copyRoomCode()">📋 複製邀請碼</button>
+                  <button class="btn btn-sm btn-outline" id="btnCopyRoomLink" onclick="PKBattleModule.copyRoomLink()">🔗 複製邀請連結</button>
+                </div>
+                
+                <div class="pvp-players-status">
+                  <div class="pvp-player-status-item host">
+                    <span class="dot green"></span>
+                    <span>房主：<strong id="pvpHostNameText">您</strong></span>
+                  </div>
+                  <div class="pvp-player-status-item guest">
+                    <span class="dot yellow" id="pvpGuestDot"></span>
+                    <span id="pvpGuestStatusText">⏳ 等待挑戰者輸入邀請碼加入...</span>
+                  </div>
+                </div>
+
+                <button class="btn btn-primary btn-lg btn-block" id="btnStartPvPGame" onclick="PKBattleModule.startPvPBattle()" disabled>
+                  <span>⚔️ 房主發起對戰！(等待好友加入)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 卡片 B：輸入邀請碼加入 (Guest) -->
+            <div class="pvp-hub-card">
+              <div class="pvp-card-header">
+                <span class="hub-icon">🚀</span>
+                <div>
+                  <h4>輸入邀請碼加入房間</h4>
+                  <p>好友已經開好房間了嗎？輸入 6 碼代碼直接連線入房！</p>
+                </div>
+              </div>
+
+              <div class="pvp-join-form">
+                <div class="form-group">
+                  <label>房間邀請碼 (Room Code)：</label>
+                  <div class="pvp-input-row">
+                    <input type="text" id="pvpJoinCodeInput" class="form-input pvp-code-input" placeholder="例如: PW-7821" maxlength="8" autocomplete="off">
+                    <button class="btn btn-success" id="btnJoinPvPRoom" onclick="PKBattleModule.joinPvPRoom()">
+                      <span>🚀 加入對決</span>
+                    </button>
+                  </div>
+                  <span class="upload-tip">💡 提示：點擊好友傳送的專屬邀請連結亦可自動填入加入！</span>
+                </div>
+
+                <!-- 加入後的等待面板 -->
+                <div class="pvp-guest-wait-box" id="pvpGuestWaitBox" style="display: none;">
+                  <div class="pvp-joined-pill">
+                    <span>✅ 已成功連線至房間 <strong id="pvpJoinedRoomCode">PW-____</strong></span>
+                  </div>
+                  <p class="pvp-wait-msg">⏳ 已準備就緒，請等待房主點擊「開始對戰」...</p>
+                  <button class="btn btn-sm btn-outline" id="btnLeavePvPRoom" onclick="PKBattleModule.leavePvPRoom()">🚪 退出房間</button>
+                </div>
+              </div>
+            </div>
           </div>
-          <button class="btn btn-primary btn-lg" id="btnStartPKBattle">
-            <span>⚔️ 進入競技場，開始對戰！</span>
-          </button>
         </div>
       </div>
 
@@ -961,7 +1072,7 @@
         <div class="versus-stage">
           <!-- 玩家英雄卡片 -->
           <div class="fighter-card player-fighter" id="pkPlayerCard">
-            <div class="fighter-tag player-tag">PLAYER 玩家英雄</div>
+            <div class="fighter-tag player-tag" id="pkPlayerTag">PLAYER 玩家英雄</div>
             <div class="fighter-avatar-wrap">
               <span class="fighter-avatar" id="pkPlayerAvatar">🧝‍♀️</span>
             </div>
@@ -998,7 +1109,7 @@
 
           <!-- 敵方 AI 挑戰者卡片 -->
           <div class="fighter-card enemy-fighter" id="pkEnemyCard">
-            <div class="fighter-tag enemy-tag">AI 挑戰者</div>
+            <div class="fighter-tag enemy-tag" id="pkEnemyTag">AI 挑戰者</div>
             <div class="fighter-avatar-wrap">
               <span class="fighter-avatar" id="pkEnemyAvatar">😈</span>
             </div>

@@ -154,11 +154,21 @@ const PKBattleModule = {
   ],
 
   // 狀態管理
+  mode: 'solo', // 'solo' | 'pvp'
   selectedChar: null,
   activeDeck: [],
   customDecks: [],
   selectedDeckId: 'builtin_exam',
   
+  // PvP 雙人連線狀態
+  pvpRoomCode: null,
+  pvpPlayerId: null,
+  pvpIsHost: false,
+  pvpPollInterval: null,
+  pvpState: null,
+  pvpLastProcessedRound: 0,
+  pvpLastRenderedQWord: '',
+
   // 戰鬥即時狀態
   battleActive: false,
   round: 1,
@@ -180,6 +190,21 @@ const PKBattleModule = {
     this.bindEvents();
     this.renderCharacterSelector();
     this.renderDeckSelector();
+
+    // 檢查網址參數是否帶有房間邀請碼 ?room=PW-xxxx
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomFromUrl = urlParams.get('room') || urlParams.get('code');
+    if (roomFromUrl) {
+      this.switchMode('pvp');
+      const input = document.getElementById('pvpJoinCodeInput');
+      if (input) {
+        input.value = roomFromUrl.toUpperCase();
+        input.focus();
+      }
+      setTimeout(() => {
+        showToast(`🎮 偵測到對戰邀請碼【${roomFromUrl.toUpperCase()}】！請選擇出戰英雄後點擊加入！`);
+      }, 500);
+    }
   },
 
   loadCustomDecks() {
@@ -277,37 +302,64 @@ const PKBattleModule = {
     });
   },
 
+  switchMode(targetMode) {
+    this.mode = targetMode;
+    const btnSolo = document.getElementById('btnPkModeSolo');
+    const btnPvP = document.getElementById('btnPkModePvP');
+    const soloArea = document.getElementById('pkSoloArea');
+    const pvpArea = document.getElementById('pkPvPArea');
+
+    if (targetMode === 'solo') {
+      btnSolo?.classList.add('active');
+      btnPvP?.classList.remove('active');
+      if (soloArea) soloArea.style.display = 'block';
+      if (pvpArea) pvpArea.style.display = 'none';
+    } else {
+      btnSolo?.classList.remove('active');
+      btnPvP?.classList.add('active');
+      if (soloArea) soloArea.style.display = 'none';
+      if (pvpArea) pvpArea.style.display = 'block';
+      this.renderDeckSelector();
+    }
+  },
+
   renderDeckSelector() {
     const selectEl = document.getElementById('pkDeckSelect');
-    if (!selectEl) return;
-    selectEl.innerHTML = '';
+    const pvpSelectEl = document.getElementById('pkPvPDeckSelect');
+    const selects = [selectEl, pvpSelectEl].filter(Boolean);
 
-    // 1. 內建題庫選項
-    const optBuiltin = document.createElement('option');
-    optBuiltin.value = 'builtin_exam';
-    optBuiltin.textContent = '📚 內建大考與多益核心題庫 (15 單字)';
-    selectEl.appendChild(optBuiltin);
+    selects.forEach(sel => {
+      sel.innerHTML = '';
 
-    // 2. 生字本選項
-    const starredWords = AppState.getStarredWords();
-    const optWordbook = document.createElement('option');
-    optWordbook.value = 'my_wordbook';
-    optWordbook.textContent = `⭐ 個人生字收藏庫 (${starredWords.length} 單字)`;
-    selectEl.appendChild(optWordbook);
+      // 1. 內建題庫選項
+      const optBuiltin = document.createElement('option');
+      optBuiltin.value = 'builtin_exam';
+      optBuiltin.textContent = '📚 內建大考與多益核心題庫 (15 單字)';
+      sel.appendChild(optBuiltin);
 
-    // 3. 自創題庫選項
-    this.customDecks.forEach(deck => {
-      const opt = document.createElement('option');
-      opt.value = deck.id;
-      opt.textContent = `⚔️ [自創] ${deck.name} (${deck.words.length} 單字)`;
-      selectEl.appendChild(opt);
+      // 2. 生字本選項
+      const starredWords = AppState.getStarredWords ? AppState.getStarredWords() : [];
+      const optWordbook = document.createElement('option');
+      optWordbook.value = 'my_wordbook';
+      optWordbook.textContent = `⭐ 個人生字收藏庫 (${starredWords.length} 單字)`;
+      sel.appendChild(optWordbook);
+
+      // 3. 自創題庫選項
+      this.customDecks.forEach(deck => {
+        const opt = document.createElement('option');
+        opt.value = deck.id;
+        opt.textContent = `⚔️ [自創] ${deck.name} (${deck.words.length} 單字)`;
+        sel.appendChild(opt);
+      });
+
+      sel.value = this.selectedDeckId;
+      sel.onchange = (e) => {
+        this.selectedDeckId = e.target.value;
+        if (selectEl) selectEl.value = this.selectedDeckId;
+        if (pvpSelectEl) pvpSelectEl.value = this.selectedDeckId;
+        this.updateDeckStatsInfo();
+      };
     });
-
-    selectEl.value = this.selectedDeckId;
-    selectEl.onchange = (e) => {
-      this.selectedDeckId = e.target.value;
-      this.updateDeckStatsInfo();
-    };
 
     this.updateDeckStatsInfo();
   },
@@ -925,6 +977,654 @@ const PKBattleModule = {
     document.getElementById('pkLobbyScreen').style.display = 'block';
   },
 
+  // ==========================================
+  // PvP 雙人線上對決模組 (邀請碼對戰系統)
+  // ==========================================
+  getPlayerNickname() {
+    const input = document.getElementById('pkPlayerNickname');
+    const val = input ? input.value.trim() : '';
+    return val || (this.selectedChar ? this.selectedChar.name : '戰神玩家');
+  },
+
+  async createPvPRoom() {
+    const nickname = this.getPlayerNickname();
+    const char = this.selectedChar || this.characters[0];
+    const words = await this.getBattleWordList();
+
+    let deckName = '大考核心衝刺題庫';
+    if (this.selectedDeckId === 'my_wordbook') {
+      deckName = '個人生字庫';
+    } else if (this.selectedDeckId !== 'builtin_exam') {
+      const d = this.customDecks.find(x => x.id === this.selectedDeckId);
+      if (d) deckName = d.name;
+    }
+
+    try {
+      const res = await fetch('/api/pk/pvp/create_room', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hostName: nickname,
+          charId: char.id,
+          deckWords: words,
+          deckName: deckName
+        })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.message || '創建房間失敗！');
+        return;
+      }
+
+      this.pvpRoomCode = data.roomCode;
+      this.pvpPlayerId = data.playerId;
+      this.pvpIsHost = true;
+      this.pvpLastProcessedRound = 0;
+      this.pvpLastRenderedQWord = '';
+
+      // 更新房主面板
+      const hostBox = document.getElementById('pvpHostRoomBox');
+      if (hostBox) hostBox.style.display = 'block';
+      document.getElementById('pvpDisplayRoomCode').textContent = data.roomCode;
+      document.getElementById('pvpHostNameText').textContent = `${nickname} (${char.name})`;
+      document.getElementById('pvpGuestStatusText').textContent = '⏳ 等待挑戰者輸入邀請碼加入...';
+      const guestDot = document.getElementById('pvpGuestDot');
+      if (guestDot) { guestDot.className = 'dot yellow'; }
+
+      const startBtn = document.getElementById('btnStartPvPGame');
+      if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<span>⚔️ 房主發起對戰！(等待好友連線)</span>';
+      }
+
+      // 開始輪詢房間狀態
+      this.startPvPPolling();
+      showToast(`🎉 房間已建立！邀請碼為【${data.roomCode}】，請發送給好友！`);
+    } catch (e) {
+      alert('創建房間時發生網路錯誤，請稍後再試！');
+    }
+  },
+
+  async joinPvPRoom() {
+    const input = document.getElementById('pvpJoinCodeInput');
+    const code = (input ? input.value : '').trim().toUpperCase();
+    if (!code) {
+      alert('請輸入 6 碼房間邀請碼！');
+      input?.focus();
+      return;
+    }
+
+    const nickname = this.getPlayerNickname();
+    const char = this.selectedChar || this.characters[0];
+
+    try {
+      const res = await fetch('/api/pk/pvp/join_room', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomCode: code,
+          guestName: nickname,
+          charId: char.id
+        })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.message || '加入房間失敗！');
+        return;
+      }
+
+      this.pvpRoomCode = data.roomCode;
+      this.pvpPlayerId = data.playerId;
+      this.pvpIsHost = false;
+      this.pvpLastProcessedRound = 0;
+      this.pvpLastRenderedQWord = '';
+
+      const waitBox = document.getElementById('pvpGuestWaitBox');
+      if (waitBox) waitBox.style.display = 'block';
+      document.getElementById('pvpJoinedRoomCode').textContent = data.roomCode;
+
+      // 開始輪詢
+      this.startPvPPolling();
+      showToast(`✅ 已成功加入房間【${data.roomCode}】！等待房主開戰！`);
+    } catch (e) {
+      alert('加入房間時發生網路錯誤，請稍後再試！');
+    }
+  },
+
+  copyRoomCode() {
+    if (!this.pvpRoomCode) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(this.pvpRoomCode);
+    } else {
+      const temp = document.createElement('input');
+      temp.value = this.pvpRoomCode;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+    showToast(`📋 邀請碼【${this.pvpRoomCode}】已複製到剪貼簿！`);
+  },
+
+  copyRoomLink() {
+    if (!this.pvpRoomCode) return;
+    const link = `${window.location.origin}${window.location.pathname}?tab=pk-battle&room=${this.pvpRoomCode}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link);
+    } else {
+      const temp = document.createElement('input');
+      temp.value = link;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+    showToast('🔗 邀請連結已複製！好友點開即可直接進入房間對決！');
+  },
+
+  async startPvPBattle() {
+    if (!this.pvpRoomCode || !this.pvpPlayerId) return;
+    try {
+      const res = await fetch('/api/pk/pvp/start_battle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomCode: this.pvpRoomCode,
+          playerId: this.pvpPlayerId
+        })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.message || '發起對戰失敗！');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  startPvPPolling() {
+    this.stopPvPPolling();
+    this.pvpPollInterval = setInterval(() => this.pollPvPState(), 1000);
+    this.pollPvPState();
+  },
+
+  stopPvPPolling() {
+    if (this.pvpPollInterval) {
+      clearInterval(this.pvpPollInterval);
+      this.pvpPollInterval = null;
+    }
+  },
+
+  async pollPvPState() {
+    if (!this.pvpRoomCode || !this.pvpPlayerId) return;
+
+    try {
+      const res = await fetch(`/api/pk/pvp/room_state?code=${this.pvpRoomCode}&playerId=${this.pvpPlayerId}`);
+      const data = await res.json();
+      if (!data.success) return;
+
+      const state = data.room;
+      this.pvpState = state;
+
+      // 1. 等待與準備階段
+      if (state.state === 'WAITING') {
+        if (this.pvpIsHost) {
+          const guestText = document.getElementById('pvpGuestStatusText');
+          if (guestText) guestText.textContent = '⏳ 等待挑戰者輸入邀請碼加入...';
+          const guestDot = document.getElementById('pvpGuestDot');
+          if (guestDot) guestDot.className = 'dot yellow';
+          const startBtn = document.getElementById('btnStartPvPGame');
+          if (startBtn) {
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span>⚔️ 房主發起對戰！(等待好友連線)</span>';
+          }
+        }
+      } else if (state.state === 'READY') {
+        if (this.pvpIsHost) {
+          const guestText = document.getElementById('pvpGuestStatusText');
+          if (guestText && state.opponent) {
+            guestText.textContent = `🟢 挑戰者【${state.opponent.name} (${state.opponent.char.name})】已就緒！`;
+          }
+          const guestDot = document.getElementById('pvpGuestDot');
+          if (guestDot) guestDot.className = 'dot green';
+          const startBtn = document.getElementById('btnStartPvPGame');
+          if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<span>⚔️ 雙方已就緒，立即發起對戰！</span>';
+          }
+        } else {
+          const waitBox = document.getElementById('pvpGuestWaitBox');
+          if (waitBox && state.opponent) {
+            const msg = waitBox.querySelector('.pvp-wait-msg');
+            if (msg) msg.textContent = `🟢 房主【${state.opponent.name}】已就緒，等待房主開啟戰鬥...`;
+          }
+        }
+      }
+
+      // 2. 答題階段 (QUESTION)
+      else if (state.state === 'QUESTION') {
+        // 切換到競技場畫面
+        document.getElementById('pkLobbyScreen').style.display = 'none';
+        document.getElementById('pkResultScreen').style.display = 'none';
+        document.getElementById('pkArenaScreen').style.display = 'block';
+
+        this.updatePvPFighterCards(state);
+
+        // 倒數計時與頂部標題
+        document.getElementById('pkRoundNotice').textContent = `👥 雙人對決 [${state.code}] 第 ${state.round} 回合`;
+        document.getElementById('pkRoundTimer').textContent = `${state.timeLeft}s`;
+        const pct = Math.max(0, (state.timeLeft / (state.roundDuration || 10)) * 100);
+        document.getElementById('pkTimerBarFill').style.width = `${pct}%`;
+
+        // 渲染題目
+        if (state.currentQ && (this.pvpLastRenderedQWord !== state.currentQ.targetWord || this.pvpLastProcessedRound !== state.round)) {
+          this.pvpLastRenderedQWord = state.currentQ.targetWord;
+          this.pvpLastProcessedRound = state.round;
+          this.renderPvPRoundQuestion(state);
+        }
+
+        // 若自己已作答，鎖定選項按鈕
+        if (state.me && state.me.hasAnswered) {
+          document.querySelectorAll('.pk-opt-btn').forEach(b => {
+            b.disabled = true;
+          });
+          const hint = document.getElementById('pkQuestionHint');
+          if (hint) hint.textContent = '✓ 您已完成作答！等待對手選擇...';
+        }
+      }
+
+      // 3. 攻防決策階段 (DECISION)
+      else if (state.state === 'DECISION') {
+        document.getElementById('pkQuestionSection').style.display = 'none';
+        document.getElementById('pkDecisionSection').style.display = 'block';
+
+        this.updatePvPFighterCards(state);
+        this.renderPvPDecisionBoard(state);
+      }
+
+      // 4. 回合結算動畫 (RESOLUTION)
+      else if (state.state === 'RESOLUTION') {
+        this.updatePvPFighterCards(state);
+        if (state.resolutionData) {
+          this.renderPvPResolution(state);
+        }
+      }
+
+      // 5. 遊戲結束 (GAME_OVER)
+      else if (state.state === 'GAME_OVER') {
+        this.stopPvPPolling();
+        document.getElementById('pkArenaScreen').style.display = 'none';
+        const resScreen = document.getElementById('pkResultScreen');
+        resScreen.style.display = 'block';
+
+        const isWin = (state.winner === this.pvpPlayerId);
+        const isDraw = (state.winner === 'DRAW');
+        const iconEl = document.getElementById('pkResIcon');
+        const titleEl = document.getElementById('pkResTitle');
+        const descEl = document.getElementById('pkResDesc');
+
+        if (isWin) {
+          iconEl.textContent = '🏆';
+          titleEl.textContent = 'VICTORY 戰鬥大獲全勝！';
+          descEl.textContent = `恭喜您在雙人即時對決中力克【${state.opponent?.name}】，榮登單字霸主！`;
+        } else if (isDraw) {
+          iconEl.textContent = '⚖️';
+          titleEl.textContent = 'DRAW 勢均力敵！';
+          descEl.textContent = '雙方實力旗鼓相當，同時耗盡體力，平局收場！';
+        } else {
+          iconEl.textContent = '💀';
+          titleEl.textContent = 'DEFEAT 戰鬥惜敗！';
+          descEl.textContent = `【${state.opponent?.name}】在本次對決中略勝一籌！請整軍備戰再次挑戰！`;
+        }
+      }
+
+      // 6. 棄賽退出 (ABANDONED)
+      else if (state.state === 'ABANDONED') {
+        this.stopPvPPolling();
+        alert('⚠️ 對手已退出房間或棄賽，戰局已終止！');
+        this.exitPvPToLobby();
+      }
+
+      // 同步戰鬥日誌
+      if (state.logs && state.logs.length > 0) {
+        const logBox = document.getElementById('pkBattleLog');
+        if (logBox) {
+          logBox.innerHTML = '';
+          state.logs.forEach(msg => {
+            const p = document.createElement('p');
+            p.className = 'log-line';
+            p.textContent = msg;
+            logBox.appendChild(p);
+          });
+          logBox.scrollTop = logBox.scrollHeight;
+        }
+      }
+    } catch (e) {
+      console.error('PvP Polling Error:', e);
+    }
+  },
+
+  updatePvPFighterCards(state) {
+    if (!state.me || !state.opponent) return;
+
+    // 左邊：自己 (Me)
+    const pTag = document.getElementById('pkPlayerTag');
+    if (pTag) pTag.textContent = `PLAYER (您 - ${state.me.name})`;
+    document.getElementById('pkPlayerAvatar').textContent = state.me.char.avatar;
+    document.getElementById('pkPlayerName').textContent = state.me.char.name;
+
+    const pHpPct = Math.max(0, (state.me.hp / state.me.maxHp) * 100);
+    const pMpPct = Math.max(0, (state.me.mp / state.me.maxMp) * 100);
+    document.getElementById('pkPlayerHpFill').style.width = `${pHpPct}%`;
+    document.getElementById('pkPlayerHpText').textContent = `${state.me.hp} / ${state.me.maxHp}${state.me.shield > 0 ? ` (🛡️+${state.me.shield})` : ''}`;
+    document.getElementById('pkPlayerMpFill').style.width = `${pMpPct}%`;
+    document.getElementById('pkPlayerMpText').textContent = `${state.me.mp} / ${state.me.maxMp}`;
+
+    // 右邊：對手 (Opponent)
+    const eTag = document.getElementById('pkEnemyTag');
+    if (eTag) eTag.textContent = `OPPONENT (好友 - ${state.opponent.name})`;
+    document.getElementById('pkEnemyAvatar').textContent = state.opponent.char.avatar;
+    document.getElementById('pkEnemyName').textContent = state.opponent.char.name;
+
+    const eHpPct = Math.max(0, (state.opponent.hp / state.opponent.maxHp) * 100);
+    const eMpPct = Math.max(0, (state.opponent.mp / state.opponent.maxMp) * 100);
+    document.getElementById('pkEnemyHpFill').style.width = `${eHpPct}%`;
+    document.getElementById('pkEnemyHpText').textContent = `${state.opponent.hp} / ${state.opponent.maxHp}${state.opponent.shield > 0 ? ` (🛡️+${state.opponent.shield})` : ''}`;
+    document.getElementById('pkEnemyMpFill').style.width = `${eMpPct}%`;
+    document.getElementById('pkEnemyMpText').textContent = `${state.opponent.mp} / ${state.opponent.maxMp}`;
+  },
+
+  renderPvPRoundQuestion(state) {
+    const q = state.currentQ;
+    if (!q) return;
+
+    document.getElementById('pkQuestionSection').style.display = 'block';
+    document.getElementById('pkDecisionSection').style.display = 'none';
+
+    document.getElementById('pkQuestionStem').textContent = q.stem;
+    document.getElementById('pkQuestionHint').textContent = q.isEnToZh ? '請選出正確的中文解釋：' : '請選出對應的英文單字：';
+
+    document.getElementById('pkQuestionAudioBtn').onclick = () => {
+      SpeechEngine.speak(q.targetWord);
+    };
+
+    const optGrid = document.getElementById('pkQuestionOptions');
+    optGrid.innerHTML = '';
+
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'pk-opt-btn';
+      btn.innerHTML = `<span class="opt-key">${String.fromCharCode(65 + idx)}</span> <span class="opt-val">${opt}</span>`;
+
+      // 賽拉全知領域天賦剔除一個錯項
+      if (state.me.eliminated && opt !== q.answer) {
+        btn.disabled = true;
+        btn.classList.add('eliminated');
+        btn.title = '🔮 奧術全知領域已自動剔除此錯誤項！';
+      }
+
+      btn.onclick = () => {
+        this.submitPvPAnswer(opt, btn);
+      };
+
+      optGrid.appendChild(btn);
+    });
+  },
+
+  async submitPvPAnswer(selectedOpt, btn) {
+    document.querySelectorAll('.pk-opt-btn').forEach(b => b.disabled = true);
+    btn?.classList.add('selected-choice');
+
+    try {
+      await fetch('/api/pk/pvp/submit_answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomCode: this.pvpRoomCode,
+          playerId: this.pvpPlayerId,
+          answer: selectedOpt,
+          timeTaken: 1
+        })
+      });
+      const hint = document.getElementById('pkQuestionHint');
+      if (hint) hint.textContent = '✓ 作答已送出！等待對手選擇...';
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  renderPvPDecisionBoard(state) {
+    const promptTitle = document.getElementById('pkDecisionPromptTitle');
+    const promptDesc = document.getElementById('pkDecisionPromptDesc');
+    const actionBtnsBox = document.getElementById('pkDecisionButtons');
+    actionBtnsBox.innerHTML = '';
+
+    const dec = state.decision;
+    if (!dec) return;
+
+    const isHost = this.pvpIsHost;
+    const myCorr = isHost ? dec.p1Correct : dec.p2Correct;
+    const oppCorr = isHost ? dec.p2Correct : dec.p1Correct;
+
+    // 若自己已經送出行動
+    if (state.me.hasAction) {
+      promptTitle.innerHTML = '⏳ 行動已鎖定！';
+      promptDesc.textContent = '已接收您的決策，等待雙方決策完成結算戰局...';
+      return;
+    }
+
+    if (myCorr && !oppCorr) {
+      // 我贏，對手輸 -> 我進攻！
+      promptTitle.innerHTML = `🎉 本回合答對獲勝！請選擇您的攻勢：`;
+      promptDesc.textContent = `對手【${state.opponent.name}】答錯露出破綻！您可發動普通攻擊或消耗能量釋放絕招！`;
+
+      // 1. 普通攻擊
+      const atkBtn = document.createElement('button');
+      atkBtn.className = 'btn-action btn-attack';
+      atkBtn.innerHTML = `
+        <span class="act-icon">⚔️</span>
+        <div class="act-text">
+          <strong>普通攻擊 (Basic Attack)</strong>
+          <span>造成基礎 ${state.me.char.baseAtk} 點傷害，並回復 10 MP</span>
+        </div>
+      `;
+      atkBtn.onclick = () => this.submitPvPAction('player_basic_attack');
+      actionBtnsBox.appendChild(atkBtn);
+
+      // 2. 角色技能
+      state.me.char.skills.forEach((skill, sIdx) => {
+        const canAfford = (state.me.mp >= skill.cost);
+        const skillBtn = document.createElement('button');
+        skillBtn.className = `btn-action btn-skill ${canAfford ? '' : 'disabled'}`;
+        skillBtn.innerHTML = `
+          <span class="act-icon">🔥</span>
+          <div class="act-text">
+            <strong>${skill.name}</strong>
+            <span>${skill.desc} <span class="mp-cost-pill">耗藍 ${skill.cost} MP</span></span>
+          </div>
+        `;
+        if (canAfford) {
+          skillBtn.onclick = () => this.submitPvPAction(`player_skill_${sIdx}`);
+        } else {
+          skillBtn.onclick = () => showToast('⚠️ 能量不足，無法釋放此技能！');
+        }
+        actionBtnsBox.appendChild(skillBtn);
+      });
+
+    } else if (!myCorr && oppCorr) {
+      // 我輸，對手贏 -> 我防守！
+      promptTitle.innerHTML = `⚠️ 本回合答錯失利！請選擇您的防守姿態：`;
+      promptDesc.textContent = `對手【${state.opponent.name}】答對發動進攻！您可以選擇穩妥防禦或用肉身抗傷換取怒氣！`;
+
+      // 1. 防禦姿態
+      const defBtn = document.createElement('button');
+      defBtn.className = 'btn-action btn-defend';
+      const defRateText = (state.me.charId === 'leon') ? '70% (聖盾天賦)' : '50%';
+      defBtn.innerHTML = `
+        <span class="act-icon">🛡️</span>
+        <div class="act-text">
+          <strong>採取防禦姿態 (Shield Defense)</strong>
+          <span>傷害減免 ${defRateText}，回復 10 MP，穩紮穩打</span>
+        </div>
+      `;
+      defBtn.onclick = () => this.submitPvPAction('player_defend');
+      actionBtnsBox.appendChild(defBtn);
+
+      // 2. 放棄防禦扣血
+      const takeHitBtn = document.createElement('button');
+      takeHitBtn.className = 'btn-action btn-takehit';
+      const rageGain = (state.me.charId === 'bork') ? '+35 (戰狂被動)' : '+25';
+      takeHitBtn.innerHTML = `
+        <span class="act-icon">💥</span>
+        <div class="act-text">
+          <strong>放棄防禦，直接扣血！(Take Damage)</strong>
+          <span>承受全額傷害，但瞬間激發怒氣獲得能量 ${rageGain} MP！</span>
+        </div>
+      `;
+      takeHitBtn.onclick = () => this.submitPvPAction('player_take_hit');
+      actionBtnsBox.appendChild(takeHitBtn);
+
+    } else if (myCorr && oppCorr) {
+      // 雙方皆答對
+      promptTitle.innerHTML = `⚡ 雙方皆答對！劍拔弩張互拼！`;
+      promptDesc.textContent = `雙方同時出手交鋒，互拼刀刃，各承受 12 點傷害並激發 15 MP 鬥志！`;
+
+      const clashBtn = document.createElement('button');
+      clashBtn.className = 'btn-action btn-clash';
+      clashBtn.innerHTML = `
+        <span class="act-icon">⚡</span>
+        <div class="act-text">
+          <strong>刀光劍影・雙方交鋒！</strong>
+          <span>確認交鋒，雙方各扣 12 體力，能量各 +15 MP！</span>
+        </div>
+      `;
+      clashBtn.onclick = () => this.submitPvPAction('both_clash');
+      actionBtnsBox.appendChild(clashBtn);
+
+    } else {
+      // 雙方皆答錯
+      promptTitle.innerHTML = `💨 雙方皆答錯！僵持重整！`;
+      promptDesc.textContent = `彼此皆未能抓住弱點，各自喘息重整旗鼓，各受 5 點消耗！`;
+
+      const stumbleBtn = document.createElement('button');
+      stumbleBtn.className = 'btn-action btn-stumble';
+      stumbleBtn.innerHTML = `
+        <span class="act-icon">💨</span>
+        <div class="act-text">
+          <strong>重整旗鼓・再戰下輪！</strong>
+          <span>各受 5 點消耗，調整心態進入下一回合！</span>
+        </div>
+      `;
+      stumbleBtn.onclick = () => this.submitPvPAction('both_stumble');
+      actionBtnsBox.appendChild(stumbleBtn);
+    }
+  },
+
+  async submitPvPAction(action) {
+    const actionBtnsBox = document.getElementById('pkDecisionButtons');
+    if (actionBtnsBox) {
+      actionBtnsBox.innerHTML = '<p style="text-align:center; padding:1.5rem; font-weight:700; color:var(--primary-color);">✓ 決策已鎖定！等待伺服器同步結算...</p>';
+    }
+
+    try {
+      await fetch('/api/pk/pvp/submit_action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomCode: this.pvpRoomCode,
+          playerId: this.pvpPlayerId,
+          action: action
+        })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  renderPvPResolution(state) {
+    const res = state.resolutionData;
+    if (!res) return;
+
+    const isHost = this.pvpIsHost;
+    const myDmg = isHost ? res.p1Damage : res.p2Damage;
+    const oppDmg = isHost ? res.p2Damage : res.p1Damage;
+    const myHeal = isHost ? res.p1Heal : res.p2Heal;
+    const myShield = isHost ? res.p1Shield : res.p2Shield;
+
+    if (myDmg > 0) {
+      this.showFloater('player', `-${myDmg}`, '#ef4444');
+      this.animateAttack('enemy');
+    }
+    if (oppDmg > 0) {
+      this.showFloater('enemy', `-${oppDmg}`, '#ef4444');
+      this.animateAttack('player');
+    }
+    if (myHeal > 0) {
+      this.showFloater('player', `+${myHeal} 💖`, '#10b981');
+    }
+    if (myShield > 0) {
+      this.showFloater('player', `+${myShield} 🛡️`, '#3b82f6');
+    }
+  },
+
+  async rematchPvP() {
+    if (!this.pvpRoomCode || !this.pvpPlayerId) return;
+    try {
+      const res = await fetch('/api/pk/pvp/rematch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomCode: this.pvpRoomCode,
+          playerId: this.pvpPlayerId
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('pkResultScreen').style.display = 'none';
+        document.getElementById('pkLobbyScreen').style.display = 'block';
+        showToast('🔄 房間狀態已重置！房主可點擊立即再次發起對戰！');
+        this.startPvPPolling();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  async leavePvPRoom() {
+    if (this.pvpRoomCode && this.pvpPlayerId) {
+      try {
+        await fetch('/api/pk/pvp/leave_room', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomCode: this.pvpRoomCode,
+            playerId: this.pvpPlayerId
+          })
+        });
+      } catch (e) {}
+    }
+    this.exitPvPToLobby();
+  },
+
+  exitPvPToLobby() {
+    this.stopPvPPolling();
+    this.pvpRoomCode = null;
+    this.pvpPlayerId = null;
+    this.pvpIsHost = false;
+    this.pvpState = null;
+    this.pvpLastProcessedRound = 0;
+    this.pvpLastRenderedQWord = '';
+
+    const hostBox = document.getElementById('pvpHostRoomBox');
+    if (hostBox) hostBox.style.display = 'none';
+    const waitBox = document.getElementById('pvpGuestWaitBox');
+    if (waitBox) waitBox.style.display = 'none';
+
+    document.getElementById('pkArenaScreen').style.display = 'none';
+    document.getElementById('pkResultScreen').style.display = 'none';
+    document.getElementById('pkLobbyScreen').style.display = 'block';
+  },
+
   // 自創題庫建立與管理
   openCreateDeckModal() {
     const modal = document.getElementById('pkCreateDeckModal');
@@ -1006,7 +1706,7 @@ const PKBattleModule = {
   },
 
   bindEvents() {
-    // 開始戰鬥按鈕
+    // 開始戰鬥按鈕 (單人)
     document.getElementById('btnStartPKBattle')?.addEventListener('click', () => {
       this.startBattle();
     });
@@ -1014,16 +1714,28 @@ const PKBattleModule = {
     // 逃跑/退出對戰
     document.getElementById('btnPkFlee')?.addEventListener('click', () => {
       if (confirm("確定要棄賽退出競技場嗎？")) {
-        this.exitToLobby();
+        if (this.mode === 'pvp' && this.pvpRoomCode) {
+          this.leavePvPRoom();
+        } else {
+          this.exitToLobby();
+        }
       }
     });
 
     // 結算頁按鈕
     document.getElementById('btnPkReplay')?.addEventListener('click', () => {
-      this.startBattle();
+      if (this.mode === 'pvp' && this.pvpRoomCode) {
+        this.rematchPvP();
+      } else {
+        this.startBattle();
+      }
     });
     document.getElementById('btnPkBackToLobby')?.addEventListener('click', () => {
-      this.exitToLobby();
+      if (this.mode === 'pvp' && this.pvpRoomCode) {
+        this.leavePvPRoom();
+      } else {
+        this.exitToLobby();
+      }
     });
 
     // 創立題庫彈窗（支援多個按鈕、遮罩點擊）

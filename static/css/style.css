@@ -1,4 +1,4 @@
-﻿/* ===== 全域變數與主題色彩系統 ===== */
+/* ===== 全域變數與主題色彩系統 ===== */
 :root {
   --primary: #4f46e5;
   --primary-hover: #4338ca;
@@ -3868,3 +3868,285 @@ body.theme-dark .quiz-choice-btn.selected-incorrect {
     order: -1;
   }
 }
+
+/* ==========================================================
+   雙人連線 PK (PvP 邀請碼對戰系統) 樣式
+   ========================================================== */
+.pk-mode-switch-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pk-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  color: var(--text-color);
+}
+
+.pk-mode-btn:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.15);
+}
+
+.pk-mode-btn.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08));
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 8px 20px rgba(99, 102, 241, 0.15);
+}
+
+.pk-mode-btn .mode-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+
+.pk-mode-btn .mode-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.pk-mode-btn .mode-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.pk-mode-btn.active .mode-title {
+  color: var(--primary-color);
+}
+
+.pk-mode-btn .mode-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.mode-pill-badge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  background: linear-gradient(135deg, #ef4444, #f59e0b);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.pk-nickname-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.pk-nickname-box label {
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-color);
+}
+
+.pk-nickname-box input {
+  max-width: 220px;
+}
+
+/* PvP 雙卡片佈局 */
+.pvp-hub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pvp-hub-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.pvp-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.pvp-card-header .hub-icon {
+  font-size: 2rem;
+}
+
+.pvp-card-header h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.pvp-card-header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.pvp-deck-row {
+  margin-bottom: 1.25rem;
+}
+
+.pvp-deck-row label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.pvp-room-display-box {
+  margin-top: 1.25rem;
+  background: var(--bg-body);
+  border: 2px dashed var(--primary-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.pvp-code-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.pvp-code-text {
+  font-size: 1.8rem;
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-weight: 800;
+  color: var(--primary-color);
+  letter-spacing: 2px;
+  background: rgba(99, 102, 241, 0.12);
+  padding: 2px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.pvp-code-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.pvp-code-actions button {
+  flex: 1;
+}
+
+.pvp-players-status {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border-color);
+}
+
+.pvp-player-status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  padding: 0.35rem 0;
+}
+
+.pvp-player-status-item .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pvp-player-status-item .dot.green {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.pvp-player-status-item .dot.yellow {
+  background: #f59e0b;
+  animation: pulse 1.5s infinite;
+}
+
+.pvp-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pvp-code-input {
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.pvp-guest-wait-box {
+  margin-top: 1.25rem;
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.pvp-joined-pill {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  font-weight: 700;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+.pvp-wait-msg {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.6; }
+}
+
+@media (max-width: 768px) {
+  .pk-mode-switch-bar {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .pvp-hub-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .pk-nickname-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pk-nickname-box input {
+    max-width: 100%;
+  }
+}
+

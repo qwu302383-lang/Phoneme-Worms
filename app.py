@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 import json
 import logging
@@ -201,6 +201,88 @@ Be encouraging, professional, and pedagogically insightful.
         "recommendedWords": ["furthermore", "strategic", "perspective"]
     }
     return jsonify({"success": True, "result": fallback_result, "offlineFallback": True})
+
+# -------------------------------------------------------------
+# 雙人線上對決 (PvP 邀請碼對戰系統) API
+# -------------------------------------------------------------
+from pk_pvp_manager import pvp_manager
+
+@app.route("/api/pk/pvp/create_room", methods=["POST"])
+def pk_pvp_create_room():
+    data = request.get_json(silent=True) or {}
+    host_name = data.get("hostName", "玩家 1")
+    char_id = data.get("charId", "aria")
+    deck_words = data.get("deckWords", [])
+    deck_name = data.get("deckName", "精選對戰題庫")
+
+    res = pvp_manager.create_room(host_name, char_id, deck_words, deck_name)
+    return jsonify(res)
+
+@app.route("/api/pk/pvp/join_room", methods=["POST"])
+def pk_pvp_join_room():
+    data = request.get_json(silent=True) or {}
+    room_code = data.get("roomCode", "")
+    guest_name = data.get("guestName", "玩家 2")
+    char_id = data.get("charId", "leon")
+
+    res = pvp_manager.join_room(room_code, guest_name, char_id)
+    return jsonify(res)
+
+@app.route("/api/pk/pvp/start_battle", methods=["POST"])
+def pk_pvp_start_battle():
+    data = request.get_json(silent=True) or {}
+    room_code = data.get("roomCode", "")
+    player_id = data.get("playerId", "")
+
+    res = pvp_manager.start_battle(room_code, player_id)
+    return jsonify(res)
+
+@app.route("/api/pk/pvp/room_state", methods=["GET"])
+def pk_pvp_room_state():
+    room_code = request.args.get("code", "")
+    player_id = request.args.get("playerId", "")
+
+    res = pvp_manager.get_room_state(room_code, player_id)
+    return jsonify(res)
+
+@app.route("/api/pk/pvp/submit_answer", methods=["POST"])
+def pk_pvp_submit_answer():
+    data = request.get_json(silent=True) or {}
+    room_code = data.get("roomCode", "")
+    player_id = data.get("playerId", "")
+    answer = data.get("answer", "")
+    time_taken = data.get("timeTaken", 0)
+
+    res = pvp_manager.submit_answer(room_code, player_id, answer, time_taken)
+    return jsonify(res)
+
+@app.route("/api/pk/pvp/submit_action", methods=["POST"])
+def pk_pvp_submit_action():
+    data = request.get_json(silent=True) or {}
+    room_code = data.get("roomCode", "")
+    player_id = data.get("playerId", "")
+    action = data.get("action", "")
+
+    res = pvp_manager.submit_action(room_code, player_id, action)
+    return jsonify(res)
+
+@app.route("/api/pk/pvp/rematch", methods=["POST"])
+def pk_pvp_rematch():
+    data = request.get_json(silent=True) or {}
+    room_code = data.get("roomCode", "")
+    player_id = data.get("playerId", "")
+
+    res = pvp_manager.rematch(room_code, player_id)
+    return jsonify(res)
+
+@app.route("/api/pk/pvp/leave_room", methods=["POST"])
+def pk_pvp_leave_room():
+    data = request.get_json(silent=True) or {}
+    room_code = data.get("roomCode", "")
+    player_id = data.get("playerId", "")
+
+    res = pvp_manager.leave_room(room_code, player_id)
+    return jsonify(res)
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5050))
