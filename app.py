@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import base64
 import logging
 from flask import Flask, request, jsonify, render_template, send_from_directory
 import requests
@@ -283,6 +284,121 @@ def pk_pvp_leave_room():
 
     res = pvp_manager.leave_room(room_code, player_id)
     return jsonify(res)
+
+# -------------------------------------------------------------
+# AI 多模態視覺 OCR：從圖片中自動識別並萃取所有英文單字與中文釋義
+# -------------------------------------------------------------
+@app.route("/api/ocr/extract_words", methods=["POST"])
+def ocr_extract_words():
+    """使用 Gemini 3.6 Flash 視覺模型從圖片辨識全部英文單字與繁體中文解釋"""
+    image_b64 = None
+    mime_type = "image/jpeg"
+
+    if request.is_json:
+        req_data = request.get_json(silent=True) or {}
+        raw_b64 = req_data.get("image", "")
+        if "base64," in raw_b64:
+            header, content = raw_b64.split("base64,", 1)
+            image_b64 = content.strip()
+            if "image/png" in header:
+                mime_type = "image/png"
+            elif "image/webp" in header:
+                mime_type = "image/webp"
+            elif "image/gif" in header:
+                mime_type = "image/gif"
+        else:
+            image_b64 = raw_b64.strip()
+    elif "image" in request.files:
+        f = request.files["image"]
+        mime_type = f.content_type or "image/jpeg"
+        image_b64 = base64.b64encode(f.read()).decode("utf-8")
+
+    if not image_b64:
+        return jsonify({"success": False, "message": "請上傳欲辨識的單字圖片！"}), 400
+
+    if not GEMINI_API_KEY:
+        return jsonify({
+            "success": False,
+            "message": "系統未設定 GEMINI_API_KEY，請於 .env 配置後使用！"
+        }), 500
+
+    prompt = """
+You are an expert English lexicographer and visual OCR recognition specialist.
+The user has provided an image filled with English vocabulary words (e.g. textbook page, vocabulary list sheet, exam paper, flashcard set, or notebook notes).
+
+Your job:
+1. Examine the image carefully and extract EVERY English word and phrase present.
+2. For each word, provide:
+   - "word": Clean English word or phrase (strip any numbering or formatting artifacts).
+   - "definition": Traditional Chinese (繁體中文) translation. If Chinese definitions exist in the image, transcribe and clean them; if the image only has English, translate accurately into Traditional Chinese.
+   - "pos": Part of speech (e.g., n., v., adj., adv., phr., idiom).
+   - "phonetic": IPA phonetic symbol (optional, e.g., /ˌpɝː.səˈvɪr.əns/).
+   - "example": Short natural English example sentence (optional).
+3. Return ONLY a valid JSON array of objects, with no markdown code blocks:
+[
+  {
+    "word": "perseverance",
+    "definition": "毅力；堅持不懈",
+    "pos": "n.",
+    "phonetic": "/ˌpɝː.səˈvɪr.əns/",
+    "example": "Through hard work and perseverance, she reached her goal."
+  }
+]
+If the image does not contain recognizable English words, return an empty array: [].
+"""
+
+    models_to_try = [GEMINI_MODEL, "gemini-3.6-flash", "gemini-2.5-flash", "gemini-1.5-flash"]
+    if "gemini-3.6-flash" in models_to_try:
+        models_to_try.remove("gemini-3.6-flash")
+    models_to_try.insert(0, "gemini-3.6-flash")
+
+    last_error = ""
+    for model_name in models_to_try:
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inlineData": {
+                            "mimeType": mime_type,
+                            "data": image_b64
+                        }
+                    }
+                ]
+            }],
+            "generationConfig": {
+                "temperature": 0.2,
+                "responseMimeType": "application/json"
+            }
+        }
+
+        try:
+            resp = requests.post(endpoint, json=payload, timeout=30)
+            if resp.status_code == 200:
+                resp_json = resp.json()
+                candidates = resp_json.get("candidates", [])
+                if candidates:
+                    raw_text = candidates[0]["content"]["parts"][0]["text"].strip()
+                    if raw_text.startswith("```"):
+                        raw_text = raw_text.strip("`")
+                        if raw_text.startswith("json"):
+                            raw_text = raw_text[4:].strip()
+                    parsed = json.loads(raw_text)
+                    word_list = parsed if isinstance(parsed, list) else parsed.get("words", [])
+                    return jsonify({
+                        "success": True,
+                        "words": word_list,
+                        "count": len(word_list),
+                        "model": model_name
+                    })
+            else:
+                last_error = f"{model_name} HTTP {resp.status_code}: {resp.text[:120]}"
+        except Exception as e:
+            last_error = str(e)
+            logging.warning(f"OCR model {model_name} failed: {e}")
+
+    return jsonify({"success": False, "message": f"AI 圖片辨識失敗: {last_error}"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5050))

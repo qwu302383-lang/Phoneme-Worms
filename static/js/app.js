@@ -227,7 +227,9 @@ function renderWordbook(filterText = '') {
  * WordbookModule: 個人生字本手動新增與智慧查詞管理
  */
 const WordbookModule = {
-  currentAddMode: 'single',
+  currentAddMode: 'single', // 'single' | 'batch' | 'ocr'
+  ocrImageBase64: null,
+  ocrDetectedWords: [],
 
   openAddModal() {
     const modal = document.getElementById('addWordbookModal');
@@ -261,22 +263,137 @@ const WordbookModule = {
     this.currentAddMode = mode;
     const tabSingle = document.getElementById('wbTabSingle');
     const tabBatch = document.getElementById('wbTabBatch');
+    const tabOcr = document.getElementById('wbTabOcr');
     const areaSingle = document.getElementById('wbSingleAddArea');
     const areaBatch = document.getElementById('wbBatchAddArea');
+    const areaOcr = document.getElementById('wbOcrAddArea');
+    const confirmBtn = document.getElementById('btnWbConfirmAdd');
+
+    [tabSingle, tabBatch, tabOcr].forEach(t => t?.classList.remove('active'));
+    [areaSingle, areaBatch, areaOcr].forEach(a => { if (a) a.style.display = 'none'; });
 
     if (mode === 'single') {
       tabSingle?.classList.add('active');
-      tabBatch?.classList.remove('active');
       if (areaSingle) areaSingle.style.display = 'block';
-      if (areaBatch) areaBatch.style.display = 'none';
+      if (confirmBtn) confirmBtn.textContent = '確認新增至生字本';
       document.getElementById('wbInputWord')?.focus();
-    } else {
-      tabSingle?.classList.remove('active');
+    } else if (mode === 'batch') {
       tabBatch?.classList.add('active');
-      if (areaSingle) areaSingle.style.display = 'none';
       if (areaBatch) areaBatch.style.display = 'block';
+      if (confirmBtn) confirmBtn.textContent = '確認批次匯入至生字本';
       document.getElementById('wbBatchText')?.focus();
+    } else if (mode === 'ocr') {
+      tabOcr?.classList.add('active');
+      if (areaOcr) areaOcr.style.display = 'block';
+      if (confirmBtn) confirmBtn.textContent = '一鍵匯入選取單字至生字本';
     }
+  },
+
+  handleImageSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    this.processImageFile(file);
+  },
+
+  processImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      this.ocrImageBase64 = event.target.result;
+      const previewArea = document.getElementById('wbOcrPreviewArea');
+      const imgPreview = document.getElementById('wbOcrImgPreview');
+      const fileNameEl = document.getElementById('wbOcrFileName');
+
+      if (imgPreview) imgPreview.src = this.ocrImageBase64;
+      if (fileNameEl) fileNameEl.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+      if (previewArea) previewArea.style.display = 'block';
+
+      // 隱藏前次結果
+      const resultArea = document.getElementById('wbOcrResultArea');
+      if (resultArea) resultArea.style.display = 'none';
+      const loadingEl = document.getElementById('wbOcrLoading');
+      if (loadingEl) loadingEl.style.display = 'none';
+
+      showToast('📸 圖片已載入，點擊「開始 AI 辨識」進行萃取！');
+    };
+    reader.readAsDataURL(file);
+  },
+
+  async startOcrScan() {
+    if (!this.ocrImageBase64) {
+      alert('請先選擇或貼上單字圖片！');
+      return;
+    }
+
+    const loadingEl = document.getElementById('wbOcrLoading');
+    const resultArea = document.getElementById('wbOcrResultArea');
+    const scanBtn = document.getElementById('btnStartOcrScan');
+
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (resultArea) resultArea.style.display = 'none';
+    if (scanBtn) {
+      scanBtn.disabled = true;
+      scanBtn.innerHTML = '<span>⏳ Gemini AI 正在掃描圖片所有單字...</span>';
+    }
+
+    try {
+      const res = await fetch('/api/ocr/extract_words', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: this.ocrImageBase64 })
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || '圖片辨識失敗，請確認圖片清晰度後重試！');
+        return;
+      }
+
+      this.ocrDetectedWords = data.words || [];
+      if (this.ocrDetectedWords.length === 0) {
+        alert('未能從圖片中辨識出英文單字，請嘗試上傳字跡更清晰的單字列表或教材頁面！');
+        return;
+      }
+
+      this.renderOcrWordsList();
+      showToast(`🎉 成功從圖片中萃取出 ${this.ocrDetectedWords.length} 個英文單字！`);
+    } catch (e) {
+      alert('辨識請求失敗，請檢查網路連線或稍後再試！');
+    } finally {
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (scanBtn) {
+        scanBtn.disabled = false;
+        scanBtn.innerHTML = '<span>✨ 重新辨識圖片單字</span>';
+      }
+    }
+  },
+
+  renderOcrWordsList() {
+    const listEl = document.getElementById('wbOcrWordsList');
+    const countEl = document.getElementById('wbOcrCount');
+    const resultArea = document.getElementById('wbOcrResultArea');
+    if (!listEl) return;
+
+    listEl.innerHTML = '';
+    if (countEl) countEl.textContent = this.ocrDetectedWords.length;
+    if (resultArea) resultArea.style.display = 'block';
+
+    this.ocrDetectedWords.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = 'ocr-word-row';
+      row.innerHTML = `
+        <input type="checkbox" id="ocr_chk_${idx}" checked data-idx="${idx}">
+        <span class="ocr-word-text">${item.word}</span>
+        ${item.pos ? `<span class="ocr-pos-pill">${item.pos}</span>` : ''}
+        <span class="ocr-def-text">${item.definition || '未提供釋義'}</span>
+      `;
+      listEl.appendChild(row);
+    });
+  },
+
+  toggleSelectAllOcr(selectAll) {
+    document.querySelectorAll('#wbOcrWordsList input[type="checkbox"]').forEach(chk => {
+      chk.checked = selectAll;
+    });
   },
 
   async autoLookupWord() {
@@ -362,7 +479,7 @@ const WordbookModule = {
       if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
       showToast(`⭐ 成功新增【${word}】至生字本！（已自動從每日單字卡排除）`);
 
-    } else {
+    } else if (this.currentAddMode === 'batch') {
       const text = document.getElementById('wbBatchText')?.value.trim();
       if (!text) {
         alert("請輸入至少一筆單字與解釋！");
@@ -403,9 +520,52 @@ const WordbookModule = {
       renderWordbook();
       if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
       showToast(`⭐ 成功批次新增 ${count} 筆單字至個人生字本！（已自動從每日單字卡排除）`);
+
+    } else if (this.currentAddMode === 'ocr') {
+      const checkedBoxes = document.querySelectorAll('#wbOcrWordsList input[type="checkbox"]:checked');
+      if (checkedBoxes.length === 0) {
+        alert("請至少勾選一個要匯入的單字！");
+        return;
+      }
+
+      let count = 0;
+      checkedBoxes.forEach(chk => {
+        const idx = parseInt(chk.dataset.idx, 10);
+        const item = this.ocrDetectedWords[idx];
+        if (item && item.word) {
+          AppState.addCustomWordToWordbook({
+            word: item.word,
+            definition: item.definition || '圖片識別詞彙',
+            pos: item.pos || 'n.',
+            phonetic: item.phonetic || '',
+            example: item.example || ''
+          });
+          count++;
+        }
+      });
+
+      this.closeAddModal();
+      renderWordbook();
+      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast(`⭐ 成功從圖片辨識匯入 ${count} 筆單字至個人生字本！（已自動從每日單字卡排除）`);
     }
   }
 };
+
+// 支援在 OCR 模式下直接 Ctrl+V 貼上截圖圖片
+window.addEventListener('paste', (e) => {
+  const modal = document.getElementById('addWordbookModal');
+  if (modal && modal.style.display !== 'none' && WordbookModule.currentAddMode === 'ocr') {
+    const items = (e.clipboardData || e.originalEvent.clipboardData)?.items || [];
+    for (let item of items) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const blob = item.getAsFile();
+        WordbookModule.processImageFile(blob);
+        break;
+      }
+    }
+  }
+});
 
 window.WordbookModule = WordbookModule;
 

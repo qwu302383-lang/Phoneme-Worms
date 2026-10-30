@@ -519,10 +519,11 @@
             <button class="btn-close-modal" onclick="WordbookModule.closeAddModal()">&times;</button>
           </div>
           <div class="modal-body">
-            <!-- 模式切換：單筆手動輸入 / 批次文字貼上 -->
+            <!-- 模式切換：單筆手動輸入 / 批次文字貼上 / 圖片辨識匯入 -->
             <div class="wb-add-mode-tabs">
               <button type="button" class="wb-tab-btn active" id="wbTabSingle" onclick="WordbookModule.switchAddMode('single')">✏️ 單筆詳細輸入</button>
               <button type="button" class="wb-tab-btn" id="wbTabBatch" onclick="WordbookModule.switchAddMode('batch')">📋 批次文字貼上</button>
+              <button type="button" class="wb-tab-btn" id="wbTabOcr" onclick="WordbookModule.switchAddMode('ocr')">📸 圖片辨識匯入 (OCR)</button>
             </div>
 
             <!-- 單筆輸入區 -->
@@ -584,6 +585,49 @@ resilience - 韌性；復原能力
 ubiquitous - 無所不在的
 ..."></textarea>
                 <span class="upload-tip">💡 提示：使用減號 -、逗號 , 或冒號 : 分隔英文單字與中文解釋，即可一次批次匯入多筆！</span>
+              </div>
+            </div>
+
+            <!-- 圖片拍照/上傳辨識區 (OCR) -->
+            <div id="wbOcrAddArea" style="display: none;">
+              <div class="ocr-upload-box" id="wbOcrDropZone" onclick="document.getElementById('wbOcrFileInput').click()">
+                <input type="file" id="wbOcrFileInput" accept="image/*" style="display: none;" onchange="WordbookModule.handleImageSelected(event)">
+                <div class="ocr-icon">📸</div>
+                <h4>點擊上傳或拖曳單字圖片至此</h4>
+                <p class="ocr-desc">支援課本、單字筆記、考卷、講義照片或截圖，亦可直接按下 <kbd>Ctrl + V</kbd> 貼上圖片！</p>
+                <button type="button" class="btn btn-outline btn-sm">選擇圖片檔案</button>
+              </div>
+
+              <!-- 圖片預覽與辨識按鈕 -->
+              <div id="wbOcrPreviewArea" style="display: none; margin-top: 1rem;">
+                <div class="ocr-preview-row">
+                  <img id="wbOcrImgPreview" class="ocr-thumbnail" alt="預覽圖片">
+                  <div class="ocr-preview-info">
+                    <span id="wbOcrFileName" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">words_photo.png</span>
+                    <button type="button" class="btn btn-primary" id="btnStartOcrScan" onclick="WordbookModule.startOcrScan()">
+                      <span>✨ 開始 AI 辨識整張圖片單字</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 辨識中動畫提示 -->
+              <div id="wbOcrLoading" style="display: none; text-align: center; padding: 2rem;">
+                <div class="ocr-spinner"></div>
+                <p style="font-weight: 700; color: var(--primary-color); margin-top: 1rem;">🤖 Gemini AI 正在深度掃描圖片中的所有單字與中文釋義...</p>
+                <span class="upload-tip">正在提取英文單詞、詞性標註與翻譯，請稍候約 3~5 秒...</span>
+              </div>
+
+              <!-- 辨識結果預覽與勾選清單 -->
+              <div id="wbOcrResultArea" style="display: none; margin-top: 1.25rem;">
+                <div class="ocr-result-header">
+                  <h5>🎉 成功辨識出 <strong id="wbOcrCount">0</strong> 個單字：</h5>
+                  <div class="ocr-result-actions">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="WordbookModule.toggleSelectAllOcr(true)">全選</button>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="WordbookModule.toggleSelectAllOcr(false)">全不選</button>
+                  </div>
+                </div>
+                <div class="ocr-words-scroll" id="wbOcrWordsList"></div>
               </div>
             </div>
           </div>
@@ -1286,9 +1330,15 @@ ubiquitous - 無所不在的
             <div class="form-group">
               <div class="deck-modal-label-row">
                 <label style="margin-bottom: 0;">批次輸入單字與中文 (每行一個單字與解釋) <span class="required">*</span></label>
-                <button type="button" class="btn btn-sm btn-wordbook-import" id="btnImportFromWordbook" onclick="PKBattleModule.importFromWordbook()">
-                  ⭐ 從個人生字本匯入 (<span id="pkWordbookCountBadge">0</span>)
-                </button>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-sm btn-wordbook-import" id="btnImportFromWordbook" onclick="PKBattleModule.importFromWordbook()">
+                    ⭐ 從個人生字本匯入 (<span id="pkWordbookCountBadge">0</span>)
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline" id="btnPkOcrImport" onclick="document.getElementById('pkDeckOcrInput').click()">
+                    📸 圖片辨識匯入
+                  </button>
+                  <input type="file" id="pkDeckOcrInput" accept="image/*" style="display: none;" onchange="PKBattleModule.handleOcrImageSelected(event)">
+                </div>
               </div>
               <textarea id="pkNewDeckWordsText" class="form-input pk-deck-textarea" rows="8" placeholder="每行一筆單字，格式支援：
 apple - 蘋果

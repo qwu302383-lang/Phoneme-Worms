@@ -1682,6 +1682,42 @@ const PKBattleModule = {
     wordsTextarea.focus();
   },
 
+  async handleOcrImageSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    showToast("📸 正在透過 Gemini AI 視覺掃描圖片中的所有單字...");
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const b64 = event.target.result;
+      try {
+        const res = await fetch('/api/ocr/extract_words', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: b64 })
+        });
+        const data = await res.json();
+        if (data.success && data.words && data.words.length > 0) {
+          const textarea = document.getElementById('pkNewDeckWordsText');
+          const nameInput = document.getElementById('pkNewDeckName');
+          const lines = data.words.map(w => `${w.word} - ${w.definition || '自訂釋義'}`).join('\n');
+          if (textarea) {
+            textarea.value = textarea.value.trim() ? (textarea.value.trim() + '\n' + lines) : lines;
+          }
+          if (nameInput && !nameInput.value.trim()) {
+            nameInput.value = `圖片辨識題庫 (${data.words.length}單)`;
+          }
+          showToast(`🎉 成功從圖片辨識出 ${data.words.length} 個單字並已填入題庫！`);
+        } else {
+          alert(data.message || '未能辨識出單字，請確認圖片清晰度！');
+        }
+      } catch (err) {
+        alert('圖片辨識失敗，請稍後重試！');
+      }
+    };
+    reader.readAsDataURL(file);
+  },
+
   closeCreateDeckModal() {
     const modal = document.getElementById('pkCreateDeckModal');
     if (modal) modal.style.display = 'none';
