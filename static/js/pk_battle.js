@@ -1634,7 +1634,52 @@ const PKBattleModule = {
         const input = document.getElementById('pkNewDeckName');
         if (input) input.focus();
       }, 50);
+
+      // 同步更新生字本現有單字數量徽章
+      const starredCount = (window.AppState && AppState.getStarredWords) ? AppState.getStarredWords().length : 0;
+      const badge = document.getElementById('pkWordbookCountBadge');
+      if (badge) badge.textContent = starredCount;
     }
+  },
+
+  importFromWordbook() {
+    const starred = (window.AppState && AppState.getStarredWords) ? AppState.getStarredWords() : [];
+    if (!starred || starred.length === 0) {
+      alert("您的個人生字本目前為空！\n\n建議可以在「單字卡背誦」或「文章閱讀」中點擊星星 ⭐ 收藏生詞後再來匯入。");
+      return;
+    }
+
+    const wordsTextarea = document.getElementById('pkNewDeckWordsText');
+    const nameInput = document.getElementById('pkNewDeckName');
+    if (!wordsTextarea) return;
+
+    // 將生字本單字格式化為每行 "word - definition"
+    const formattedLines = starred.map(item => {
+      const def = (item.definition || '生字本收藏單字').replace(/[\r\n]+/g, ' ').trim();
+      return `${item.word.trim()} - ${def}`;
+    });
+
+    const newText = formattedLines.join('\n');
+
+    // 若原先已經有輸入文字，詢問是追加還是覆蓋
+    if (wordsTextarea.value.trim().length > 0) {
+      const shouldAppend = confirm(`偵測到輸入框已有單字內容！\n\n點擊【確定】將生字本的 ${starred.length} 個單字「追加」至末尾；\n點擊【取消】將「替換覆蓋」原有內容。`);
+      if (shouldAppend) {
+        wordsTextarea.value = wordsTextarea.value.trim() + '\n' + newText;
+      } else {
+        wordsTextarea.value = newText;
+      }
+    } else {
+      wordsTextarea.value = newText;
+    }
+
+    // 若題庫名稱為空，自動填入預設建議名稱
+    if (nameInput && !nameInput.value.trim()) {
+      nameInput.value = `生字本特選題庫 (${starred.length}單)`;
+    }
+
+    showToast(`⭐ 成功從個人生字本匯入 ${starred.length} 筆單字！`);
+    wordsTextarea.focus();
   },
 
   closeCreateDeckModal() {

@@ -1196,14 +1196,19 @@
             </div>
 
             <div class="form-group">
-              <label>批次輸入單字與中文 (每行一個單字與解釋) <span class="required">*</span></label>
+              <div class="deck-modal-label-row">
+                <label style="margin-bottom: 0;">批次輸入單字與中文 (每行一個單字與解釋) <span class="required">*</span></label>
+                <button type="button" class="btn btn-sm btn-wordbook-import" id="btnImportFromWordbook" onclick="PKBattleModule.importFromWordbook()">
+                  ⭐ 從個人生字本匯入 (<span id="pkWordbookCountBadge">0</span>)
+                </button>
+              </div>
               <textarea id="pkNewDeckWordsText" class="form-input pk-deck-textarea" rows="8" placeholder="每行一筆單字，格式支援：
 apple - 蘋果
 perseverance - 毅力；堅持不懈
 innovation - 創新；革新
 resilient - 具韌性的
 ..."></textarea>
-              <span class="upload-tip">💡 提示：使用減號 - 、逗號 , 或冒號 : 分隔英文單字與中文解釋即可！</span>
+              <span class="upload-tip">💡 提示：使用減號 - 、逗號 , 或冒號 : 分隔英文單字與中文解釋，亦可點上方按鈕從個人生字本一鍵匯入！</span>
             </div>
           </div>
           <div class="modal-footer">
