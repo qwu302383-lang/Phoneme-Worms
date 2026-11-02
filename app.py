@@ -2,10 +2,12 @@ import os
 import sys
 import json
 import base64
+import io
 import logging
 from flask import Flask, request, jsonify, render_template, send_from_directory
 import requests
 from dotenv import load_dotenv
+from PIL import Image, ImageOps
 
 # 設定編碼以防止 Windows 繁體中文控制台亂碼
 if sys.platform == "win32":
@@ -319,12 +321,36 @@ def pk_pvp_leave_room():
     res = pvp_manager.leave_room(room_code, player_id)
     return jsonify(res)
 
+def robust_json_parse(raw_text):
+    """強健 JSON 解析器，支援 Markdown 剝離與結尾括號自動補齊修復"""
+    text = (raw_text or "").strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.startswith("json"):
+            text = text[4:].strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # 嘗試尋找最後一個完整閉合的物件 '}' 並自動封閉陣列 ']'
+        last_brace = text.rfind("}")
+        if last_brace != -1:
+            repaired = text[:last_brace + 1].strip()
+            if not repaired.endswith("]"):
+                repaired += "]"
+            if not repaired.startswith("["):
+                repaired = "[" + repaired
+            try:
+                return json.loads(repaired)
+            except Exception:
+                pass
+        return []
+
 # -------------------------------------------------------------
 # AI 多模態視覺 OCR：從圖片中自動識別並萃取所有英文單字與中文釋義
 # -------------------------------------------------------------
 @app.route("/api/ocr/extract_words", methods=["POST"])
 def ocr_extract_words():
-    """使用 Gemini 3.6 Flash 視覺模型從圖片辨識全部英文單字與繁體中文解釋"""
+    """使用 Gemini 3.6 Flash / 最新視覺多模態模型全盤精準識別圖片內全部英文單字與中文釋義"""
     image_b64 = None
     mime_type = "image/jpeg"
 
@@ -356,35 +382,51 @@ def ocr_extract_words():
             "message": "系統未設定 GEMINI_API_KEY，請於 .env 配置後使用！"
         }), 500
 
-    prompt = """
-You are an expert English lexicographer and visual OCR recognition specialist.
-The user has provided an image filled with English vocabulary words (e.g. textbook page, vocabulary list sheet, exam paper, flashcard set, or notebook notes).
+    # 圖片預先最佳化：修正相機拍攝 EXIF 方向，並將超大圖等比例縮放至 2048px 內（兼顧頂級辨識細節與極速上傳）
+    try:
+        raw_bytes = base64.b64decode(image_b64)
+        img = Image.open(io.BytesIO(raw_bytes))
+        img = ImageOps.exif_transpose(img)
+        max_dim = 2048
+        if img.width > max_dim or img.height > max_dim:
+            img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+        buf = io.BytesIO()
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        img.save(buf, format="JPEG", quality=90, optimize=True)
+        image_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+        mime_type = "image/jpeg"
+    except Exception as img_err:
+        logging.warning(f"Image resize / orientation fix skipped: {img_err}")
 
-Your job:
-1. Examine the image carefully and extract EVERY English word and phrase present.
-2. For each word, provide:
-   - "word": Clean English word or phrase (strip any numbering or formatting artifacts).
-   - "definition": Traditional Chinese (繁體中文) translation. If Chinese definitions exist in the image, transcribe and clean them; if the image only has English, translate accurately into Traditional Chinese.
+    prompt = """
+You are an expert English lexicographer and high-precision visual OCR recognition engine.
+The user has provided an image containing English vocabulary words (e.g. textbook page, vocabulary list, exam paper, sheet, flashcard set, multi-column glossary, or notes).
+
+EXHAUSTIVE EXTRACTION MANDATE:
+1. Thoroughly scan EVERY single region of the image from top to bottom, including all columns (left column, middle column, right column, sidebars, footnotes, and tables).
+2. You MUST extract 100% of ALL distinct English vocabulary words and phrases visible in the image. Do NOT summarize, skip, truncate, or sample. Capture EVERY SINGLE WORD.
+3. For each vocabulary item, provide:
+   - "word": The clean English word or phrase (strip any numbering like "1.", "2.", "•", or bullet points).
+   - "definition": Accurate Traditional Chinese (繁體中文) translation. If Chinese definitions exist in the image, transcribe and clean them; if the image only has English, translate accurately into Traditional Chinese.
    - "pos": Part of speech (e.g., n., v., adj., adv., phr., idiom).
-   - "phonetic": IPA phonetic symbol (optional, e.g., /ˌpɝː.səˈvɪr.əns/).
-   - "example": Short natural English example sentence (optional).
-3. Return ONLY a valid JSON array of objects, with no markdown code blocks:
+   - "phonetic": IPA phonetic symbol (e.g., /kəmˈpliːt/).
+4. Keep definitions concise so that ALL words fit without reaching token limits. Do NOT generate lengthy example sentences.
+5. Return ONLY a valid JSON array of objects with NO markdown formatting around it:
 [
   {
     "word": "perseverance",
     "definition": "毅力；堅持不懈",
     "pos": "n.",
-    "phonetic": "/ˌpɝː.səˈvɪr.əns/",
-    "example": "Through hard work and perseverance, she reached her goal."
+    "phonetic": "/ˌpɝː.səˈvɪr.əns/"
   }
 ]
 If the image does not contain recognizable English words, return an empty array: [].
 """
 
-    models_to_try = [GEMINI_MODEL, "gemini-3.6-flash", "gemini-2.5-flash", "gemini-1.5-flash"]
-    if "gemini-3.6-flash" in models_to_try:
-        models_to_try.remove("gemini-3.6-flash")
-    models_to_try.insert(0, "gemini-3.6-flash")
+    models_to_try = ["gemini-3.6-flash", "gemini-flash-latest"]
+    if GEMINI_MODEL and GEMINI_MODEL not in models_to_try:
+        models_to_try.insert(0, GEMINI_MODEL)
 
     last_error = ""
     for model_name in models_to_try:
@@ -402,23 +444,21 @@ If the image does not contain recognizable English words, return an empty array:
                 ]
             }],
             "generationConfig": {
-                "temperature": 0.2,
+                "temperature": 0.1,
+                "maxOutputTokens": 8192,
                 "responseMimeType": "application/json"
             }
         }
 
         try:
-            resp = requests.post(endpoint, json=payload, timeout=30)
+            resp = requests.post(endpoint, json=payload, timeout=75)
             if resp.status_code == 200:
                 resp_json = resp.json()
                 candidates = resp_json.get("candidates", [])
                 if candidates:
-                    raw_text = candidates[0]["content"]["parts"][0]["text"].strip()
-                    if raw_text.startswith("```"):
-                        raw_text = raw_text.strip("`")
-                        if raw_text.startswith("json"):
-                            raw_text = raw_text[4:].strip()
-                    parsed = json.loads(raw_text)
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    raw_text = parts[0].get("text", "").strip() if parts else ""
+                    parsed = robust_json_parse(raw_text)
                     word_list = parsed if isinstance(parsed, list) else parsed.get("words", [])
                     return jsonify({
                         "success": True,

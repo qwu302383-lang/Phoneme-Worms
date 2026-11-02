@@ -750,13 +750,21 @@ ubiquitous - 無所不在的
               <!-- 辨識結果預覽與勾選清單 -->
               <div id="wbOcrResultArea" style="display: none; margin-top: 1.25rem;">
                 <div class="ocr-result-header">
-                  <h5>🎉 成功辨識出 <strong id="wbOcrCount">0</strong> 個單字：</h5>
+                  <div>
+                    <h5 style="margin: 0;">🎉 成功辨識出 <strong id="wbOcrCount">0</strong> 個單字：</h5>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">已選取 <strong id="wbOcrSelectedCount" style="color: var(--primary-color);">0</strong> 個單字</span>
+                  </div>
                   <div class="ocr-result-actions">
                     <button type="button" class="btn btn-sm btn-outline" onclick="WordbookModule.toggleSelectAllOcr(true)">全選</button>
                     <button type="button" class="btn btn-sm btn-outline" onclick="WordbookModule.toggleSelectAllOcr(false)">全不選</button>
+                    <button type="button" class="btn btn-sm btn-primary" id="btnOcrQuickImportTop" onclick="WordbookModule.saveWord()">📥 立即匯入勾選單字</button>
                   </div>
                 </div>
                 <div class="ocr-words-scroll" id="wbOcrWordsList"></div>
+                <div class="ocr-result-bottom-bar">
+                  <span class="ocr-hint-text">💡 提示：點擊「立即匯入勾選單字」即可一次性全部加入個人生字本！</span>
+                  <button type="button" class="btn btn-sm btn-primary" id="btnOcrQuickImportBtm" onclick="WordbookModule.saveWord()">📥 立即匯入勾選單字</button>
+                </div>
               </div>
             </div>
           </div>

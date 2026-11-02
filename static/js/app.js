@@ -380,6 +380,23 @@ const WordbookModule = {
     }
   },
 
+  updateOcrSelectedCount() {
+    const checked = document.querySelectorAll('#wbOcrWordsList input[type="checkbox"]:checked');
+    const total = document.querySelectorAll('#wbOcrWordsList input[type="checkbox"]');
+    const selCountEl = document.getElementById('wbOcrSelectedCount');
+    if (selCountEl) selCountEl.textContent = `${checked.length} / ${total.length}`;
+
+    const label = `📥 立即匯入勾選單字 (${checked.length})`;
+    const topBtn = document.getElementById('btnOcrQuickImportTop');
+    const btmBtn = document.getElementById('btnOcrQuickImportBtm');
+    const confirmBtn = document.getElementById('btnWbConfirmAdd');
+    if (topBtn) topBtn.textContent = label;
+    if (btmBtn) btmBtn.textContent = label;
+    if (confirmBtn && this.currentAddMode === 'ocr') {
+      confirmBtn.textContent = `確認匯入 ${checked.length} 個單字至生字本`;
+    }
+  },
+
   renderOcrWordsList() {
     const listEl = document.getElementById('wbOcrWordsList');
     const countEl = document.getElementById('wbOcrCount');
@@ -395,18 +412,24 @@ const WordbookModule = {
       row.className = 'ocr-word-row';
       row.innerHTML = `
         <input type="checkbox" id="ocr_chk_${idx}" checked data-idx="${idx}">
-        <span class="ocr-word-text">${item.word}</span>
-        ${item.pos ? `<span class="ocr-pos-pill">${item.pos}</span>` : ''}
-        <span class="ocr-def-text">${item.definition || '未提供釋義'}</span>
+        <label for="ocr_chk_${idx}" style="cursor: pointer; display: flex; align-items: center; gap: 0.75rem; flex: 1; margin: 0;">
+          <span class="ocr-word-text">${item.word}</span>
+          ${item.pos ? `<span class="ocr-pos-pill">${item.pos}</span>` : ''}
+          <span class="ocr-def-text">${item.definition || '未提供釋義'}</span>
+        </label>
       `;
+      row.querySelector('input[type="checkbox"]').addEventListener('change', () => this.updateOcrSelectedCount());
       listEl.appendChild(row);
     });
+
+    this.updateOcrSelectedCount();
   },
 
   toggleSelectAllOcr(selectAll) {
     document.querySelectorAll('#wbOcrWordsList input[type="checkbox"]').forEach(chk => {
       chk.checked = selectAll;
     });
+    this.updateOcrSelectedCount();
   },
 
   async autoLookupWord() {
