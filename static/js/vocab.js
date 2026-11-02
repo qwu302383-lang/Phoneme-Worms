@@ -16,18 +16,25 @@ const VocabModule = {
     this.updateStats();
   },
 
-  async loadData() {
+  async loadData(forceRefresh = false) {
     try {
-      const res = await fetch('/api/vocab');
+      const url = forceRefresh ? '/api/vocab?refresh=1' : '/api/vocab';
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success && json.data) {
         this.vocabList = json.data;
+        if (json.date) {
+          const statusEl = document.getElementById('vocabDailyStatusText');
+          if (statusEl) {
+            statusEl.textContent = `📅 ${json.date} 今日專屬池 (${json.data.length} 字・非重複)`;
+          }
+        }
       }
     } catch (e) {
       console.warn("Using offline vocab fallback", e);
     }
 
-    this.applyFilter('all');
+    this.applyFilter(this.currentFilter || 'all');
   },
 
   applyFilter(filterType) {
@@ -314,6 +321,14 @@ const VocabModule = {
     document.getElementById('vQuizNextBtn')?.addEventListener('click', () => {
       this.quizCurrentIndex++;
       this.renderQuizQuestion();
+    });
+
+    // 換一池新的單字
+    document.getElementById('btnRefreshVocabPool')?.addEventListener('click', async () => {
+      showToast('正在換一池全新未學習的單字...');
+      await this.loadData(true);
+      if (window.DailyPoolModule) window.DailyPoolModule.loadOverview();
+      showToast('已換入全新單字池！');
     });
   }
 };

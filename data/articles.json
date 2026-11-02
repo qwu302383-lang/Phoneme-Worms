@@ -105,5 +105,95 @@
         "explanation": "最後一句提到 'demand rigorous regulatory frameworks before these breakthrough technologies can be universally integrated'，故選 (B)。"
       }
     ]
+  },
+  {
+    "id": "art-3",
+    "title": "Generative AI and the Transformation of Higher Education",
+    "category": "科技與教育 / 學測與多益閱讀",
+    "difficulty": "Upper-Intermediate",
+    "readTime": "4 min",
+    "summary": "分析生成式人工智慧如何翻轉高等教育傳統評量機制，促使師生從記憶性測驗轉向批判性思維與協作探究。",
+    "content": "The emergence of large language models and generative AI systems has catalyzed unprecedented debates within universities across the globe. For decades, traditional evaluation metrics placed significant weight on take-home essays, standardized knowledge recall, and rote problem-solving. However, as artificial intelligence demonstrates human-level proficiency in synthesising academic literature and drafting coherent prose, educators are compelled to overhaul their instructional paradigms.\n\nRather than imposing outright bans that prove unenforceable, forward-thinking institutions are adopting AI as a pedagogical collaborator. Students are encouraged to use automated tools to generate preliminary hypotheses, interrogate data discrepancies, and simulate counterarguments. The pedagogical focus has consequently pivoted toward critical inquiry: evaluating algorithmic outputs for hallucinations, recognizing systemic biases, and articulating original value judgments that synthetic systems cannot fathom.\n\nUltimately, this pedagogical evolution mirrors previous historical disruptions, such as the introduction of electronic calculators and web search engines. Far from rendering human intellect obsolete, generative technologies serve as intellectual scaffolding, enabling learners to transcend mundane execution and cultivate deeper analytical creativity."
+  },
+  {
+    "id": "art-4",
+    "title": "Urban Rewilding: Bringing Biodiversity Back to Concrete Jungles",
+    "category": "環境生態 / 學測長文選讀",
+    "difficulty": "Intermediate",
+    "readTime": "3 min",
+    "summary": "探討全球大都市如何推動「城市再野化」計畫，透過屋頂綠化、生態走廊與原生植物復育應對氣候危機。",
+    "content": "As climate change intensifies thermal stress and storm runoff in densely populated urban centers, city planners are turning to an innovative environmental philosophy: urban rewilding. Unlike conventional municipal landscaping that prioritizes pristine manicured lawns and non-native ornamental flora, rewilding aims to restore natural ecological processes and native biodiversity directly within urban landscapes.\n\nPioneering initiatives in metropolises such as Singapore, London, and Tokyo demonstrate the multifaceted dividends of this approach. Abandoned railway corridors have been transformed into linear wildlife corridors, allowing pollinators, birds, and small mammals to migrate safely through congested districts. Furthermore, extensive green roofs and permeable wetland parks absorb torrential precipitation, mitigating urban flood risks while lowering the heat island effect by several degrees Celsius.\n\nCrucially, rewilding also yields profound psychological benefits for urbanites. Empirical studies in environmental psychology reveal that regular immersion in biodiverse green spaces significantly reduces cortisol levels and enhances cognitive focus. By reintegrating authentic wilderness into everyday urban living, societies cultivate both ecological resilience and human well-being."
+  },
+  {
+    "id": "art-5",
+    "title": "The Science of Neuroplasticity: How the Brain Adapts to Lifelong Learning",
+    "category": "認知心理學 / 科普大考閱讀",
+    "difficulty": "Upper-Intermediate",
+    "readTime": "4 min",
+    "summary": "解構神經可塑性的科學機制，揭示大腦如何透過持續練習與刻意學習重新連結突觸網路。",
+    "content": "For much of the twentieth century, the prevailing dogma in neurobiology maintained that the adult mammalian brain was static and incapable of structural alteration once developmental maturity was attained. Recent decades of neuroimaging research have completely dismantled this assumption, revealing instead that the human brain exhibits remarkable neuroplasticity throughout its entire lifespan.\n\nNeuroplasticity refers to the biological capacity of neural networks to grow, reorganize, and forge new synaptic connections in response to experiential stimuli and deliberate cognitive practice. When an individual engages in intensive acquisition of a foreign language, musical instrument, or complex problem-solving framework, specific neural pathways are repeatedly stimulated. In response, neurons strengthen their synaptic junctions through long-term potentiation, coating active nerve fibers with protective myelin to accelerate electrical impulse conduction.\n\nThis scientific paradigm offers empowering implications for lifelong learners. It indicates that cognitive limitations are rarely fixed biological verdicts. Provided that learners embrace challenging cognitive tasks, maintain regular sleep cycles for memory consolidation, and cultivate resilient learning habits, the brain retains the dynamic agility to reshape its own cognitive architecture well into advanced age."
+  },
+  {
+    "id": "art-6",
+    "title": "Global Supply Chain Reconfiguration in an Era of Geopolitical Uncertainty",
+    "category": "TOEIC / 國際商務趨勢",
+    "difficulty": "Advanced (TOEIC 850+)",
+    "readTime": "4 min",
+    "summary": "深入剖析現代跨國企業如何由追求極致成本效益的精實庫存模式，轉向重視韌性與在地化的多元供應鏈戰略。",
+    "content": "For nearly four decades, global corporate operations were governed by the gospel of hyper-efficiency. Multinational manufacturers methodically structured their global supply chains around 'just-in-time' inventory models, centralizing production in regions offering the lowest labor costs and optimal economies of scale. However, recent compounding shocks—ranging from pandemic bottlenecks and geopolitical volatility to critical shipping route disruptions—have exposed the profound vulnerabilities inherent in over-optimized, singular sourcing.\n\nIn response, multinational enterprises are orchestrating a sweeping reconfiguration toward 'just-in-case' resilience. Corporations are aggressively pursuing nearshoring and friendshoring strategies, dispersing manufacturing facilities across geographically diversified regional hubs. By reducing over-reliance on any single nation or transit corridor, enterprises mitigate the risk of catastrophic supply interruptions.\n\nMoreover, digital visibility has emerged as a cornerstone of modern logistics management. Incorporating predictive analytics, IoT sensor tracking, and artificial intelligence allows supply chain orchestrators to anticipate bottlenecks days before they materialize. While this structural pivot necessitates higher operational overhead, global executives increasingly regard supply chain resilience as an indispensable insurance premium in an unpredictable world order."
+  },
+  {
+    "id": "art-7",
+    "title": "The Psychology of Flow: Unlocking Peak Performance and Creativity",
+    "category": "心理學與自我成長 / 學測精選",
+    "difficulty": "Intermediate",
+    "readTime": "3 min",
+    "summary": "介紹心理學家米哈里提出的心流理論，剖析如何透過挑戰與技能的平衡進入高度專注與創造力狀態。",
+    "content": "Have you ever been so deeply engrossed in writing, coding, or composing music that hours seemed to vanish in what felt like mere minutes? This optimal psychological state, famously termed 'flow' by psychologist Mihaly Csikszentmihalyi, represents a condition of total immersion where action and awareness seamlessly merge.\n\nAccording to psychological research, entering the flow state requires three fundamental prerequisites. First, the task at hand must possess clear goals and provide immediate, unambiguous feedback. Second, and most critically, there must be a harmonious equilibrium between the challenge of the activity and the skill level of the practitioner. If the challenge dwarfs ability, anxiety paralyzes the mind; conversely, if skills drastically exceed the challenge, boredom promptly ensues. Flow resides exclusively along the razor-thin frontier where existing competencies are stretched to their limits.\n\nIn our hyper-connected modern landscape saturated with push notifications and fragmented attention spans, the ability to summon flow has become a superpower. Organizations and individuals that cultivate distraction-free deep work environments not only achieve unprecedented productivity but also experience heightened levels of intrinsic fulfillment and creative breakthrough."
+  },
+  {
+    "id": "art-8",
+    "title": "Renewable Energy Transition and the Quest for Grid-Scale Storage",
+    "category": "綠色科技 / 學測趨勢議題",
+    "difficulty": "Upper-Intermediate",
+    "readTime": "4 min",
+    "summary": "探討風能與太陽能發電的間歇性問題，以及新一代電網級電池儲能技術如何成為全球淨零排放的關鍵拼圖。",
+    "content": "The global trajectory toward decarbonization has witnessed phenomenal strides in renewable power generation. Over the last decade, capital costs for photovoltaic solar modules and offshore wind turbines have plummeted exponentially, making clean electricity cheaper to generate than fossil fuel alternatives in many energy markets. Nevertheless, an engineering bottleneck continues to impede the total transition: intermittency.\n\nSolar panels produce maximal power during midday sun, while wind turbines generate surge output during nocturnal gusts. Unfortunately, human power demand peaks during early morning routines and post-work evening hours when renewable generation may drop to minimal levels. To prevent widespread grid instability and blackouts, electrical utilities require robust, grid-scale energy storage systems capable of capturing surplus power and discharging it reliably over extended durations.\n\nWhile lithium-ion batteries dominate consumer electronics and electric mobility, alternative chemistries are emerging to conquer utility-scale demands. Flow batteries utilizing vanadium electrolyte solutions offer non-degrading lifecycles spanning decades without fire hazards, while compressed air and thermal gravity storage provide massive mechanical reserves. Mastering long-duration energy storage represents the definitive technological frontier that will unlock a dependable 100% renewable power grid."
+  },
+  {
+    "id": "art-9",
+    "title": "The Rise of Deep Sea Mining: Environmental Gamble in the Abyss",
+    "category": "海洋生態與科技 / 學測國際視野",
+    "difficulty": "Upper-Intermediate",
+    "readTime": "4 min",
+    "summary": "探討深海探勘開採多金屬結核以製造電動車電池的巨大經濟價值，以及對深海脆弱生態系不可逆衝擊的國際爭端。",
+    "content": "Miles beneath the ocean's sunlit surface lies an abyssal realm once thought to be completely barren and devoid of life. Today, this benthic frontier in the Clarion-Clipperton Zone has transformed into a focal point of intense international geopolitical and environmental contention. Resting upon the oceanic seabed are trillions of potato-sized polymetallic nodules, richly encrusted with nickel, cobalt, copper, and manganese—critical metals essential for manufacturing electric vehicle batteries and renewable energy storage.\n\nAdvocates of deep-sea exploitation maintain that harvesting abyssal nodules causes far fewer direct human displacements and lower carbon footprints than terrestrial mining in tropical rainforests. Furthermore, the sheer abundance of high-grade raw materials could alleviate geopolitical bottlenecks that currently restrict clean tech supply chains.\n\nConversely, marine biologists and oceanographers warn that seabed extraction threatens pristine ecosystems that have taken millions of years to evolve. Heavy robotic crawlers dredging the seafloor generate massive sediment plumes that smother filter-feeding benthic organisms across thousands of square kilometers. With zero light and glacially slow biological metabolic rates, deep-sea ecosystems may require centuries to recover from a single mining operation, prompting a global coalition of nations to demand a precautionary moratorium."
+  },
+  {
+    "id": "art-10",
+    "title": "The Philosophy of Minimalist Architecture: How Space Shapes Mind",
+    "category": "藝術美學與建築 / 學測閱讀精選",
+    "difficulty": "Intermediate",
+    "readTime": "3 min",
+    "summary": "從現代主義名言「少即是多」探討極簡建築哲學，如何透過留白光影與純粹材質平息現代人的精神焦慮。",
+    "content": "In an era characterized by sensory overload, ubiquitous consumer advertising, and hyper-dense urban living, architecture has increasingly evolved from mere shelter into a sanctuary for mental restoration. At the forefront of this spatial movement stands minimalist design, famously encapsulated by modernist architect Ludwig Mies van der Rohe's enduring aphorism: 'Less is more.'\n\nMinimalism in architecture is far more than an aesthetic absence of ornamentation; it is a rigorous discipline of intentional elimination. By stripping away extraneous decorations, structural architects accentuate the raw authenticity of tactile materials—such as unpolished concrete, warm timber, and clear glass. Natural sunlight is treated as an active architectural element, casting shifting geometric shadows that mark the quiet passage of diurnal time.\n\nPsychological studies confirm that uncluttered living environments substantially lower cognitive load and mental fatigue. When the visual field is relieved of chaotic visual stimuli, occupants report diminished anxiety, improved contemplative clarity, and deeper interpersonal connections. In essence, by creating deliberate emptiness in physical space, minimalist architecture cultivates serene spaciousness within the human mind."
+  },
+  {
+    "id": "art-11",
+    "title": "Quantum Computing: Breaking the Boundaries of Classical Calculation",
+    "category": "前瞻科技 / TOEIC 與大考科普",
+    "difficulty": "Advanced",
+    "readTime": "4 min",
+    "summary": "解析量子位元與疊加態如何使量子電腦在分子模擬、藥物開發與密碼學中呈現超越傳統超級電腦的幾何級算力躍升。",
+    "content": "For over half a century, the explosive trajectory of digital computing obeyed Moore's Law, as chip manufacturers continually shrunk silicon transistors to amplify processing capacity. Today, however, classical microchips are colliding with fundamental atomic limits. Entering this computational frontier is quantum computing—a revolutionary paradigm that discards the binary zeros and ones of classical circuits in favor of the bizarre principles of quantum mechanics.\n\nAt the heart of quantum systems is the 'qubit.' Unlike classical bits that must exist strictly as either zero or one, qubits exploit the quantum phenomenon of superposition, existing simultaneously as probabilistic combinations of both states. When multiple qubits are entangled, their joint computational space expands exponentially. A quantum machine with merely a few hundred high-fidelity qubits can evaluate more potential configurations simultaneously than there are fundamental particles in the observable universe.\n\nThe real-world implications are monumental. Quantum algorithms promise to simulate intricate molecular chemistry with pinpoint accuracy, accelerating the discovery of revolutionary room-temperature superconductors, nitrogen-fixing agricultural catalysts, and life-saving oncology therapeutics. While overcoming quantum decoherence and error mitigation remains a formidable engineering hurdle, achieving fault-tolerant quantum supremacy will undoubtedly redefine the boundaries of technological possibility."
+  },
+  {
+    "id": "art-12",
+    "title": "Microbiota-Gut-Brain Axis: The Hidden Organ Governing Emotion and Immunity",
+    "category": "生命科學與健康 / 學測趨勢",
+    "difficulty": "Upper-Intermediate",
+    "readTime": "4 min",
+    "summary": "解密腸道微生物群如何透過迷走神經與神經傳導物質與大腦雙向溝通，深刻影響人類情緒、憂鬱症狀與免疫調節。",
+    "content": "Medical science traditionally viewed the digestive system as a relatively utilitarian biological machine tasked with breaking down nutrients and expelling metabolic waste. Over the past decade, however, an explosion of biomedical discoveries has elevated the human gut microbiome into what many scientists now term a 'second brain.' Within the gastrointestinal tract reside trillions of microorganisms, harboring more genetic variety than the entire human genome.\n\nThis microscopic ecosystem maintains an intricate, bi-directional communication network known as the microbiota-gut-brain axis. Through the vagus nerve, immune cytokines, and circulating metabolic byproducts such as short-chain fatty acids, gut microbes continuously broadcast biochemical signals to the central nervous system. Astonishingly, over 90 percent of the body's serotonin—a neurotransmitter responsible for regulating mood, sleep cycles, and anxiety—is produced directly within the gut lining under microbial influence.\n\nThese revelations are transforming psychiatric treatments. Pioneering gastroenterologists and psychiatrists are developing 'psychobiotics'—specific strains of probiotic bacteria designed to alleviate clinical depression and chronic generalized anxiety. By nourishing our internal microbial partners with dietary fiber and fermented foods, we unlock a powerful pathway toward holistic emotional resilience and mental well-being."
   }
 ]

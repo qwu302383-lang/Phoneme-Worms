@@ -13,12 +13,19 @@ const QuizModule = {
     this.bindEvents();
   },
 
-  async loadQuizzes() {
+  async loadQuizzes(forceRefresh = false) {
     try {
-      const res = await fetch('/api/quizzes');
+      const url = forceRefresh ? '/api/quizzes?refresh=1' : '/api/quizzes';
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success && json.data) {
         this.quizzes = json.data;
+        if (json.date) {
+          const statusEl = document.getElementById('quizDailyStatusText');
+          if (statusEl) {
+            statusEl.textContent = `📅 ${json.date} 今日文法克漏字池 (${json.data.length} 題・非重複)`;
+          }
+        }
       }
     } catch (e) {
       console.warn("Using offline quizzes fallback", e);
@@ -181,6 +188,14 @@ const QuizModule = {
         e.target.classList.add('active');
         this.applyFilter(e.target.dataset.qfilter);
       });
+    });
+
+    // 換一池新的克漏字題目
+    document.getElementById('btnRefreshQuizPool')?.addEventListener('click', async () => {
+      showToast('正在換一池全新文法克漏字題目...');
+      await this.loadQuizzes(true);
+      if (window.DailyPoolModule) window.DailyPoolModule.loadOverview();
+      showToast('已換入全新測驗池！');
     });
   }
 };

@@ -63,6 +63,9 @@ const AppState = {
     }
     localStorage.setItem(this.STARRED_KEY, JSON.stringify(list));
     this.updateStarredBadge();
+    if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
+      window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
+    }
     return true;
   },
 
@@ -73,6 +76,9 @@ const AppState = {
       list.splice(existingIndex, 1);
       localStorage.setItem(this.STARRED_KEY, JSON.stringify(list));
       this.updateStarredBadge();
+      if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
+        window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
+      }
       return false;
     } else {
       list.unshift({
@@ -85,6 +91,9 @@ const AppState = {
       });
       localStorage.setItem(this.STARRED_KEY, JSON.stringify(list));
       this.updateStarredBadge();
+      if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
+        window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
+      }
       return true;
     }
   },
@@ -92,6 +101,9 @@ const AppState = {
   clearAllStarred() {
     localStorage.removeItem(this.STARRED_KEY);
     this.updateStarredBadge();
+    if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
+      window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
+    }
   },
 
   getStats() {
@@ -155,6 +167,7 @@ function switchTab(tabId) {
   }
 
   // 特殊分頁啟動回呼
+  if (tabId === 'dashboard' && window.DailyPoolModule) { DailyPoolModule.loadOverview(); }
   if (tabId === 'vocab' && window.VocabModule) { VocabModule.applyFilter(VocabModule.currentFilter); }
   if (tabId === 'custom-quiz' && window.CustomQuizModule) { CustomQuizModule.renderWordGrid(); }
   if (tabId === 'pk-battle' && window.PKBattleModule) { PKBattleModule.renderDeckSelector(); }
@@ -569,6 +582,145 @@ window.addEventListener('paste', (e) => {
 
 window.WordbookModule = WordbookModule;
 
+/**
+ * 每日專屬學習池模組 (Daily Content Rotation Module)
+ * 負責首頁單字卡、精選長文、文法克漏字之每日自動更新與非重複換池
+ */
+const DailyPoolModule = {
+  currentOverview: null,
+
+  async init() {
+    this.bindEvents();
+    await this.loadOverview();
+  },
+
+  async loadOverview(forceRefresh = false) {
+    try {
+      const url = forceRefresh ? '/api/daily/overview?refresh=1' : '/api/daily/overview';
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.success && json.data) {
+        this.currentOverview = json.data;
+        this.renderDashboardCards(json.data);
+      }
+    } catch (err) {
+      console.error('Failed to load daily overview:', err);
+    }
+  },
+
+  renderDashboardCards(data) {
+    // 1. 日期標籤
+    const dateBadge = document.getElementById('dailyPoolDateBadge');
+    if (dateBadge && data.date) {
+      dateBadge.textContent = `📅 今日學習池 ${data.date}`;
+    }
+
+    // 2. 單字卡池預覽 (排除已收藏在生字本的單字)
+    const vocabCountEl = document.getElementById('dailyVocabCount');
+    const vocabListEl = document.getElementById('dailyVocabPreviewList');
+    const starredWords = AppState.getStarredWords();
+    const starredWordSet = new Set(starredWords.map(w => w.word.toLowerCase()));
+
+    if (data.vocab && data.vocab.items) {
+      const unstarredDaily = data.vocab.items.filter(v => !starredWordSet.has(v.word.toLowerCase()));
+      if (vocabCountEl) {
+        vocabCountEl.textContent = `${unstarredDaily.length} 個未重複單字`;
+      }
+      if (vocabListEl) {
+        if (unstarredDaily.length === 0) {
+          vocabListEl.innerHTML = `
+            <div class="daily-vocab-row">
+              <span class="v-word">🎉 今日推薦單字已全數掌握</span>
+              <span class="v-def">生字本已收錄所有詞彙</span>
+            </div>
+          `;
+        } else {
+          const previewItems = unstarredDaily.slice(0, 4);
+          vocabListEl.innerHTML = previewItems.map(item => `
+            <div class="daily-vocab-row">
+              <div>
+                <span class="v-word">${item.word}</span>
+                <span class="v-pos">${item.pos || ''}</span>
+              </div>
+              <span class="v-def" title="${item.definition}">${item.definition}</span>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    // 3. 閱讀文章預覽
+    if (data.article && data.article.featured) {
+      const art = data.article.featured;
+      const titleEl = document.getElementById('dailyReadingTitle');
+      const catEl = document.getElementById('dailyReadingCategory');
+      const timeEl = document.getElementById('dailyReadingTime');
+      const sumEl = document.getElementById('dailyReadingSummary');
+
+      if (titleEl) titleEl.textContent = art.title;
+      if (catEl) catEl.textContent = art.category || '精選長文';
+      if (timeEl) timeEl.textContent = art.readTime || '3 min';
+      if (sumEl) sumEl.textContent = art.summary || '';
+    }
+
+    // 4. 克漏字測驗預覽
+    const quizCountEl = document.getElementById('dailyQuizCount');
+    const teaserEl = document.getElementById('dailyQuizTeaser');
+    if (quizCountEl && data.quiz) {
+      quizCountEl.textContent = `${data.quiz.count} 題大考與多益精選`;
+    }
+    if (teaserEl && data.quiz) {
+      teaserEl.textContent = data.quiz.first_question || '點擊進入開始今日 5 題文法與克漏字深度診斷測驗！';
+    }
+  },
+
+  async refreshModule(moduleType = 'all') {
+    showToast(`正在更換最新非重複學習池...`);
+    try {
+      const res = await fetch('/api/daily/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ module: moduleType })
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        this.currentOverview = json.data;
+        this.renderDashboardCards(json.data);
+
+        // 連動各分頁重新載入最新池
+        if (moduleType === 'all' || moduleType === 'vocab') {
+          if (window.VocabModule && window.VocabModule.loadData) {
+            await window.VocabModule.loadData();
+          }
+        }
+        if (moduleType === 'all' || moduleType === 'reading') {
+          if (window.ReadingModule && window.ReadingModule.loadArticles) {
+            await window.ReadingModule.loadArticles();
+          }
+        }
+        if (moduleType === 'all' || moduleType === 'quiz') {
+          if (window.QuizModule && window.QuizModule.loadQuizzes) {
+            await window.QuizModule.loadQuizzes();
+          }
+        }
+
+        showToast(json.message || '✨ 今日學習池已更換為全新未學習內容！');
+      }
+    } catch (err) {
+      showToast('換池失敗，請稍候重試');
+      console.error(err);
+    }
+  },
+
+  bindEvents() {
+    document.getElementById('btnRefreshDailyAll')?.addEventListener('click', () => this.refreshModule('all'));
+    document.getElementById('btnRefreshDailyVocab')?.addEventListener('click', () => this.refreshModule('vocab'));
+    document.getElementById('btnRefreshDailyReading')?.addEventListener('click', () => this.refreshModule('reading'));
+    document.getElementById('btnRefreshDailyQuiz')?.addEventListener('click', () => this.refreshModule('quiz'));
+  }
+};
+window.DailyPoolModule = DailyPoolModule;
+
 // 主程式初始化
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. 初始化語音模組
@@ -634,6 +786,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 6. 載入各功能模組
+  await DailyPoolModule.init();
   await VocabModule.init();
   await AITutorModule.init();
   await ReadingModule.init();

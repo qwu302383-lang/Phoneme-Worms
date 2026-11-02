@@ -92,5 +92,380 @@
     ],
     "answer": 2,
     "explanation": "【考點分析：Neither A nor B 主謂就近一致原則】\n使用 'Neither A nor B' 連接兩個主詞時，動詞的單複數形態應與靠近動詞的後方主詞 (B) 一致。\n此處靠近動詞的主詞為 'any of the junior analysts'（複數），因此動詞需用複數形式 were (be willing to 樂意做某事)。"
+  },
+  {
+    "id": "quiz-6",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 關係代名詞與結構",
+    "difficulty": "Medium",
+    "question": "Candidates ______ applications meet all statutory requirements will be summoned for an in-person panel interview next week.",
+    "options": [
+      "who",
+      "whom",
+      "whose",
+      "which"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：所有格關係代名詞 whose】\n句中先行詞為 Candidates（求職者，人），後方接著名詞 applications（申請表），兩者具所有格關係（求職者『的』申請表符合所有法定要求），故應選關係代名詞所有格 whose。\n(A) who (主格關係代名詞，後接動詞)\n(B) whom (受格關係代名詞)\n(C) whose (所有格關係代名詞，後接名詞) 👉 正確答案\n(D) which (用於指代事物先行詞)"
+  },
+  {
+    "id": "quiz-7",
+    "type": "cloze",
+    "category": "學測克漏字 / 轉折連接詞",
+    "difficulty": "Medium",
+    "question": "Renewable energy costs have declined significantly in recent years; ______, utility companies must still address the storage challenges posed by intermittent generation.",
+    "options": [
+      "nevertheless",
+      "furthermore",
+      "consequently",
+      "similarly"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：轉折副詞 nevertheless】\n前半句指出「再生能源成本顯著下降」，後半句轉折指出「電力公司仍須解決間歇發電的儲能挑戰」，兩者呈現對比與轉折關係，因此選 nevertheless（然而、儘管如此）。\n(A) nevertheless (adv. 儘管如此、然而) 👉 正確答案\n(B) furthermore (adv. 此外、而且)\n(C) consequently (adv. 因此、結果)\n(D) similarly (adv. 同樣地)"
+  },
+  {
+    "id": "quiz-8",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 假設語氣與倒裝",
+    "difficulty": "Hard",
+    "question": "______ you require additional legal documentation regarding the licensing contract, please notify the compliance officer immediately.",
+    "options": [
+      "Were",
+      "Had",
+      "Should",
+      "Would"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：未來條件句 if 倒裝省略】\n原句為 'If you should require additional legal documentation...'，在正式商業書信中，省略 if 時應將助動詞 Should 倒裝置於句首（Should you require...），表「萬一 / 若您需要…」。\n(A) Were (用於與現在事實相反之倒裝，如 Were you a lawyer...)\n(B) Had (用於與過去事實相反之倒裝，如 Had you told me...)\n(C) Should (用於未來可能情況之倒裝，相當於 If you should...) 👉 正確答案\n(D) Would (不能直接用於倒裝條件句首)"
+  },
+  {
+    "id": "quiz-9",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 動詞受詞補語與使役",
+    "difficulty": "Medium",
+    "question": "The newly installed security protocols will enable enterprise employees ______ confidential cloud drives securely from home.",
+    "options": [
+      "access",
+      "to access",
+      "accessing",
+      "accessed"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：enable + O + to V】\n動詞 enable（使能夠）的慣用搭配為 enable someone to do something（使某人能夠做某事），受詞補語必須使用不定詞 to V。\n(A) access (原形動詞)\n(B) to access (不定詞) 👉 正確答案\n(C) accessing (現在分詞/動名詞)\n(D) accessed (過去分詞)"
+  },
+  {
+    "id": "quiz-10",
+    "type": "cloze",
+    "category": "學測克漏字 / 慣用介系詞搭配",
+    "difficulty": "Medium",
+    "question": "The ongoing urban reforestation project is in accordance ______ the municipal government's zero-carbon pledge for 2030.",
+    "options": [
+      "with",
+      "for",
+      "to",
+      "by"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：片語 in accordance with】\nin accordance with 為高頻正式片語，意為「符合；與…一致；依據…」。\n(A) with 👉 正確答案（in accordance with）\n(B) for\n(C) to (注：according to 或 in accordance with)\n(D) by"
+  },
+  {
+    "id": "quiz-11",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 分詞構句與主被動",
+    "difficulty": "Hard",
+    "question": "______ by the regional sales figures of the previous quarter, the steering board decided to expand operations into Southeast Asia.",
+    "options": [
+      "Encourage",
+      "Encouraging",
+      "Encouraged",
+      "Having encourage"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：過去分詞構句表示被動】\n主詞 the steering board（指導委員會）與動詞 encourage（激勵、鼓舞）之間為「被動關係」（受到前一季亮眼銷售數據的鼓舞），原句為 'Because the steering board was encouraged by...'，省略連接詞與 be 動詞後保留過去分詞 Encouraged 開頭。\n(A) Encourage (原形動詞)\n(B) Encouraging (現在分詞，表主動或令人鼓舞的)\n(C) Encouraged (過去分詞，表感到鼓舞的) 👉 正確答案\n(D) Having encourage (文法錯誤，完成式應為 Having encouraged)"
+  },
+  {
+    "id": "quiz-12",
+    "type": "cloze",
+    "category": "學測克漏字 / 邏輯因果關係",
+    "difficulty": "Medium",
+    "question": "The international symposium had to be postponed ______ unexpected travel restrictions imposed across European transport hubs.",
+    "options": [
+      "because",
+      "due to",
+      "in spite of",
+      "as though"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：介系詞片語 due to + 名詞】\n空格後方為名詞片語 unexpected travel restrictions...，表示「因為突發的旅行限制」，因此應選介系詞片語 due to（因為、由於）。because 是連接詞需後接完整子句。\n(A) because (連接詞，後需接 S + V)\n(B) due to (介系詞片語，後接名詞/名詞片語) 👉 正確答案\n(C) in spite of (介系詞片語，表「儘管」，語意相反)\n(D) as though (連接詞，表「彷彿、好像」)"
+  },
+  {
+    "id": "quiz-13",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 詞性辨析（形容詞與副詞）",
+    "difficulty": "Medium",
+    "question": "To uphold data integrity, all automated backup logs must be reviewed ______ by certified security specialists.",
+    "options": [
+      "rigor",
+      "rigorous",
+      "rigorously",
+      "rigorousness"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：副詞修飾被動態動詞片語】\n句中動詞為 must be reviewed（必須被審核），此處需要副詞 rigorously（嚴格地、周密地）來修飾動作 reviewed。\n(A) rigor (n. 嚴謹、嚴酷)\n(B) rigorous (adj. 嚴格的、縝密的)\n(C) rigorously (adv. 嚴格地、嚴密地) 👉 正確答案\n(D) rigorousness (n. 嚴謹性)"
+  },
+  {
+    "id": "quiz-14",
+    "type": "grammar",
+    "category": "學測克漏字 / 比較級與慣用句型",
+    "difficulty": "Medium",
+    "question": "The more conscientiously students review their spaced-repetition flashcards, the ______ they can retain newly acquired academic vocabulary.",
+    "options": [
+      "effectively",
+      "more effectively",
+      "most effectively",
+      "effect"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：The + 比較級 ..., the + 比較級 ...】\n本題考「越…就越…」句型：The more conscientiously ..., the more effectively ...。後半句修飾動詞 retain（記住），故需使用副詞 effectively 的比較級 more effectively。\n(A) effectively (原級副詞)\n(B) more effectively (比較級副詞) 👉 正確答案\n(C) most effectively (最高級副詞)\n(D) effect (名詞)"
+  },
+  {
+    "id": "quiz-15",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 堅決建議動詞與 That 子句原形動詞",
+    "difficulty": "Hard",
+    "question": "The senior safety inspector insisted that the chemical laboratory ______ all hazardous materials before the scheduled audit.",
+    "options": [
+      "relocate",
+      "relocates",
+      "relocated",
+      "will relocate"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：堅持/建議/要求動詞後的 that 子句使用原形動詞】\n動詞 insisted（堅持要求）表示強烈要求或命令，其後接 that 子句時，子句動詞慣用「(should) + 原形動詞」，should 通常省略，故即使主詞 the chemical laboratory 為單數，動詞仍用原形 relocate！\n(A) relocate (原形動詞，省略 should) 👉 正確答案\n(B) relocates (第三人稱單數現在式，不符此文法規則)\n(C) relocated (過去式)\n(D) will relocate (未來式)"
+  },
+  {
+    "id": "quiz-16",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 不定代名詞主謂一致",
+    "difficulty": "Medium",
+    "question": "Each of the regional branch managers ______ required to submit a comprehensive fiscal report before the annual shareholders' assembly.",
+    "options": [
+      "is",
+      "are",
+      "were",
+      "have been"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：Each of + 複數名詞，主詞為單數 Each】\n本題主詞為代名詞 Each（每一個），後方的 of the regional branch managers 為介系詞片語作修飾語。依照主謂一致原則，Each 恆為單數，因此現在式動詞須選單數 is。\n(A) is (第三人稱單數現在式 be 動詞) 👉 正確答案\n(B) are (複數)\n(C) were (複數過去式)\n(D) have been (複數完成式)"
+  },
+  {
+    "id": "quiz-17",
+    "type": "cloze",
+    "category": "學測克漏字 / 關係副詞與先行詞",
+    "difficulty": "Medium",
+    "question": "The newly inaugurated tech park provides an inspiring collaborative incubator ______ aspiring software entrepreneurs can test algorithmic prototypes.",
+    "options": [
+      "where",
+      "which",
+      "that",
+      "whose"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：關係副詞 where 引導地方關係子句】\n先行詞為 an inspiring collaborative incubator（一個鼓舞人心的協作孵化器，表場所），後方子句 aspiring software entrepreneurs can test algorithmic prototypes 為結構完整之句子（S+V+O完整），在子句中作地方副詞（in which = where），故選關係副詞 where。\n(A) where (關係副詞，修飾地點場所) 👉 正確答案\n(B) which (關係代名詞，後方須缺少主詞或受詞)\n(C) that (關係代名詞)\n(D) whose (所有格關係代名詞，後接名詞)"
+  },
+  {
+    "id": "quiz-18",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 複合名詞與動名詞",
+    "difficulty": "Medium",
+    "question": "The executive management team expressed deep appreciation for Mr. Davis's ______ contributions to overseas market expansion.",
+    "options": [
+      "signify",
+      "significantly",
+      "significant",
+      "significance"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：形容詞修飾名詞】\n空格後為名詞 contributions（貢獻），其前方需要一個形容詞來修飾名詞，故應選 significant（重大的、顯著的）。\n(A) signify (動詞，象徵、意味著)\n(B) significantly (副詞，顯著地)\n(C) significant (形容詞，重大的、顯著的) 👉 正確答案\n(D) significance (名詞，重要性)"
+  },
+  {
+    "id": "quiz-19",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 授與動詞與介系詞",
+    "difficulty": "Medium",
+    "question": "The senior research grant was awarded ______ Dr. Lin for her groundbreaking discoveries in semiconductor nanotechnology.",
+    "options": [
+      "for",
+      "to",
+      "with",
+      "from"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：被動語態 award something to someone】\n主動語態為 'award someone something' 或 'award something to someone'。轉為被動語態時，受詞 the senior research grant 作主詞，後接介系詞 to（The grant was awarded to Dr. Lin），表頒發給某人。\n(A) for (表原因，此處後方接人)\n(B) to (表對象，頒發給…) 👉 正確答案\n(C) with\n(D) from"
+  },
+  {
+    "id": "quiz-20",
+    "type": "cloze",
+    "category": "學測克漏字 / 轉折副詞與語氣",
+    "difficulty": "Hard",
+    "question": "The experimental drug demonstrated moderate efficacy in laboratory mice; ______, human clinical trials failed to reproduce comparable therapeutic results.",
+    "options": [
+      "however",
+      "moreover",
+      "therefore",
+      "meanwhile"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：轉折副詞 however】\n前半句「在白鼠實驗中展現適度療效」，分號後後半句「人類臨床試驗未能重現相應療效」，兩句語意形成強烈對比與轉折，故選 however（然而）。\n(A) however (adv. 然而、可是) 👉 正確答案\n(B) moreover (adv. 此外、而且)\n(C) therefore (adv. 因此、所以)\n(D) meanwhile (adv. 與此同時)"
+  },
+  {
+    "id": "quiz-21",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 連接詞 as soon as vs once",
+    "difficulty": "Medium",
+    "question": "______ all confidential nondisclosure agreements are fully executed, the proprietary engineering blueprints will be released.",
+    "options": [
+      "Once",
+      "During",
+      "Unless",
+      "Despite"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：從屬連接詞 Once（一旦…就…）】\n空格後接完整子句 all ... agreements are fully executed（主詞 + 被動動詞），需要從屬連接詞。During 與 Despite 均為介系詞不能接子句；Unless 表「除非」，語意不通；Once 表「一旦…（就…）」，完美契合句意。\n(A) Once (從屬連接詞，一旦…) 👉 正確答案\n(B) During (介系詞，在…期間)\n(C) Unless (從屬連接詞，除非)\n(D) Despite (介系詞，儘管)"
+  },
+  {
+    "id": "quiz-22",
+    "type": "grammar",
+    "category": "學測克漏字 / 複合關係代名詞 what",
+    "difficulty": "Hard",
+    "question": "Modern cognitive psychologists emphasize that ______ matters most in deep learning is sustained deliberate practice, not innate talent.",
+    "options": [
+      "which",
+      "that",
+      "what",
+      "how"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：複合關係代名詞 what 作主詞】\nthat 子句內部需要一個兼具先行詞與關係代名詞功能的主詞（the thing which = what），what matters most 構成名詞子句「最重要的事情」，在此名詞子句中擔任動詞 matters 的主詞。\n(A) which (須有先行詞)\n(B) that (名詞子句連接詞，但在內部子句中不作主詞受詞)\n(C) what (= that which，最重要之事) 👉 正確答案\n(D) how (副詞，表方式)"
+  },
+  {
+    "id": "quiz-23",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 使役動詞 have/make/let",
+    "difficulty": "Medium",
+    "question": "The facilities director had the outdated ventilation ducts ______ and sanitized before the re-opening of the school campus.",
+    "options": [
+      "inspect",
+      "inspected",
+      "inspecting",
+      "to inspect"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：使役動詞 have + 受詞 + 過去分詞 p.p.（使某物被…）】\nhave + 物（outdated ventilation ducts）+ p.p. 表示主詞安排讓某物「被檢查與消毒」。ducts（通風管線）與 inspect（檢查）為被動關係，故受詞補語使用過去分詞 inspected。\n(A) inspect (主動原形)\n(B) inspected (過去分詞，表被動) 👉 正確答案\n(C) inspecting (現在分詞)\n(D) to inspect (不定詞)"
+  },
+  {
+    "id": "quiz-24",
+    "type": "cloze",
+    "category": "TOEIC Part 5 / 介系詞 prior to",
+    "difficulty": "Medium",
+    "question": "All international flight attendants must attend a mandatory security briefing prior ______ their designated departure time.",
+    "options": [
+      "at",
+      "to",
+      "on",
+      "for"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：慣用介系詞片語 prior to】\nprior to 是高頻片語，等同於 before，意為「在…之前」，固定搭配介系詞 to。\n(A) at\n(B) to 👉 正確答案（prior to）\n(C) on\n(D) for"
+  },
+  {
+    "id": "quiz-25",
+    "type": "grammar",
+    "category": "學測克漏字 / 假設語氣與省略",
+    "difficulty": "Hard",
+    "question": "If the government ______ proactive flood containment infrastructure ten years ago, yesterday's catastrophic damage could have been avoided.",
+    "options": [
+      "invests",
+      "had invested",
+      "invested",
+      "would invest"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：與過去事實相反的假設語氣】\n主要子句為 'could have been avoided'（過去虛擬式），時間狀語為 ten years ago（十年前），因此條件 if 子句必須使用過去完成式 had + p.p.（had invested）來表達與過去事實相反之假設。\n(A) invests (現在式)\n(B) had invested (過去完成式) 👉 正確答案\n(C) invested (過去簡單式，與現在事實相反)\n(D) would invest"
+  },
+  {
+    "id": "quiz-26",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 不定詞作目的狀語",
+    "difficulty": "Easy",
+    "question": "______ employee satisfaction and retention, HR launched a comprehensive flexible working program.",
+    "options": [
+      "Boost",
+      "To boost",
+      "Boosted",
+      "Boosting for"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：不定詞片語 To V 表目的】\n句首的不定詞片語 To boost employee satisfaction... 作為全句的目的副詞修飾語，表「為了提升員工滿意度與留任率，HR 推出了…」。\n(A) Boost (原形動詞)\n(B) To boost (不定詞表目的) 👉 正確答案\n(C) Boosted (過去分詞)\n(D) Boosting for (文法錯誤)"
+  },
+  {
+    "id": "quiz-27",
+    "type": "cloze",
+    "category": "學測克漏字 / 連接片語 in addition to",
+    "difficulty": "Medium",
+    "question": "In addition ______ providing free public transit for senior citizens, the city council subsidizes solar panel installation.",
+    "options": [
+      "with",
+      "to",
+      "for",
+      "at"
+    ],
+    "answer": 1,
+    "explanation": "【考點分析：片語 In addition to + V-ing/N】\nIn addition to 為固定搭配介系詞片語，意為「除了…之外（還有…）」，注意其中的 to 為介系詞，後接動名詞 providing。\n(A) with\n(B) to 👉 正確答案（In addition to）\n(C) for\n(D) at"
+  },
+  {
+    "id": "quiz-28",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 形容詞子句簡化分詞",
+    "difficulty": "Hard",
+    "question": "Passengers ______ on Flight TW-802 to London are requested to report to Boarding Gate 24 immediately.",
+    "options": [
+      "book",
+      "booking",
+      "booked",
+      "are booked"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：過去分詞片語修飾名詞】\nPassengers（乘客）與 book（訂位）為被動關係（乘客是被登記訂位的），原形容詞子句為 'who are booked on Flight TW-802'，簡化後保留過去分詞 booked 作後位修飾。\n(A) book (原形動詞)\n(B) booking (現在分詞)\n(C) booked (過去分詞，表已被訂位的乘客) 👉 正確答案\n(D) are booked (此處全句已有主要動詞 are requested，不可再有第二個獨立謂語動詞)"
+  },
+  {
+    "id": "quiz-29",
+    "type": "grammar",
+    "category": "TOEIC Part 5 / 副詞修飾形容詞",
+    "difficulty": "Medium",
+    "question": "The new battery cells developed by the startup are ______ efficient compared with traditional lithium alternatives.",
+    "options": [
+      "remark",
+      "remarkable",
+      "remarkably",
+      "remarkableness"
+    ],
+    "answer": 2,
+    "explanation": "【考點分析：副詞修飾形容詞】\n空格後為形容詞 efficient（有效率的），修飾形容詞必須使用副詞 remarkably（顯著地、非常地）。\n(A) remark (動詞/名詞)\n(B) remarkable (形容詞)\n(C) remarkably (副詞) 👉 正確答案\n(D) remarkableness (名詞)"
+  },
+  {
+    "id": "quiz-30",
+    "type": "cloze",
+    "category": "學測克漏字 / 假設條件與倒裝",
+    "difficulty": "Hard",
+    "question": "______ it not been for the prompt intervention of emergency responders, the warehouse fire would have caused irreversible devastation.",
+    "options": [
+      "Had",
+      "Were",
+      "Should",
+      "Would"
+    ],
+    "answer": 0,
+    "explanation": "【考點分析：Had it not been for...（若非當時…）】\n本題考與過去事實相反的固定句型：'If it had not been for...'，省略 If 時倒裝為 'Had it not been for...'，意為「若非當時有急救人員的迅速介入」。主要子句搭配 would have caused，完全對應過去虛擬語氣。\n(A) Had 👉 正確答案（Had it not been for）\n(B) Were (用於與現在事實相反：Were it not for...)\n(C) Should\n(D) Would"
   }
 ]

@@ -18,6 +18,9 @@ if sys.platform == "win32":
 # 讀取當前或上一層目錄的 .env
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(BASE_DIR)
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+from daily_content_manager import daily_manager
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 load_dotenv(os.path.join(PARENT_DIR, ".env"))
 
@@ -48,18 +51,49 @@ def index():
 
 @app.route("/api/vocab", methods=["GET"])
 def get_vocab():
-    data = load_json("vocab.json")
-    return jsonify({"success": True, "data": data})
+    if request.args.get("all") == "1":
+        data = load_json("vocab.json")
+        return jsonify({"success": True, "data": data, "is_daily": False})
+    refresh = request.args.get("refresh") in ["1", "true", "True"]
+    data = daily_manager.get_daily_vocab(force_refresh=refresh)
+    return jsonify({"success": True, "data": data, "is_daily": True, "date": daily_manager.get_today_str()})
 
 @app.route("/api/articles", methods=["GET"])
 def get_articles():
-    data = load_json("articles.json")
-    return jsonify({"success": True, "data": data})
+    if request.args.get("all") == "1":
+        data = load_json("articles.json")
+        return jsonify({"success": True, "data": data, "is_daily": False})
+    refresh = request.args.get("refresh") in ["1", "true", "True"]
+    data = daily_manager.get_daily_articles(force_refresh=refresh)
+    return jsonify({"success": True, "data": data, "is_daily": True, "date": daily_manager.get_today_str()})
 
 @app.route("/api/quizzes", methods=["GET"])
 def get_quizzes():
-    data = load_json("quizzes.json")
-    return jsonify({"success": True, "data": data})
+    if request.args.get("all") == "1":
+        data = load_json("quizzes.json")
+        return jsonify({"success": True, "data": data, "is_daily": False})
+    refresh = request.args.get("refresh") in ["1", "true", "True"]
+    data = daily_manager.get_daily_quizzes(force_refresh=refresh)
+    return jsonify({"success": True, "data": data, "is_daily": True, "date": daily_manager.get_today_str()})
+
+@app.route("/api/daily/overview", methods=["GET"])
+def get_daily_overview():
+    refresh = request.args.get("refresh") in ["1", "true", "True"]
+    overview = daily_manager.get_overview(force_refresh=refresh)
+    return jsonify({"success": True, "data": overview})
+
+@app.route("/api/daily/refresh", methods=["POST"])
+def refresh_daily_pool():
+    req = request.get_json(silent=True) or {}
+    target = req.get("module", "all")
+    if target in ["all", "vocab"]:
+        daily_manager.get_daily_vocab(force_refresh=True)
+    if target in ["all", "articles", "reading"]:
+        daily_manager.get_daily_articles(force_refresh=True)
+    if target in ["all", "quizzes", "quiz"]:
+        daily_manager.get_daily_quizzes(force_refresh=True)
+    overview = daily_manager.get_overview()
+    return jsonify({"success": True, "data": overview, "message": "已成功更新為最新非重複學習池！"})
 
 @app.route("/api/scenarios", methods=["GET"])
 def get_scenarios():

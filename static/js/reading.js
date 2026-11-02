@@ -11,12 +11,19 @@ const ReadingModule = {
     this.bindEvents();
   },
 
-  async loadArticles() {
+  async loadArticles(forceRefresh = false) {
     try {
-      const res = await fetch('/api/articles');
+      const url = forceRefresh ? '/api/articles?refresh=1' : '/api/articles';
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success && json.data) {
         this.articles = json.data;
+        if (json.date) {
+          const statusEl = document.getElementById('readingDailyStatusText');
+          if (statusEl) {
+            statusEl.textContent = `📅 ${json.date} 今日精選長文池 (${json.data.length} 篇・非重複)`;
+          }
+        }
       }
     } catch (e) {
       console.warn("Using offline articles fallback", e);
@@ -241,6 +248,14 @@ const ReadingModule = {
       if (transBox) {
         transBox.style.display = e.target.checked ? 'block' : 'none';
       }
+    });
+
+    // 換一篇新的文章
+    document.getElementById('btnRefreshReadingPool')?.addEventListener('click', async () => {
+      showToast('正在換一篇全新精選長文...');
+      await this.loadArticles(true);
+      if (window.DailyPoolModule) window.DailyPoolModule.loadOverview();
+      showToast('已換入全新長文！');
     });
   }
 };

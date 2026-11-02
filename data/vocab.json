@@ -328,5 +328,1193 @@
       "destined"
     ],
     "imageUrl": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=600&auto=format&fit=crop"
+  },
+  {
+    "word": "unprecedented",
+    "phonetic": "/ʌnˈpres.ə.den.tɪd/",
+    "pos": "adj.",
+    "category": "學測高頻 / 國際時事",
+    "definition": "史無前例的；空前的",
+    "englishDef": "Never having happened or existed before.",
+    "example": "The rapid advancement of generative artificial intelligence has brought unprecedented changes to education.",
+    "exampleTranslation": "生成式人工智慧的迅速進展為教育界帶來了前所未有的變革。",
+    "collocations": [
+      "unprecedented surge",
+      "unprecedented scale",
+      "unprecedented success"
+    ],
+    "synonyms": [
+      "unparalleled",
+      "novel",
+      "groundbreaking"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop",
+    "id": 16
+  },
+  {
+    "word": "meticulous",
+    "phonetic": "/məˈtɪk.jə.ləs/",
+    "pos": "adj.",
+    "category": "學測高頻 / 工作素養",
+    "definition": "一絲不苟的；嚴謹細緻的",
+    "englishDef": "Very careful and with great attention to every detail.",
+    "example": "The research scientist conducted a meticulous inspection of every data record before publication.",
+    "exampleTranslation": "該研究科學家在出版前對每一筆數據記錄進行了一絲不苟的核查。",
+    "collocations": [
+      "meticulous attention",
+      "meticulous planning",
+      "meticulous research"
+    ],
+    "synonyms": [
+      "painstaking",
+      "thorough",
+      "precise"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop",
+    "id": 17
+  },
+  {
+    "word": "subsidize",
+    "phonetic": "/ˈsʌb.sə.daɪz/",
+    "pos": "v.",
+    "category": "TOEIC / 公共政策",
+    "definition": "資助；給予津貼；補貼",
+    "englishDef": "To support financially by paying part of the cost.",
+    "example": "The government launched a grant to subsidize public transportation passes for university students.",
+    "exampleTranslation": "政府啟動了一項補助金，用以補貼大學生的大眾運輸通勤月票。",
+    "collocations": [
+      "heavily subsidized",
+      "subsidize education",
+      "subsidize housing"
+    ],
+    "synonyms": [
+      "fund",
+      "underwrite",
+      "finance"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&auto=format&fit=crop",
+    "id": 18
+  },
+  {
+    "word": "ambiguity",
+    "phonetic": "/ˌæm.bɪˈɡjuː.ə.t̬i/",
+    "pos": "n.",
+    "category": "學測高頻 / 邏輯思辨",
+    "definition": "模稜兩可；語意含糊；不明確之處",
+    "englishDef": "The quality of being open to more than one interpretation.",
+    "example": "To avoid contract disputes, legal agreements must be drafted without any ambiguity.",
+    "exampleTranslation": "為避免合約爭端，法律協議在起草時絕不能有任何模稜兩可之處。",
+    "collocations": [
+      "avoid ambiguity",
+      "tolerate ambiguity",
+      "linguistic ambiguity"
+    ],
+    "synonyms": [
+      "vagueness",
+      "obscurity",
+      "equivocation"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=600&auto=format&fit=crop",
+    "id": 19
+  },
+  {
+    "word": "contingency",
+    "phonetic": "/kənˈtɪn.dʒən.si/",
+    "pos": "n.",
+    "category": "TOEIC / 危機管理",
+    "definition": "意外事故；應急預案；可能發生的緊急情況",
+    "englishDef": "A future event or circumstance which is possible but cannot be predicted with certainty.",
+    "example": "Every financial institution must establish a contingency plan to mitigate severe system outages.",
+    "exampleTranslation": "每家金融機構都必須制定應急計畫，以減輕嚴重系統癱瘓帶來的衝擊。",
+    "collocations": [
+      "contingency plan",
+      "contingency fund",
+      "prepare for contingencies"
+    ],
+    "synonyms": [
+      "emergency",
+      "backup",
+      "safeguard"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop",
+    "id": 20
+  },
+  {
+    "word": "pioneer",
+    "phonetic": "/ˌpaɪ.əˈnɪr/",
+    "pos": "v./n.",
+    "category": "學測高頻 / 創新科技",
+    "definition": "倡導；開拓；先驅者；拓荒者",
+    "englishDef": "A person who is among the first to explore or settle a new area; to develop new methods.",
+    "example": "The medical laboratory has pioneered a revolutionary gene therapy for hereditary diseases.",
+    "exampleTranslation": "該醫學實驗室開創了一種治療遺傳性疾病的革命性基因療法。",
+    "collocations": [
+      "pioneering research",
+      "tech pioneer",
+      "pioneer new methods"
+    ],
+    "synonyms": [
+      "innovator",
+      "trailblazer",
+      "spearhead"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=600&auto=format&fit=crop",
+    "id": 21
+  },
+  {
+    "word": "lucrative",
+    "phonetic": "/ˈluː.krə.tɪv/",
+    "pos": "adj.",
+    "category": "TOEIC / 商務投資",
+    "definition": "獲利豐厚的；賺錢的",
+    "englishDef": "Producing a great deal of profit.",
+    "example": "The international corporation secured a lucrative contract with foreign municipal partners.",
+    "exampleTranslation": "這家跨國公司與國外市政夥伴簽下了一份獲利豐厚的合約。",
+    "collocations": [
+      "lucrative deal",
+      "lucrative market",
+      "lucrative career"
+    ],
+    "synonyms": [
+      "profitable",
+      "rewarding",
+      "remunerative"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=600&auto=format&fit=crop",
+    "id": 22
+  },
+  {
+    "word": "versatile",
+    "phonetic": "/ˈvɝː.sə.t̬əl/",
+    "pos": "adj.",
+    "category": "學測高頻 / 科技技能",
+    "definition": "多才多藝的；多功能的；萬用的",
+    "englishDef": "Able to adapt or be adapted to many different functions or activities.",
+    "example": "Python is renowned among software engineers for being an extraordinarily versatile programming language.",
+    "exampleTranslation": "Python 在軟體工程師中以其極其多功能的程式語言特性而聞名。",
+    "collocations": [
+      "versatile tool",
+      "versatile performer",
+      "versatile design"
+    ],
+    "synonyms": [
+      "adaptable",
+      "all-round",
+      "flexible"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop",
+    "id": 23
+  },
+  {
+    "word": "scrutinize",
+    "phonetic": "/ˈskruː.t̬ən.aɪz/",
+    "pos": "v.",
+    "category": "TOEIC / 法律法規",
+    "definition": "嚴密審查；仔細端詳；澈底檢驗",
+    "englishDef": "To examine or inspect closely and thoroughly.",
+    "example": "Regulators will closely scrutinize the proposed merger to prevent anti-competitive monopoly practices.",
+    "exampleTranslation": "監管當局將嚴密審查該合併案，以防止反競爭壟斷行為。",
+    "collocations": [
+      "scrutinize closely",
+      "scrutinize documents",
+      "scrutinize behavior"
+    ],
+    "synonyms": [
+      "examine",
+      "inspect",
+      "audit"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&auto=format&fit=crop",
+    "id": 24
+  },
+  {
+    "word": "authenticate",
+    "phonetic": "/ɑːˈθen.tɪ.keɪt/",
+    "pos": "v.",
+    "category": "TOEIC / 資安科技",
+    "definition": "認證；證明…為真；驗證身分",
+    "englishDef": "To prove or show something to be true, genuine, or valid.",
+    "example": "Users must authenticate their identity using multi-factor authorization before entering confidential records.",
+    "exampleTranslation": "使用者在進入機密檔案前，必須使用多因素授權來驗證身分。",
+    "collocations": [
+      "authenticate identity",
+      "authenticate documents",
+      "authenticate signatures"
+    ],
+    "synonyms": [
+      "verify",
+      "validate",
+      "certify"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&auto=format&fit=crop",
+    "id": 25
+  },
+  {
+    "word": "monopolize",
+    "phonetic": "/məˈnɑː.pəl.aɪz/",
+    "pos": "v.",
+    "category": "TOEIC / 市場經濟",
+    "definition": "壟斷；獨佔；包攬",
+    "englishDef": "To obtain exclusive possession or control of something.",
+    "example": "Antitrust agencies intervene whenever single conglomerates attempt to monopolize key market sectors.",
+    "exampleTranslation": "每當單一大型企業集團企圖壟斷關鍵市場板塊時，反壟斷機構都會介入。",
+    "collocations": [
+      "monopolize the market",
+      "monopolize attention",
+      "monopolize resources"
+    ],
+    "synonyms": [
+      "dominate",
+      "corner",
+      "control"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600&auto=format&fit=crop",
+    "id": 26
+  },
+  {
+    "word": "cohesive",
+    "phonetic": "/koʊˈhiː.sɪv/",
+    "pos": "adj.",
+    "category": "學測高頻 / 寫作團隊",
+    "definition": "有凝聚力的；前後連貫的",
+    "englishDef": "Characterized by being united, cohesive, or working well together.",
+    "example": "A truly cohesive team is built on mutual psychological safety and open communication channels.",
+    "exampleTranslation": "一個真正具有凝聚力的團隊建立在彼此的心理安全感與暢通的溝通管道之上。",
+    "collocations": [
+      "cohesive team",
+      "cohesive argument",
+      "cohesive society"
+    ],
+    "synonyms": [
+      "unified",
+      "connected",
+      "consistent"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop",
+    "id": 27
+  },
+  {
+    "word": "pragmatic",
+    "phonetic": "/præɡˈmæt̬.ɪk/",
+    "pos": "adj.",
+    "category": "學測高頻 / 決策哲學",
+    "definition": "務實的；重實效的；實用主義的",
+    "englishDef": "Dealing with things sensibly and realistically in a way that is based on practical considerations.",
+    "example": "Instead of debating theoretical ideals, the committee chose a pragmatic approach to solve traffic congestion.",
+    "exampleTranslation": "該委員會沒有爭論理論上的理想狀態，而是選擇了務實的途徑來解決交通壅塞問題。",
+    "collocations": [
+      "pragmatic approach",
+      "pragmatic solution",
+      "pragmatic decision"
+    ],
+    "synonyms": [
+      "practical",
+      "sensible",
+      "down-to-earth"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&auto=format&fit=crop",
+    "id": 28
+  },
+  {
+    "word": "indispensable",
+    "phonetic": "/ˌɪn.dɪˈspen.sə.bəl/",
+    "pos": "adj.",
+    "category": "學測高頻 / 核心必備",
+    "definition": "不可或缺的；絕對必要的",
+    "englishDef": "Absolutely necessary and essential.",
+    "example": "Critical thinking skills have become indispensable for distinguishing factual reports from synthetic media.",
+    "exampleTranslation": "批判性思維技能已成為分辨真實報導與合成媒體時不可或缺的能力。",
+    "collocations": [
+      "indispensable part",
+      "indispensable tool",
+      "indispensable role"
+    ],
+    "synonyms": [
+      "essential",
+      "crucial",
+      "vital"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop",
+    "id": 29
+  },
+  {
+    "word": "spontaneous",
+    "phonetic": "/spɑːnˈteɪ.ni.əs/",
+    "pos": "adj.",
+    "category": "學測高頻 / 心理行為",
+    "definition": "自發的；自然產生的；心血來潮的",
+    "englishDef": "Performed or occurring as a result of a sudden inner impulse without premeditation.",
+    "example": "The keynote speaker received spontaneous applause from the enthusiastic audience across the hall.",
+    "exampleTranslation": "主題演講嘉賓贏得了全場熱情聽眾發自內心的熱烈掌聲。",
+    "collocations": [
+      "spontaneous applause",
+      "spontaneous reaction",
+      "spontaneous decision"
+    ],
+    "synonyms": [
+      "unprompted",
+      "instinctive",
+      "impromptu"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&auto=format&fit=crop",
+    "id": 30
+  },
+  {
+    "word": "reconcile",
+    "phonetic": "/ˈrek.ən.saɪl/",
+    "pos": "v.",
+    "category": "學測高頻 / 調和人際",
+    "definition": "調解；使和解；使和諧一致",
+    "englishDef": "To restore friendly relations between; to make consistent or compatible.",
+    "example": "Diplomats spent several sleepless nights trying to reconcile the conflicting demands of both nations.",
+    "exampleTranslation": "外交官們度過了數個不眠之夜，試圖調和兩國之間互相衝突的訴求。",
+    "collocations": [
+      "reconcile differences",
+      "reconcile conflicts",
+      "reconcile accounts"
+    ],
+    "synonyms": [
+      "harmonize",
+      "settle",
+      "resolve"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&auto=format&fit=crop",
+    "id": 31
+  },
+  {
+    "word": "lucid",
+    "phonetic": "/ˈluː.sɪd/",
+    "pos": "adj.",
+    "category": "學測高頻 / 表達思維",
+    "definition": "清晰易懂的；頭腦清醒的",
+    "englishDef": "Expressed clearly; easy to understand; showing the ability to think clearly.",
+    "example": "Professor Harrison gave an exceptionally lucid explanation of quantum entanglement to undergraduate students.",
+    "exampleTranslation": "哈里森教授為大學部學生對量子糾纏做出了極其清晰易懂的解釋。",
+    "collocations": [
+      "lucid explanation",
+      "lucid dream",
+      "lucid argument"
+    ],
+    "synonyms": [
+      "clear",
+      "coherent",
+      "intelligible"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop",
+    "id": 32
+  },
+  {
+    "word": "exponential",
+    "phonetic": "/ˌek.spoʊˈnen.ʃəl/",
+    "pos": "adj.",
+    "category": "TOEIC / 科技趨勢",
+    "definition": "指數級的；呈指數成長的；倍增的",
+    "englishDef": "Becoming more and more rapid.",
+    "example": "The cloud computing sector has experienced exponential growth over the past half-decade.",
+    "exampleTranslation": "過去五年來，雲端運算領域經歷了指數級的爆炸性成長。",
+    "collocations": [
+      "exponential growth",
+      "exponential curve",
+      "exponential rise"
+    ],
+    "synonyms": [
+      "rapid",
+      "dramatic",
+      "skyrocketing"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop",
+    "id": 33
+  },
+  {
+    "word": "mitigate",
+    "phonetic": "/ˈmɪt̬.ə.ɡeɪt/",
+    "pos": "v.",
+    "category": "TOEIC / 風險控制",
+    "definition": "減輕；緩和；緩解",
+    "englishDef": "To make something less severe, harmful, or painful.",
+    "example": "Engineers installed seismic shock absorbers to mitigate earthquake vibration in high-rise buildings.",
+    "exampleTranslation": "工程師安裝了抗震避震器，以減輕高樓建築在地震中的震動衝擊。",
+    "collocations": [
+      "mitigate risk",
+      "mitigate damage",
+      "mitigate impact"
+    ],
+    "synonyms": [
+      "alleviate",
+      "lessen",
+      "diminish"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop",
+    "id": 34
+  },
+  {
+    "word": "paramount",
+    "phonetic": "/ˈper.ə.maʊnt/",
+    "pos": "adj.",
+    "category": "學測高頻 / 重點判斷",
+    "definition": "最重要的；首要的；至高無上的",
+    "englishDef": "More important than anything else; supreme.",
+    "example": "Passenger safety is of paramount importance in the aviation manufacturing sector.",
+    "exampleTranslation": "乘客安全在航空製造業中具有首要且至高無上的重要性。",
+    "collocations": [
+      "paramount importance",
+      "paramount concern",
+      "paramount duty"
+    ],
+    "synonyms": [
+      "supreme",
+      "primary",
+      "foremost"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop",
+    "id": 35
+  },
+  {
+    "word": "consolidate",
+    "phonetic": "/kənˈsɑː.lə.deɪt/",
+    "pos": "v.",
+    "category": "TOEIC / 企業經營",
+    "definition": "鞏固；整合；合併",
+    "englishDef": "To make something physically stronger or more solid; to combine into a single more effective whole.",
+    "example": "The multinational group planned to consolidate its European operations into a centralized hub.",
+    "exampleTranslation": "這家跨國集團計畫將其歐洲業務整合為一個集中營運樞紐。",
+    "collocations": [
+      "consolidate position",
+      "consolidate debt",
+      "consolidate gains"
+    ],
+    "synonyms": [
+      "strengthen",
+      "unify",
+      "merge"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop",
+    "id": 36
+  },
+  {
+    "word": "lucidity",
+    "phonetic": "/luːˈsɪd.ə.t̬i/",
+    "pos": "n.",
+    "category": "學測高頻 / 哲學表達",
+    "definition": "清晰；明朗；清醒",
+    "englishDef": "Clarity of expression; intelligibility.",
+    "example": "The essay was praised by the admissions committee for its rare philosophical lucidity.",
+    "exampleTranslation": "這篇申論文章因其少見的哲學清晰度而受到招生委員會的高度讚賞。",
+    "collocations": [
+      "mental lucidity",
+      "rare lucidity",
+      "moment of lucidity"
+    ],
+    "synonyms": [
+      "clarity",
+      "clearness",
+      "perspicuity"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop",
+    "id": 37
+  },
+  {
+    "word": "benchmark",
+    "phonetic": "/ˈbentʃ.mɑːrk/",
+    "pos": "n./v.",
+    "category": "TOEIC / 績效評估",
+    "definition": "基準；標準；參照指標",
+    "englishDef": "A standard or point of reference against which things may be compared or assessed.",
+    "example": "The quarterly performance indicators set a new benchmark for software reliability across the sector.",
+    "exampleTranslation": "該季度的績效指標為全產業的軟體可靠性樹立了全新的基準。",
+    "collocations": [
+      "set a benchmark",
+      "performance benchmark",
+      "industry benchmark"
+    ],
+    "synonyms": [
+      "standard",
+      "criterion",
+      "gauge"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&auto=format&fit=crop",
+    "id": 38
+  },
+  {
+    "word": "advocate",
+    "phonetic": "/ˈæd.və.keɪt/",
+    "pos": "v./n.",
+    "category": "學測高頻 / 公共議題",
+    "definition": "擁護；提倡；主張；擁護者",
+    "englishDef": "To publicly recommend or support; a person who puts a case on someone else's behalf.",
+    "example": "Environmental activists continue to advocate for stricter emission standards across all shipping routes.",
+    "exampleTranslation": "環保倡導者持續主張在所有航運路線上實施更嚴格的排放標準。",
+    "collocations": [
+      "advocate for policy",
+      "consumer advocate",
+      "strongly advocate"
+    ],
+    "synonyms": [
+      "champion",
+      "support",
+      "promote"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&auto=format&fit=crop",
+    "id": 39
+  },
+  {
+    "word": "allocate",
+    "phonetic": "/ˈæl.ə.keɪt/",
+    "pos": "v.",
+    "category": "TOEIC / 預算管理",
+    "definition": "撥出；分配；配置",
+    "englishDef": "To distribute resources or duties for a particular purpose.",
+    "example": "The committee decided to allocate twenty percent of the annual budget to research and development.",
+    "exampleTranslation": "委員會決定將年度預算的百分之二十撥給研發部門。",
+    "collocations": [
+      "allocate funds",
+      "allocate resources",
+      "allocate time"
+    ],
+    "synonyms": [
+      "distribute",
+      "assign",
+      "apportion"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop",
+    "id": 40
+  },
+  {
+    "word": "ubiquitous",
+    "phonetic": "/juːˈbɪk.wə.t̬əs/",
+    "pos": "adj.",
+    "category": "學測高頻 / 科技社會",
+    "definition": "無所不在的；遍布的",
+    "englishDef": "Present, appearing, or found everywhere.",
+    "example": "Smartphones have become so ubiquitous that even remote rural communities rely on them daily.",
+    "exampleTranslation": "智慧型手機已變得如此普及無所不在，連偏遠鄉村社區都每天仰賴它們。",
+    "collocations": [
+      "ubiquitous presence",
+      "ubiquitous technology",
+      "become ubiquitous"
+    ],
+    "synonyms": [
+      "omnipresent",
+      "pervasive",
+      "everywhere"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=600&auto=format&fit=crop",
+    "id": 41
+  },
+  {
+    "word": "deficit",
+    "phonetic": "/ˈdef.ə.sɪt/",
+    "pos": "n.",
+    "category": "TOEIC / 經貿財政",
+    "definition": "赤字；虧損；逆差；不足額",
+    "englishDef": "The amount by which something, especially a sum of money, is too small.",
+    "example": "The government is seeking effective fiscal reforms to curb the ballooning trade deficit.",
+    "exampleTranslation": "政府正尋求有效的財政改革，以遏制不斷擴大的貿易赤字。",
+    "collocations": [
+      "budget deficit",
+      "trade deficit",
+      "reduce the deficit"
+    ],
+    "synonyms": [
+      "shortfall",
+      "shortage",
+      "loss"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&auto=format&fit=crop",
+    "id": 42
+  },
+  {
+    "word": "concur",
+    "phonetic": "/kənˈkɝː/",
+    "pos": "v.",
+    "category": "TOEIC / 會議協商",
+    "definition": "同意；贊同；意見一致",
+    "englishDef": "To be of the same opinion; agree.",
+    "example": "All independent external auditors concurred with the findings presented in the financial summary.",
+    "exampleTranslation": "所有獨立外部審計師均同意財務總結中所陳述的調查結果。",
+    "collocations": [
+      "concur with",
+      "strongly concur",
+      "concur that"
+    ],
+    "synonyms": [
+      "agree",
+      "coincide",
+      "assent"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&auto=format&fit=crop",
+    "id": 43
+  },
+  {
+    "word": "complimentary",
+    "phonetic": "/ˌkɑːm.pləˈmen.t̬ɚ.i/",
+    "pos": "adj.",
+    "category": "TOEIC / 飯店餐飲",
+    "definition": "免費贈送的；讚美的",
+    "englishDef": "Given or supplied free of charge; expressing a compliment.",
+    "example": "Guests staying in executive suites are invited to enjoy complimentary breakfast and afternoon tea.",
+    "exampleTranslation": "入住行政套房的貴賓可享用免費提供的早餐與下午茶。",
+    "collocations": [
+      "complimentary breakfast",
+      "complimentary ticket",
+      "complimentary remarks"
+    ],
+    "synonyms": [
+      "free",
+      "courtesy",
+      "gratuitous"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop",
+    "id": 44
+  },
+  {
+    "word": "deterrent",
+    "phonetic": "/dɪˈter.ənt/",
+    "pos": "n./adj.",
+    "category": "學測高頻 / 法律防制",
+    "definition": "威懾力量；遏阻物；具威懾效果的",
+    "englishDef": "A thing that discourages or is intended to discourage someone from doing something.",
+    "example": "Strict traffic fines and high-density surveillance cameras serve as a powerful deterrent to speeding.",
+    "exampleTranslation": "嚴厲的交通罰款與高密度監視攝影機對超速行為起到了強大的威懾作用。",
+    "collocations": [
+      "act as a deterrent",
+      "nuclear deterrent",
+      "effective deterrent"
+    ],
+    "synonyms": [
+      "discouragement",
+      "disincentive",
+      "curb"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&auto=format&fit=crop",
+    "id": 45
+  },
+  {
+    "word": "stringent",
+    "phonetic": "/ˈstrɪn.dʒənt/",
+    "pos": "adj.",
+    "category": "TOEIC / 法規標準",
+    "definition": "嚴格的；嚴厲的；緊縮的",
+    "englishDef": "Strict, precise, and exacting regarding rules or conditions.",
+    "example": "Pharmaceutical corporations must undergo stringent clinical trials before obtaining market approval.",
+    "exampleTranslation": "製藥公司在獲得上市許可之前，必須通過嚴格的臨床試驗。",
+    "collocations": [
+      "stringent standards",
+      "stringent regulations",
+      "stringent criteria"
+    ],
+    "synonyms": [
+      "rigorous",
+      "strict",
+      "severe"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=600&auto=format&fit=crop",
+    "id": 46
+  },
+  {
+    "word": "tentative",
+    "phonetic": "/ˈten.t̬ə.t̬ɪv/",
+    "pos": "adj.",
+    "category": "TOEIC / 商務排程",
+    "definition": "暫定的；初步的；猶豫不決的",
+    "englishDef": "Not certain or fixed; provisional.",
+    "example": "The executive board reached a tentative agreement on the new salary compensation scheme.",
+    "exampleTranslation": "執行董事會就新的薪資補償方案達成了初步暫定協議。",
+    "collocations": [
+      "tentative agreement",
+      "tentative schedule",
+      "tentative approval"
+    ],
+    "synonyms": [
+      "provisional",
+      "preliminary",
+      "unconfirmed"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=600&auto=format&fit=crop",
+    "id": 47
+  },
+  {
+    "word": "repertoire",
+    "phonetic": "/ˈrep.ɚ.twɑːr/",
+    "pos": "n.",
+    "category": "學測高頻 / 藝術才華",
+    "definition": "全部曲目；全部技能；拿手好戲",
+    "englishDef": "A stock of plays, dances, or pieces that a company or a performer is prepared to perform.",
+    "example": "The world-renowned cellist expanded her musical repertoire to include contemporary jazz compositions.",
+    "exampleTranslation": "這位世界知名的大提琴家將她的演奏曲目擴展至包括當代爵士作品。",
+    "collocations": [
+      "musical repertoire",
+      "skills repertoire",
+      "vast repertoire"
+    ],
+    "synonyms": [
+      "collection",
+      "stock",
+      "range"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop",
+    "id": 48
+  },
+  {
+    "word": "empathy",
+    "phonetic": "/ˈem.pə.θi/",
+    "pos": "n.",
+    "category": "學測高頻 / 溝通心理",
+    "definition": "同理心；同感；神入",
+    "englishDef": "The ability to understand and share the feelings of another.",
+    "example": "Effective clinical doctors demonstrate genuine empathy when communicating critical diagnoses to patients.",
+    "exampleTranslation": "優秀的臨床醫師在向病患傳達關鍵診斷時，會展現出真誠的同理心。",
+    "collocations": [
+      "demonstrate empathy",
+      "lack of empathy",
+      "empathy for others"
+    ],
+    "synonyms": [
+      "compassion",
+      "understanding",
+      "sensitivity"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600&auto=format&fit=crop",
+    "id": 49
+  },
+  {
+    "word": "prerequisite",
+    "phonetic": "/ˌpriːˈrek.wə.zɪt/",
+    "pos": "n./adj.",
+    "category": "學測高頻 / 升學制度",
+    "definition": "先決條件；必備前提；先決的",
+    "englishDef": "A thing that is required as a prior condition for something else to happen or exist.",
+    "example": "Passing advanced linear algebra is an absolute prerequisite for enrolling in machine learning courses.",
+    "exampleTranslation": "通過高等線性代數是註冊機器學習進階課程的絕對先決條件。",
+    "collocations": [
+      "prerequisite course",
+      "essential prerequisite",
+      "prerequisite for"
+    ],
+    "synonyms": [
+      "precondition",
+      "requirement",
+      "necessity"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop",
+    "id": 50
+  },
+  {
+    "word": "unanimous",
+    "phonetic": "/juːˈnæn.ə.məs/",
+    "pos": "adj.",
+    "category": "TOEIC / 決策表決",
+    "definition": "全體一致的；無異議的",
+    "englishDef": "Held or carried by the entire body of people with no dissent.",
+    "example": "The executive shareholders reached a unanimous decision to endorse the philanthropic initiative.",
+    "exampleTranslation": "執行股東們達成全體一致的決定，全力支持這項慈善倡議。",
+    "collocations": [
+      "unanimous vote",
+      "unanimous decision",
+      "unanimous agreement"
+    ],
+    "synonyms": [
+      "undivided",
+      "united",
+      "in full accord"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&auto=format&fit=crop",
+    "id": 51
+  },
+  {
+    "word": "volatile",
+    "phonetic": "/ˈvɑː.lə.t̬əl/",
+    "pos": "adj.",
+    "category": "TOEIC / 經貿時事",
+    "definition": "易變的；不穩定的；易發揮的",
+    "englishDef": "Liable to change rapidly and unpredictably, especially for the worse.",
+    "example": "Commodity crude oil prices remain highly volatile amid shifting geopolitical developments in the Middle East.",
+    "exampleTranslation": "在中東地緣政治情勢變動之下，大宗原油價格依舊高度不穩定。",
+    "collocations": [
+      "volatile market",
+      "volatile situation",
+      "politically volatile"
+    ],
+    "synonyms": [
+      "unpredictable",
+      "turbulent",
+      "erratic"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop",
+    "id": 52
+  },
+  {
+    "word": "scrutiny",
+    "phonetic": "/ˈskruː.t̬ən.i/",
+    "pos": "n.",
+    "category": "TOEIC / 監督檢視",
+    "definition": "詳細審視；仔細檢驗；監視",
+    "englishDef": "Critical observation or examination.",
+    "example": "The tech giant faced intense public scrutiny following allegations regarding user privacy violations.",
+    "exampleTranslation": "在傳出侵犯使用者隱私指控後，該科技巨頭面臨公眾嚴格的檢視與監督。",
+    "collocations": [
+      "come under scrutiny",
+      "close scrutiny",
+      "subject to scrutiny"
+    ],
+    "synonyms": [
+      "inspection",
+      "investigation",
+      "surveillance"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&auto=format&fit=crop",
+    "id": 53
+  },
+  {
+    "word": "feasible",
+    "phonetic": "/ˈfiː.zə.bəl/",
+    "pos": "adj.",
+    "category": "TOEIC / 專案規劃",
+    "definition": "可行的；行得通的；合理的",
+    "englishDef": "Possible to do easily or conveniently.",
+    "example": "The architectural committee concluded that constructing a pedestrian overpass was structurally feasible.",
+    "exampleTranslation": "建築委員會認定興建一座行人空中天橋在結構上是完全可行的。",
+    "collocations": [
+      "economically feasible",
+      "feasible plan",
+      "technically feasible"
+    ],
+    "synonyms": [
+      "workable",
+      "viable",
+      "practicable"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&auto=format&fit=crop",
+    "id": 54
+  },
+  {
+    "word": "reimburse",
+    "phonetic": "/ˌriː.ɪmˈbɝːs/",
+    "pos": "v.",
+    "category": "TOEIC / 出差報帳",
+    "definition": "償還；補償；核銷報帳",
+    "englishDef": "To repay a person who has spent or lost money.",
+    "example": "The accounting office will promptly reimburse all legitimate travel expenses upon receipt submission.",
+    "exampleTranslation": "會計室將在收到收據憑證後，迅速核銷償還所有合理的差旅支出。",
+    "collocations": [
+      "reimburse expenses",
+      "fully reimbursed",
+      "reimburse employees"
+    ],
+    "synonyms": [
+      "compensate",
+      "refund",
+      "repay"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop",
+    "id": 55
+  },
+  {
+    "word": "tenacious",
+    "phonetic": "/təˈneɪ.ʃəs/",
+    "pos": "adj.",
+    "category": "學測高頻 / 勵志精神",
+    "definition": "頑強的；不屈不撓的；堅決的",
+    "englishDef": "Tending to keep a firm hold of something; clinging or adhering closely; persistent.",
+    "example": "Through tenacious determination, the paralyzed athlete retrained her muscles and completed the marathon.",
+    "exampleTranslation": "憑藉著頑強不屈的堅毅意志，這位癱瘓運動員重新鍛鍊肌肉並跑完了馬拉松。",
+    "collocations": [
+      "tenacious spirit",
+      "tenacious grip",
+      "tenacious effort"
+    ],
+    "synonyms": [
+      "persistent",
+      "persevering",
+      "unyielding"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop",
+    "id": 56
+  },
+  {
+    "word": "exemplary",
+    "phonetic": "/ɪɡˈzem.plɚ.i/",
+    "pos": "adj.",
+    "category": "TOEIC / 楷模嘉獎",
+    "definition": "典範的；值得仿效的；模範的",
+    "englishDef": "Serving as a desirable model; representing the best of its kind.",
+    "example": "The customer care agent received the annual leadership award for providing exemplary client support.",
+    "exampleTranslation": "該客服專員因提供無可挑剔的模範客戶支援而榮獲年度領導嘉獎。",
+    "collocations": [
+      "exemplary service",
+      "exemplary conduct",
+      "exemplary performance"
+    ],
+    "synonyms": [
+      "model",
+      "ideal",
+      "outstanding"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&auto=format&fit=crop",
+    "id": 57
+  },
+  {
+    "word": "discrepancy",
+    "phonetic": "/dɪˈskrep.ən.si/",
+    "pos": "n.",
+    "category": "TOEIC / 財務查核",
+    "definition": "差異；不符；出入",
+    "englishDef": "A lack of compatibility or similarity between two or more facts.",
+    "example": "The internal audit revealed a substantial discrepancy between inventory records and physical stock.",
+    "exampleTranslation": "內部審計發現庫存記錄與實際存貨之間存在實質性差異。",
+    "collocations": [
+      "glaring discrepancy",
+      "unexplained discrepancy",
+      "discrepancy between"
+    ],
+    "synonyms": [
+      "inconsistency",
+      "variance",
+      "difference"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop",
+    "id": 58
+  },
+  {
+    "word": "conducive",
+    "phonetic": "/kənˈduː.sɪv/",
+    "pos": "adj.",
+    "category": "學測高頻 / 學習環境",
+    "definition": "有助於…的；有益於…的",
+    "englishDef": "Making a certain situation or outcome likely or possible.",
+    "example": "A quiet, well-ventilated study space is conducive to sustained cognitive focus.",
+    "exampleTranslation": "安靜且通風良好的研讀空間有助於持續保持專注力。",
+    "collocations": [
+      "conducive to learning",
+      "conducive environment",
+      "highly conducive"
+    ],
+    "synonyms": [
+      "beneficial",
+      "favorable",
+      "advantageous"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&auto=format&fit=crop",
+    "id": 59
+  },
+  {
+    "word": "recession",
+    "phonetic": "/rɪˈseʃ.ən/",
+    "pos": "n.",
+    "category": "TOEIC / 宏觀經濟",
+    "definition": "經濟衰退；不景氣",
+    "englishDef": "A period of temporary economic decline during which trade and industrial activity are reduced.",
+    "example": "Central banks adjusted interest rates to cushion the national economy against entering a deep recession.",
+    "exampleTranslation": "各國央行調整利率以緩衝國家經濟避免陷入深度衰退。",
+    "collocations": [
+      "economic recession",
+      "slip into recession",
+      "recession fears"
+    ],
+    "synonyms": [
+      "downturn",
+      "slump",
+      "depression"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop",
+    "id": 60
+  },
+  {
+    "word": "consensus",
+    "phonetic": "/kənˈsen.səs/",
+    "pos": "n.",
+    "category": "TOEIC / 會議表決",
+    "definition": "共識；一致看法",
+    "englishDef": "A general agreement among a group of people.",
+    "example": "After grueling hours of debate, the delegates finally reached a consensus on environmental carbon targets.",
+    "exampleTranslation": "經過數小時艱苦的辯論，代表們終於就環境碳排放目標達成了共識。",
+    "collocations": [
+      "reach a consensus",
+      "broad consensus",
+      "scientific consensus"
+    ],
+    "synonyms": [
+      "agreement",
+      "harmony",
+      "unanimity"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&auto=format&fit=crop",
+    "id": 61
+  },
+  {
+    "word": "culminate",
+    "phonetic": "/ˈkʌl.mə.neɪt/",
+    "pos": "v.",
+    "category": "學測高頻 / 成果累積",
+    "definition": "達到頂點；告終；以…作結",
+    "englishDef": "Reach a climax or point of highest development.",
+    "example": "Years of relentless scientific research culminated in the development of an unprecedented mRNA vaccine.",
+    "exampleTranslation": "多年不懈的科學研究最終催生出史無前例的 mRNA 疫苗。",
+    "collocations": [
+      "culminate in",
+      "culminate with",
+      "culminating moment"
+    ],
+    "synonyms": [
+      "climax",
+      "peak",
+      "conclude"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?w=600&auto=format&fit=crop",
+    "id": 62
+  },
+  {
+    "word": "ubiquity",
+    "phonetic": "/juːˈbɪk.wə.t̬i/",
+    "pos": "n.",
+    "category": "學測高頻 / 科技趨勢",
+    "definition": "到處存在；無所不在；普及性",
+    "englishDef": "The state or capacity of being everywhere, especially at the same time.",
+    "example": "The ubiquity of social media has fundamentally reshaped contemporary adolescent communication.",
+    "exampleTranslation": "社群媒體的普遍存在從根本上重塑了當代青少年的溝通方式。",
+    "collocations": [
+      "ubiquity of smartphones",
+      "growing ubiquity",
+      "digital ubiquity"
+    ],
+    "synonyms": [
+      "omnipresence",
+      "pervasiveness",
+      "universality"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1512499617640-c74ae3a79d37?w=600&auto=format&fit=crop",
+    "id": 63
+  },
+  {
+    "word": "pristine",
+    "phonetic": "/prɪˈstiːn/",
+    "pos": "adj.",
+    "category": "學測高頻 / 自然生態",
+    "definition": "純淨的；原始的；未受破壞的",
+    "englishDef": "In its original condition; unspoiled; clean and fresh as if new.",
+    "example": "Ecologists ventured into the pristine alpine rainforest to catalogue rare endemic species.",
+    "exampleTranslation": "生態學家冒險進入未受破壞的原始高山雨林，為稀有的特有物種建立檔案。",
+    "collocations": [
+      "pristine condition",
+      "pristine environment",
+      "pristine wilderness"
+    ],
+    "synonyms": [
+      "unspoiled",
+      "untouched",
+      "flawless"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&auto=format&fit=crop",
+    "id": 64
+  },
+  {
+    "word": "versatility",
+    "phonetic": "/ˌvɝː.səˈtɪl.ə.t̬i/",
+    "pos": "n.",
+    "category": "TOEIC / 人才素質",
+    "definition": "多功能性；多才多藝；適應靈活性",
+    "englishDef": "Ability to adapt or be adapted to many different functions or activities.",
+    "example": "The hiring committee favored candidates who demonstrated intellectual versatility across multiple disciplines.",
+    "exampleTranslation": "聘任委員會青睞那些在跨學科領域中展現出高度思維靈活性的候選人。",
+    "collocations": [
+      "exceptional versatility",
+      "show versatility",
+      "versatility in skills"
+    ],
+    "synonyms": [
+      "flexibility",
+      "adaptability",
+      "resourcefulness"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop",
+    "id": 65
+  },
+  {
+    "word": "spontaneity",
+    "phonetic": "/ˌspɑːn.təˈneɪ.ə.t̬i/",
+    "pos": "n.",
+    "category": "學測高頻 / 人格心理",
+    "definition": "自發性；天然自然；非勉強",
+    "englishDef": "The condition of being spontaneous; spontaneous behavior or action.",
+    "example": "Jazz performance is celebrated worldwide for its vibrant improvisation and emotional spontaneity.",
+    "exampleTranslation": "爵士樂表演因其充滿活力的即興創作與發自內心的自然情感而享譽全球。",
+    "collocations": [
+      "emotional spontaneity",
+      "lack of spontaneity",
+      "natural spontaneity"
+    ],
+    "synonyms": [
+      "impulsiveness",
+      "naturalness",
+      "unconstraint"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop",
+    "id": 66
+  },
+  {
+    "word": "counterpart",
+    "phonetic": "/ˈkaʊn.t̬ɚ.pɑːrt/",
+    "pos": "n.",
+    "category": "TOEIC / 國際外交",
+    "definition": "職務相當者；相對應之物",
+    "englishDef": "A person or thing holding a position or performing a function that corresponds to that of another person or thing in another place.",
+    "example": "The foreign minister met with her European counterparts to sign the multilateral security treaty.",
+    "exampleTranslation": "外交部長與其歐洲對等首長會面，共同簽署了多邊安全條約。",
+    "collocations": [
+      "foreign counterpart",
+      "industry counterparts",
+      "male counterpart"
+    ],
+    "synonyms": [
+      "equivalent",
+      "equal",
+      "opposite number"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&auto=format&fit=crop",
+    "id": 67
+  },
+  {
+    "word": "pivotal",
+    "phonetic": "/ˈpɪv.ə.t̬əl/",
+    "pos": "adj.",
+    "category": "學測高頻 / 關鍵樞紐",
+    "definition": "樞紐的；舉足輕重的；關鍵的",
+    "englishDef": "Of crucial importance in relation to the development or success of something else.",
+    "example": "Securing clean water access played a pivotal role in eradicating infectious epidemics across the valley.",
+    "exampleTranslation": "獲得乾淨水源在根絕整個河谷傳染性流行病方面發揮了舉足輕重的關鍵作用。",
+    "collocations": [
+      "pivotal role",
+      "pivotal moment",
+      "pivotal factor"
+    ],
+    "synonyms": [
+      "crucial",
+      "central",
+      "vital"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop",
+    "id": 68
+  },
+  {
+    "word": "concurrence",
+    "phonetic": "/kənˈkɝː.əns/",
+    "pos": "n.",
+    "category": "TOEIC / 協議核准",
+    "definition": "贊同；一致意見；同時發生",
+    "englishDef": "The agreement or consistency of position; concurrence of events.",
+    "example": "The budget reallocation requires the prior concurrence of the board of trustees.",
+    "exampleTranslation": "預算重新分配需要事先獲得信託董事會的一致贊同。",
+    "collocations": [
+      "with the concurrence of",
+      "unanimous concurrence",
+      "prior concurrence"
+    ],
+    "synonyms": [
+      "agreement",
+      "assent",
+      "approval"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&auto=format&fit=crop",
+    "id": 69
   }
 ]

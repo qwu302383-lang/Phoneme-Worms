@@ -169,6 +169,102 @@
         </div>
       </div>
 
+      <!-- 每日全新挑戰池 (單字卡 / 閱讀測驗 / 克漏字) -->
+      <div class="daily-pools-container" id="dailyPoolsSection">
+        <div class="daily-pools-header">
+          <div class="daily-pools-title-box">
+            <div class="daily-header-top-row">
+              <span class="daily-date-badge" id="dailyPoolDateBadge">📅 今日學習池</span>
+              <span class="daily-auto-badge">⚡ 每日 00:00 自動輪播・不重複題庫</span>
+            </div>
+            <h2 class="daily-pools-title">📅 今日專屬挑戰池 (單字卡・長文閱讀・克漏字)</h2>
+            <p class="daily-pools-subtitle">每天自動為您分配一池全新非重複的單字、精選長文與文法題目，達成每日抗遺忘學習目標！</p>
+          </div>
+          <div class="daily-pools-actions">
+            <button class="btn btn-outline btn-refresh-all" id="btnRefreshDailyAll" title="手動更換一池全新的非重複學習內容">
+              <span class="refresh-icon">🔄</span> 全部換一池新的
+            </button>
+          </div>
+        </div>
+
+        <div class="daily-cards-grid">
+          <!-- 1. 今日單字卡池 -->
+          <div class="daily-card daily-vocab-card">
+            <div class="daily-card-header">
+              <div class="daily-card-title-group">
+                <span class="daily-icon-box bg-blue">🗂️</span>
+                <div>
+                  <h3 class="daily-card-title">今日單字卡池</h3>
+                  <span class="daily-card-count" id="dailyVocabCount">10 個未重複單字</span>
+                </div>
+              </div>
+              <button class="btn-text-action" id="btnRefreshDailyVocab" title="更換單字池">🔄 換一池</button>
+            </div>
+            <div class="daily-card-body">
+              <div class="daily-vocab-preview-list" id="dailyVocabPreviewList">
+                <div class="daily-loading-placeholder">載入今日單字中...</div>
+              </div>
+            </div>
+            <div class="daily-card-footer">
+              <span class="daily-note">⭐ 生字本已掌握單字已自動排除</span>
+              <button class="btn btn-primary btn-sm btn-block" onclick="switchTab('vocab')">🗂️ 開始今日背誦</button>
+            </div>
+          </div>
+
+          <!-- 2. 今日長文閱讀測驗 -->
+          <div class="daily-card daily-reading-card">
+            <div class="daily-card-header">
+              <div class="daily-card-title-group">
+                <span class="daily-icon-box bg-teal">📖</span>
+                <div>
+                  <h3 class="daily-card-title">今日精選長文閱讀</h3>
+                  <span class="daily-card-count">每日深度精讀</span>
+                </div>
+              </div>
+              <button class="btn-text-action" id="btnRefreshDailyReading" title="更換長文">🔄 換一篇</button>
+            </div>
+            <div class="daily-card-body">
+              <div class="daily-reading-preview" id="dailyReadingPreview">
+                <h4 class="daily-reading-title" id="dailyReadingTitle">載入文章中...</h4>
+                <div class="daily-reading-tags">
+                  <span class="tag-pill" id="dailyReadingCategory">TOEIC / 趨勢</span>
+                  <span class="tag-pill tag-muted" id="dailyReadingTime">3 min</span>
+                </div>
+                <p class="daily-reading-summary" id="dailyReadingSummary">載入中...</p>
+              </div>
+            </div>
+            <div class="daily-card-footer">
+              <span class="daily-note">💡 支援點詞即查、AI釋義與雙語對照</span>
+              <button class="btn btn-primary btn-sm btn-block" onclick="switchTab('reading')">📖 開始長文精讀</button>
+            </div>
+          </div>
+
+          <!-- 3. 今日文法克漏字 -->
+          <div class="daily-card daily-quiz-card">
+            <div class="daily-card-header">
+              <div class="daily-card-title-group">
+                <span class="daily-icon-box bg-amber">📝</span>
+                <div>
+                  <h3 class="daily-card-title">今日文法克漏字</h3>
+                  <span class="daily-card-count" id="dailyQuizCount">5 題大考與多益精選</span>
+                </div>
+              </div>
+              <button class="btn-text-action" id="btnRefreshDailyQuiz" title="更換測驗池">🔄 換一池</button>
+            </div>
+            <div class="daily-card-body">
+              <div class="daily-quiz-preview">
+                <div class="daily-quiz-tag">考點首題速覽</div>
+                <p class="daily-quiz-teaser" id="dailyQuizTeaser">載入今日測驗題目中...</p>
+              </div>
+            </div>
+            <div class="daily-card-footer">
+              <span class="daily-note">🎯 即時作答診斷與深度考點剖析</span>
+              <button class="btn btn-primary btn-sm btn-block" onclick="switchTab('quiz')">📝 開始克漏字挑戰</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 快速入口功能矩陣 -->
       <div class="section-heading">
         <h2>🔥 核心學習模組推薦</h2>
@@ -230,6 +326,17 @@
         <div class="vocab-mode-switch">
           <button class="mode-btn active" id="btnModeCard">翻卡學習模式</button>
           <button class="mode-btn" id="btnModeQuiz">快速抽考模式</button>
+        </div>
+      </div>
+
+      <!-- 每日單字池狀態列 -->
+      <div class="daily-module-banner">
+        <div class="daily-banner-left">
+          <span class="badge-tag">📅 今日專屬單字池</span>
+          <span class="daily-banner-desc" id="vocabDailyStatusText">今日 10 個核心非重複單字（已自動過濾生字本單詞）</span>
+        </div>
+        <div class="daily-banner-right">
+          <button class="btn btn-outline-sm" id="btnRefreshVocabPool">🔄 換一池新的單字</button>
         </div>
       </div>
 
@@ -406,6 +513,17 @@
         </div>
       </div>
 
+      <!-- 每日閱讀池狀態列 -->
+      <div class="daily-module-banner">
+        <div class="daily-banner-left">
+          <span class="badge-tag">📅 今日精選長文池</span>
+          <span class="daily-banner-desc" id="readingDailyStatusText">今日推薦長文（支援點詞即查與中英對照）</span>
+        </div>
+        <div class="daily-banner-right">
+          <button class="btn btn-outline-sm" id="btnRefreshReadingPool">🔄 換一篇新的文章</button>
+        </div>
+      </div>
+
       <!-- 文章選擇卡 -->
       <div class="article-selector-row" id="articleSelector"></div>
 
@@ -463,6 +581,17 @@
         </div>
         <div class="quiz-stat-pill">
           <span>測驗正確率：<strong id="quizAccuracy">0%</strong> (<span id="quizScoreText">0/0</span>)</span>
+        </div>
+      </div>
+
+      <!-- 每日克漏字測驗池狀態列 -->
+      <div class="daily-module-banner">
+        <div class="daily-banner-left">
+          <span class="badge-tag">📅 今日文法克漏字池</span>
+          <span class="daily-banner-desc" id="quizDailyStatusText">今日 5 題大考與多益精選題目（即時診斷詳解）</span>
+        </div>
+        <div class="daily-banner-right">
+          <button class="btn btn-outline-sm" id="btnRefreshQuizPool">🔄 換一池新的題目</button>
         </div>
       </div>
 
