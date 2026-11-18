@@ -196,6 +196,9 @@
                 <div>
                   <h3 class="daily-card-title">今日單字卡池</h3>
                   <span class="daily-card-count" id="dailyVocabCount">10 個未重複單字</span>
+                  <div class="daily-score-pill-row" id="dailyVocabScorePillRow" style="display: none; margin-top: 0.35rem;">
+                    <span class="daily-score-badge" id="dailyVocabScoreBadge">🏆 今日測驗評分：未測驗</span>
+                  </div>
                 </div>
               </div>
               <button class="btn-text-action" id="btnRefreshDailyVocab" title="更換單字池">🔄 換一池</button>
@@ -421,15 +424,113 @@
         </div>
       </div>
 
-      <!-- 單字測驗模式區域 (隱藏/切換) -->
+      <!-- 單字測驗模式與評分系統區域 (隱藏/切換) -->
       <div id="vocabQuizContainer" class="vocab-quiz-wrapper" style="display: none;">
-        <div class="quiz-card-box">
-          <div class="quiz-badge">💡 單字四選一快問快答</div>
-          <h3 class="quiz-target-word" id="vQuizWord">implement</h3>
+        <!-- 階段一：測驗作答卡片 -->
+        <div class="quiz-card-box" id="vQuizCardBox">
+          <div class="vquiz-meta-bar">
+            <span class="quiz-badge" style="margin-bottom: 0;">📝 今日單字即時成效測驗</span>
+            <div>第 <strong id="vQuizCurrentNum" style="color: var(--primary-color);">1</strong> / <strong id="vQuizTotalNum">10</strong> 題</div>
+            <div>即時得分: <strong id="vQuizLiveScore" style="color: #10b981;">0</strong> 分</div>
+          </div>
+          <div class="vquiz-progress-track">
+            <div class="vquiz-progress-fill" id="vQuizProgressBarFill" style="width: 10%;"></div>
+          </div>
+
+          <div class="vquiz-word-row">
+            <h3 class="quiz-target-word" id="vQuizWord" style="margin: 0;">implement</h3>
+            <button type="button" class="vquiz-audio-btn" id="vQuizAudioBtn" title="朗讀發音">🔊</button>
+          </div>
           <p class="quiz-target-phonetic" id="vQuizPhonetic">/ˈɪm.plə.ment/</p>
+
           <div class="quiz-options-list" id="vQuizOptions"></div>
           <div class="quiz-result-feedback" id="vQuizFeedback"></div>
-          <button class="btn btn-primary" id="vQuizNextBtn" style="display: none;">下一題 &rarr;</button>
+          <button class="btn btn-primary" id="vQuizNextBtn" style="display: none; width: 100%; justify-content: center; margin-top: 0.5rem;">下一題 &rarr;</button>
+        </div>
+
+        <!-- 階段二：評分報告卡片 (測驗完成直接出評分) -->
+        <div id="vocabScoreReportContainer" class="vocab-score-report-box" style="display: none;">
+          <div class="score-report-header">
+            <div class="score-trophy-icon" id="scoreReportTrophy">🏆</div>
+            <h2 class="score-report-title" id="scoreReportTitle">今日單字評分出爐！</h2>
+            <p class="score-report-subtitle" id="scoreReportSubtitle">已完成今日全部單字翻卡學習與吸收度檢驗</p>
+          </div>
+
+          <!-- 得分大型數值儀表板 -->
+          <div class="score-main-display">
+            <div class="score-circle-badge">
+              <span class="score-number" id="scoreNumber">0</span>
+              <span class="score-unit">分</span>
+            </div>
+            <div class="score-rank-badge" id="scoreRankBadge">🏆 S級・超凡大師</div>
+            <p class="score-comment" id="scoreComment">評語載入中...</p>
+          </div>
+
+          <!-- 關鍵作答指標 -->
+          <div class="score-stats-grid">
+            <div class="score-stat-item">
+              <span class="stat-label">測驗總題數</span>
+              <strong class="stat-val" id="scoreTotalQuestions">10 題</strong>
+            </div>
+            <div class="score-stat-item text-success">
+              <span class="stat-label">正確答對</span>
+              <strong class="stat-val" id="scoreCorrectCount">0 題</strong>
+            </div>
+            <div class="score-stat-item text-danger">
+              <span class="stat-label">答錯需複習</span>
+              <strong class="stat-val" id="scoreWrongCount">0 題</strong>
+            </div>
+            <div class="score-stat-item text-primary">
+              <span class="stat-label">答題正確率</span>
+              <strong class="stat-val" id="scoreAccuracyPercent">0%</strong>
+            </div>
+          </div>
+
+          <!-- 錯題檢視與一鍵加入生字本 -->
+          <div class="score-wrong-section" id="scoreWrongSection">
+            <div class="score-wrong-header">
+              <h4>❌ 今日需加強單字 (<span id="scoreWrongListCount">0</span>)</h4>
+              <button type="button" class="btn btn-sm btn-outline" id="btnAddAllWrongToWordbook" onclick="VocabModule.addAllWrongToWordbook()">
+                ⭐ 一鍵將錯題加入生字本
+              </button>
+            </div>
+            <div class="score-wrong-list" id="scoreWrongList"></div>
+          </div>
+
+          <!-- 完美全對祝賀 -->
+          <div class="score-perfect-section" id="scorePerfectSection" style="display: none;">
+            <span class="perfect-icon">🌟</span>
+            <h4>全對滿分通關！今天所有單字皆已深刻記憶！</h4>
+            <p>已完美達成今日抗遺忘學習目標，請繼續保持！</p>
+          </div>
+
+          <!-- 操作按鈕組 -->
+          <div class="score-actions-row">
+            <button type="button" class="btn btn-outline" onclick="VocabModule.restartQuiz()">🔄 重新測驗一次</button>
+            <button type="button" class="btn btn-outline" onclick="VocabModule.stopQuizMode()">🗂️ 返回翻卡模式</button>
+            <button type="button" class="btn btn-primary" onclick="switchTab('dashboard')">🏠 前往學習總覽</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 單字閱讀完畢跳轉測驗提示彈窗 -->
+      <div class="cq-modal" id="vocabFinishModal" style="display: none;">
+        <div class="modal-overlay" onclick="VocabModule.closeFinishModal()"></div>
+        <div class="modal-card" style="max-width: 480px; text-align: center;">
+          <div class="modal-body" style="padding: 2.25rem 1.75rem;">
+            <div class="finish-celebrate-icon">🎉</div>
+            <h3 style="font-size: 1.35rem; font-weight: 800; margin: 0.5rem 0;">今日單字卡已全部閱讀完畢！</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.25rem;">
+              恭喜看完今日 <strong id="vocabFinishCount" style="color: var(--primary-color);">10</strong> 個單字！系統即將啟動<strong>「學習成效即時測驗」</strong>，直接為您的吸收度精準評分！
+            </p>
+            <div class="finish-countdown-bar">
+              <div class="countdown-fill" id="countdownFill"></div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+              <button class="btn btn-outline" onclick="VocabModule.closeFinishModal()">↺ 繼續翻卡複習</button>
+              <button class="btn btn-primary" onclick="VocabModule.startDailyGradedQuiz()">🚀 立即開始評分測驗 (<span id="finishCountdownText">3</span>s)</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>

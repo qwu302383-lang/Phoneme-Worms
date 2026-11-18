@@ -128,6 +128,25 @@ const AppState = {
     document.getElementById('statQuizFinished').textContent = stats.quizCount;
   },
 
+  DAILY_SCORE_PREFIX: 'apex_daily_vocab_score_',
+
+  saveDailyVocabScore(dateStr, scoreData) {
+    try {
+      localStorage.setItem(`${this.DAILY_SCORE_PREFIX}${dateStr}`, JSON.stringify(scoreData));
+    } catch (e) {
+      console.warn("Error saving daily score", e);
+    }
+  },
+
+  getDailyVocabScore(dateStr) {
+    try {
+      const data = localStorage.getItem(`${this.DAILY_SCORE_PREFIX}${dateStr}`);
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  },
+
   updateStarredBadge() {
     const badge = document.getElementById('starredCountBadge');
     if (badge) {
@@ -669,6 +688,22 @@ const DailyPoolModule = {
             </div>
           `).join('');
         }
+      }
+    }
+
+    // 今日單字測驗評分徽章連動
+    const scorePillRow = document.getElementById('dailyVocabScorePillRow');
+    const scoreBadge = document.getElementById('dailyVocabScoreBadge');
+    if (scorePillRow && scoreBadge && data.date) {
+      const todayScore = AppState.getDailyVocabScore(data.date);
+      if (todayScore) {
+        scorePillRow.style.display = 'block';
+        scoreBadge.innerHTML = `🏆 今日測驗評分：<strong>${todayScore.score} 分</strong> (${todayScore.grade} 級・${todayScore.correct}/${todayScore.total})`;
+        scoreBadge.style.color = todayScore.score >= 80 ? '#047857' : (todayScore.score >= 60 ? '#b45309' : '#b91c1c');
+      } else {
+        scorePillRow.style.display = 'block';
+        scoreBadge.innerHTML = `⏳ 今日測驗：看完單字卡後自動評分`;
+        scoreBadge.style.color = 'var(--text-muted, #64748b)';
       }
     }
 
