@@ -1277,40 +1277,40 @@ resilience 韌性；復原能力
         </div>
       </div>
 
-      <!-- 圖片放大預覽 Lightbox Modal -->
-      <div class="cq-image-lightbox" id="cqImageLightbox" style="display: none;">
+      <!-- 圖片放大預覽 Lightbox Modal (支援點擊關閉) -->
+      <div class="cq-image-lightbox" id="cqImageLightbox" style="display: none;" onclick="CustomQuizModule.closeLightbox()">
         <div class="lightbox-overlay"></div>
-        <div class="lightbox-content">
-          <button class="lightbox-close" id="btnCqCloseLightbox">&times;</button>
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+          <button class="lightbox-close" id="btnCqCloseLightbox" onclick="CustomQuizModule.closeLightbox()">&times;</button>
           <img id="cqLightboxImg" src="" alt="Enlarged Image">
           <p id="cqLightboxCaption" class="lightbox-caption"></p>
         </div>
       </div>
 
-      <!-- 獨立單字圖片更換 Modal -->
+      <!-- 獨立單字圖片更換 Modal (支援所有按鈕與遮罩點擊關閉) -->
       <div class="cq-modal" id="cqChangeImageModal" style="display: none;">
-        <div class="modal-overlay"></div>
+        <div class="modal-overlay" onclick="CustomQuizModule.closeChangeImageModal()"></div>
         <div class="modal-card">
           <div class="modal-header">
             <h4 id="cqChangeImgTitle">📷 更換單字圖片</h4>
-            <button class="btn-close-modal" id="btnCqCloseChangeImgModal">&times;</button>
+            <button class="btn-close-modal" id="btnCqCloseChangeImgModal" onclick="CustomQuizModule.closeChangeImageModal()">&times;</button>
           </div>
           <div class="modal-body">
             <div class="current-img-preview" id="cqCurrentImgPreview">
               <img id="cqModalImgPreview" src="" alt="Preview">
             </div>
             <div class="modal-upload-controls">
-              <label class="btn btn-outline btn-full">
+              <label class="btn btn-outline btn-full" style="cursor: pointer;">
                 📁 從電腦上傳新圖片
-                <input type="file" id="cqModalFileInput" accept="image/*" style="display: none;">
+                <input type="file" id="cqModalFileInput" accept="image/*" style="display: none;" onchange="CustomQuizModule.handleModalFileSelected(event)">
               </label>
               <div style="margin: 0.75rem 0; text-align: center; color: var(--text-muted); font-size: 0.85rem;">或</div>
               <input type="text" id="cqModalUrlInput" class="form-input" placeholder="貼上網路圖片網址 (URL)...">
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-outline" id="btnCqCancelChangeImg">取消</button>
-            <button class="btn btn-primary" id="btnCqSaveChangeImg">確認套用圖片</button>
+            <button class="btn btn-outline" id="btnCqCancelChangeImg" onclick="CustomQuizModule.closeChangeImageModal()">取消</button>
+            <button class="btn btn-primary" id="btnCqSaveChangeImg" onclick="CustomQuizModule.saveModalImage()">確認套用圖片</button>
           </div>
         </div>
       </div>

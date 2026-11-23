@@ -227,9 +227,65 @@ const CustomQuizModule = {
     this.editingWordForImg = null;
   },
 
+  handleModalFileSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert("請選擇有效的圖片檔案 (JPG、PNG、WebP)！");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("圖片大小超過 5MB 限制，請選擇較小的圖片！");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      const preview = document.getElementById('cqModalImgPreview');
+      const urlInput = document.getElementById('cqModalUrlInput');
+      if (preview) preview.src = dataUrl;
+      if (urlInput) urlInput.value = dataUrl;
+      showToast("📷 本機圖片已載入預覽，點擊「確認套用圖片」即可套用！");
+    };
+    reader.readAsDataURL(file);
+  },
+
+  async saveModalImage() {
+    if (!this.editingWordForImg) {
+      this.closeChangeImageModal();
+      return;
+    }
+    const preview = document.getElementById('cqModalImgPreview');
+    const urlInput = document.getElementById('cqModalUrlInput');
+    const newUrl = (urlInput && urlInput.value.trim()) 
+      ? urlInput.value.trim() 
+      : ((preview && preview.src && !preview.src.endsWith('undefined')) ? preview.src : '');
+
+    if (newUrl) {
+      await this.applyModalImage(newUrl);
+    } else {
+      this.closeChangeImageModal();
+    }
+  },
+
   async applyModalImage(newUrl) {
-    if (!this.editingWordForImg || !newUrl) return;
+    if (!this.editingWordForImg || !newUrl) {
+      this.closeChangeImageModal();
+      return;
+    }
     this.editingWordForImg.imageUrl = newUrl;
+
+    // 同步儲存至本地生字庫 (若在生字本中)
+    const starred = AppState.getStarredWords();
+    const targetIdx = starred.findIndex(w => w.word.toLowerCase() === this.editingWordForImg.word.toLowerCase());
+    if (targetIdx >= 0) {
+      starred[targetIdx].imageUrl = newUrl;
+      localStorage.setItem(AppState.STARRED_KEY, JSON.stringify(starred));
+      AppState.notifySync();
+    }
 
     try {
       await fetch('/api/vocab/save_custom', {
@@ -1115,20 +1171,65 @@ const CustomQuizModule = {
       document.getElementById('cqCustomWordPanel').style.display = 'none';
     });
 
-    // Lightbox 點擊遮罩關閉
-    document.getElementById('cqLightboxClose')?.addEventListener('click', () => this.closeLightbox());
+    // Lightbox 關閉按鈕與遮罩
+    document.getElementById('btnCqCloseLightbox')?.addEventListener('click', () => this.closeLightbox());
     document.getElementById('cqImageLightbox')?.addEventListener('click', (e) => {
-      if (e.target.id === 'cqImageLightbox') this.closeLightbox();
+      if (e.target.id === 'cqImageLightbox' || e.target.classList.contains('lightbox-overlay')) this.closeLightbox();
     });
 
-    // 更換圖片彈窗關閉
-    document.getElementById('cqModalClose')?.addEventListener('click', () => this.closeChangeImageModal());
-    document.getElementById('cqBtnCancelChangeImg')?.addEventListener('click', () => this.closeChangeImageModal());
+    // 更換圖片彈窗：✕ 關閉與取消按鈕
+    document.getElementById('btnCqCloseChangeImgModal')?.addEventListener('click', () => this.closeChangeImageModal());
+    document.getElementById('btnCqCancelChangeImg')?.addEventListener('click', () => this.closeChangeImageModal());
 
-    // 儲存更換圖片
-    document.getElementById('cqBtnSaveChangeImg')?.addEventListener('click', () => {
-      const input = document.getElementById('cqModalUrlInput');
-      this.applyModalImage(input.value.trim());
+    // 點擊更換圖片彈窗遮罩關閉
+    document.getElementById('cqChangeImageModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'cqChangeImageModal' || e.target.classList.contains('modal-overlay')) {
+        this.closeChangeImageModal();
+      }
+    });
+
+    // 儲存更換圖片按鈕
+    document.getElementById('btnCqSaveChangeImg')?.addEventListener('click', () => {
+      this.saveModalImage();
+    });
+
+    // URL 輸入框即時預覽與 Enter 提交
+    const urlInput = document.getElementById('cqModalUrlInput');
+    if (urlInput) {
+      urlInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (val && (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:image/'))) {
+          const preview = document.getElementById('cqModalImgPreview');
+          if (preview) preview.src = val;
+        }
+      });
+      urlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.saveModalImage();
+        }
+      });
+    }
+
+    // 本機圖片選取上傳事件
+    document.getElementById('cqModalFileInput')?.addEventListener('change', (e) => {
+      this.handleModalFileSelected(e);
+    });
+
+    // 全域 Esc 鍵安全關閉彈窗
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const changeImgModal = document.getElementById('cqChangeImageModal');
+        if (changeImgModal && changeImgModal.style.display !== 'none') {
+          this.closeChangeImageModal();
+          return;
+        }
+        const lightbox = document.getElementById('cqImageLightbox');
+        if (lightbox && lightbox.style.display !== 'none') {
+          this.closeLightbox();
+          return;
+        }
+      }
     });
 
     // 手動新增自訂單字儲存按鈕
