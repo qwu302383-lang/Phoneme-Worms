@@ -5376,3 +5376,196 @@ body.theme-dark .quiz-choice-btn.selected-incorrect {
   border: none;
   padding: 1rem 0 0;
 }
+
+
+/* ==========================================================================
+   全新出題系統與字詞翻譯 (英選中 / 中選英 / 聽力 / 同義詞) 強化樣式
+   ========================================================================== */
+.cq-hero-word-box {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(99, 102, 241, 0.08));
+  border: 2px solid rgba(59, 130, 246, 0.22);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.cq-hero-word-box.zh-mode {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(20, 184, 166, 0.08));
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.cq-hero-word-box.listen-mode {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(234, 88, 12, 0.06));
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.cq-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--primary);
+  color: #fff;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.cq-hero-badge.zh-badge {
+  background: #059669;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.cq-hero-badge.listen-badge {
+  background: #d97706;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+}
+
+.cq-hero-badge.synonym-badge {
+  background: #7c3aed;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
+}
+
+.cq-hero-word-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cq-hero-target-word {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-color);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.cq-hero-audio-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.cq-hero-audio-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.cq-hero-sub-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1.05rem;
+  color: var(--text-muted);
+}
+
+.cq-hero-phonetic {
+  font-family: var(--font-mono, monospace);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-sm);
+}
+
+.cq-hero-pos {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.cq-kbd-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--bg-card-subtle);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.cq-choice-btn {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 0.85rem;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.cq-choice-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.04);
+  transform: translateY(-1px);
+}
+
+.choice-kbd-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  margin-left: auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
+}
+
+/* 克漏字專屬高亮挖空格子 */
+.cq-cloze-sentence-box {
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+.cq-cloze-blank {
+  display: inline-block;
+  min-width: 90px;
+  border-bottom: 3px solid var(--primary);
+  color: var(--primary);
+  font-weight: 800;
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+.cq-cloze-hint-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.cq-cloze-hint-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}

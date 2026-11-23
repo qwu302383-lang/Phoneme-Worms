@@ -1030,54 +1030,81 @@ ubiquitous - 無所不在的
             </div>
           </div>
 
-          <!-- 題型選擇網格 -->
+          <!-- 題型選擇網格 (全新出題系統與字詞雙向翻譯) -->
           <div class="cq-type-grid">
+            <!-- 1. 字詞翻譯：看英選中 -->
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="trans_en_to_zh" checked>
+              <div class="type-icon-box bg-blue">🌐</div>
+              <div class="type-info">
+                <h4>字詞翻譯：看英選中 (English &rarr; Chinese)</h4>
+                <p>題目直接顯示英文單字、音標與朗讀發音，四選一選出正確中文釋義</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <!-- 2. 字詞翻譯：看中選英 -->
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="trans_zh_to_en" checked>
+              <div class="type-icon-box bg-teal">🇹🇼</div>
+              <div class="type-info">
+                <h4>字詞翻譯：看中選英 (Chinese &rarr; English)</h4>
+                <p>題目直接顯示中文釋義與詞性，四選一精準選出對應的英文單字</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <!-- 3. 看圖識字選詞 -->
             <label class="cq-type-card active">
               <input type="checkbox" name="qType" value="image_to_word" checked>
               <div class="type-icon-box bg-blue">🖼️</div>
               <div class="type-info">
-                <h4>看圖選單字 (Image to Word)</h4>
-                <p>展示情境圖片與中文定義，四選一選出正確英文單字</p>
+                <h4>看圖識字選詞 (Image Recognition)</h4>
+                <p>展示情境圖片與關鍵線索，四選一選出最契合的英文單字</p>
               </div>
               <div class="type-check-mark">✓</div>
             </label>
 
+            <!-- 4. 拼字填空挑戰 -->
             <label class="cq-type-card active">
               <input type="checkbox" name="qType" value="spelling" checked>
               <div class="type-icon-box bg-purple">⌨️</div>
               <div class="type-info">
-                <h4>看圖拼字填空 (Image Spelling)</h4>
-                <p>觀察圖片與中文提示，打字拼出正確單字（提供字母長度格子）</p>
+                <h4>看提示拼字挑戰 (Spelling Challenge)</h4>
+                <p>觀察中文提示與字母格子，在鍵盤敲出完整單字（支援即時格位提示）</p>
               </div>
               <div class="type-check-mark">✓</div>
             </label>
 
-            <label class="cq-type-card active">
-              <input type="checkbox" name="qType" value="def_to_word" checked>
-              <div class="type-icon-box bg-teal">🔠</div>
-              <div class="type-info">
-                <h4>釋義四選一 (Definition to Word)</h4>
-                <p>檢定核心題型，根據中英文定義選出正確單字</p>
-              </div>
-              <div class="type-check-mark">✓</div>
-            </label>
-
-            <label class="cq-type-card active">
-              <input type="checkbox" name="qType" value="listen_image" checked>
-              <div class="type-icon-box bg-amber">🎧</div>
-              <div class="type-info">
-                <h4>看圖聽音辨義 (Audio & Image)</h4>
-                <p>播放單字道地發音，配合圖片選出對應詞彙</p>
-              </div>
-              <div class="type-check-mark">✓</div>
-            </label>
-
+            <!-- 5. 情境例句克漏字 -->
             <label class="cq-type-card active">
               <input type="checkbox" name="qType" value="sentence_cloze" checked>
-              <div class="type-icon-box bg-blue">📝</div>
+              <div class="type-icon-box bg-amber">📝</div>
               <div class="type-info">
                 <h4>情境例句克漏字 (Sentence Cloze)</h4>
-                <p>將單字挖空置入真實例句，結合圖片情境選填正確單字</p>
+                <p>實用情境造句挖空，考查單字在真實句子與語境中的靈活運用</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <!-- 6. 聽力真題辨義 -->
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="listen_quiz" checked>
+              <div class="type-icon-box bg-amber">🎧</div>
+              <div class="type-info">
+                <h4>聽力真題辨義 (Listening Quiz)</h4>
+                <p>播放道地真人發音，純聽力訓練並選出正確單字或中文釋義</p>
+              </div>
+              <div class="type-check-mark">✓</div>
+            </label>
+
+            <!-- 7. 同義詞與搭配辨析 -->
+            <label class="cq-type-card active">
+              <input type="checkbox" name="qType" value="collocation_synonym" checked>
+              <div class="type-icon-box bg-teal">🔄</div>
+              <div class="type-info">
+                <h4>同義詞與搭配辨析 (Synonyms & Collocations)</h4>
+                <p>考查近義詞置換與常見搭配詞，全方位提升大考及檢定敏銳度</p>
               </div>
               <div class="type-check-mark">✓</div>
             </label>
@@ -1140,8 +1167,24 @@ ubiquitous - 無所不在的
         <!-- 題目主要卡片 -->
         <div class="cq-question-card" id="cqQuestionCard">
           <div class="cq-q-header">
-            <span class="category-pill" id="cqQTypePill">🖼️ 看圖選單字</span>
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+              <span class="category-pill" id="cqQTypePill">🌐 字詞翻譯・看英選中</span>
+              <span class="cq-kbd-hint">⌨️ 可按 1/2/3/4 或 A/B/C/D 作答</span>
+            </div>
             <button class="card-audio-btn-sm" id="cqQAudioBtn" title="朗讀題目/單字發音">🔊</button>
+          </div>
+
+          <!-- 單字焦點大卡牌 (字詞翻譯、聽力、同義詞題型專屬醒目視覺) -->
+          <div class="cq-hero-word-box" id="cqHeroWordBox" style="display: none;">
+            <div class="cq-hero-badge" id="cqHeroBadge">🌐 字詞翻譯・看英選中</div>
+            <div class="cq-hero-word-title-row">
+              <span class="cq-hero-target-word" id="cqHeroWord">innovation</span>
+              <button type="button" class="cq-hero-audio-btn" id="cqHeroAudioBtn" title="朗讀發音">🔊 朗讀發音</button>
+            </div>
+            <div class="cq-hero-sub-meta" id="cqHeroMeta">
+              <span class="cq-hero-phonetic" id="cqHeroPhonetic">/ˌɪn.əˈveɪ.ʃən/</span>
+              <span class="cq-hero-pos" id="cqHeroPos">n. 名詞</span>
+            </div>
           </div>
 
           <!-- 情境圖片區 (若該題目有圖片) -->

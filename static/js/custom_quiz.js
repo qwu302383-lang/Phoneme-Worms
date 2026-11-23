@@ -1,6 +1,7 @@
 /**
- * CustomQuizModule: 自訂圖文出題測驗工坊
- * 支援載入單字、配置/上傳本機圖片、多題型組合（看圖選詞、看圖拼字、聽音看圖、例句克漏字等）
+ * CustomQuizModule: 自訂圖文出題測驗工坊 (全面升級版)
+ * 支援字詞雙向翻譯 (看英選中 / 看中選英)、看圖選詞、看提示拼字、情境例句克漏字、聽力辨義、同義詞與搭配
+ * 內建高精度干擾項演算法與鍵盤快捷鍵 (1/2/3/4 或 A/B/C/D)
  */
 const CustomQuizModule = {
   vocabList: [],
@@ -41,7 +42,7 @@ const CustomQuizModule = {
       console.warn("Using offline vocab in CustomQuizModule", e);
     }
 
-    // 預設全選前 10 個單字
+    // 預設勾選前 10 個單字
     this.vocabList.slice(0, 10).forEach(w => this.selectedWordIds.add(w.id));
   },
 
@@ -55,6 +56,9 @@ const CustomQuizModule = {
         pos: item.pos || '',
         definition: item.definition || '',
         example: item.example || '',
+        exampleTranslation: item.exampleTranslation || '',
+        collocations: item.collocations || [],
+        synonyms: item.synonyms || [],
         imageUrl: item.imageUrl || ''
       }));
     }
@@ -67,7 +71,8 @@ const CustomQuizModule = {
     grid.innerHTML = '';
 
     const list = this.getCurrentSourceList();
-    document.getElementById('cqTotalAvailableCount').textContent = list.length;
+    const totalAvailEl = document.getElementById('cqTotalAvailableCount');
+    if (totalAvailEl) totalAvailEl.textContent = list.length;
 
     if (list.length === 0) {
       grid.innerHTML = `
@@ -193,7 +198,7 @@ const CustomQuizModule = {
     const shuffled = list.sort(() => 0.5 - Math.random());
     shuffled.slice(0, count).forEach(w => this.selectedWordIds.add(w.id));
     this.renderWordGrid();
-    showToast(`🎲 已為您隨機挑選 ${Math.min(count, list.length)} 個單字！`);
+    showToast(`🎲 已隨機挑選 ${Math.min(count, list.length)} 個單字！`);
   },
 
   // 開啟更換圖片 Modal
@@ -221,7 +226,6 @@ const CustomQuizModule = {
     if (!this.editingWordForImg || !newUrl) return;
     this.editingWordForImg.imageUrl = newUrl;
 
-    // 同步儲存至後端
     try {
       await fetch('/api/vocab/save_custom', {
         method: 'POST',
@@ -240,7 +244,6 @@ const CustomQuizModule = {
     showToast(`🖼️ 已更新【${this.editingWordForImg.word}】的圖片！`);
   },
 
-  // Lightbox 放大檢視
   openLightbox(imgSrc, caption = '') {
     const box = document.getElementById('cqImageLightbox');
     const img = document.getElementById('cqLightboxImg');
@@ -258,14 +261,82 @@ const CustomQuizModule = {
   },
 
   /**
+   * 高品質干擾項生成器
+   * 確保永遠取得 3 個相異且不與正解重複的選項
+   * @param {Object} targetWord 目標單字物件
+   * @param {'en'|'zh'} mode 選項語言類型
+   * @param {Array} pool 當前題庫候選池
+   */
+  getHighQualityDistractors(targetWord, mode, pool) {
+    const allCandidates = (pool && pool.length > 0) ? pool : this.vocabList;
+    const targetVal = (mode === 'en' ? targetWord.word : targetWord.definition).trim().toLowerCase();
+
+    // 備援詞庫 (即使題庫只有 1 個單字也能產生優質干擾項)
+    const fallbackEn = [
+      'innovation', 'subsequent', 'implement', 'sustainable', 'facilitate',
+      'comprehensive', 'resilient', 'perspective', 'integrity', 'ambiguous',
+      'collaborate', 'advocate', 'coherent', 'prevalent', 'reluctant',
+      'diminish', 'elaborate', 'indispensable', 'meticulous', 'spontaneous'
+    ];
+    const fallbackZh = [
+      '創新的、革新的', '隨後的、接著的', '實施、貫徹執行', '可持續的、永續的', '促進、使便利',
+      '全面的、包羅萬象的', '堅韌的、適應力強的', '觀點、視角', '正直、誠信', '模稜兩可的、含糊的',
+      '合作、協作', '擁護、倡導', '連貫的、條理分明的', '盛行的、普遍的', '勉強的、不情願的',
+      '減少、減弱', '詳細說明的、精密的', '不可或缺的、核心的', '一絲不苟的、精緻的', '自發的、自然產生的'
+    ];
+
+    const results = new Set();
+
+    // 優先策略 1: 尋找相同詞性 (pos) 的單字干擾項
+    const samePos = allCandidates.filter(w => 
+      w.pos === targetWord.pos && 
+      w.word.toLowerCase() !== targetWord.word.toLowerCase() &&
+      w.definition !== targetWord.definition
+    ).sort(() => 0.5 - Math.random());
+
+    for (const item of samePos) {
+      const val = (mode === 'en' ? item.word : item.definition).trim();
+      if (val && val.toLowerCase() !== targetVal && !results.has(val)) {
+        results.add(val);
+        if (results.size >= 3) break;
+      }
+    }
+
+    // 策略 2: 從全體題庫與全域 vocabList 隨機補充
+    if (results.size < 3) {
+      const combined = [...allCandidates, ...this.vocabList].sort(() => 0.5 - Math.random());
+      for (const item of combined) {
+        const val = (mode === 'en' ? item.word : item.definition).trim();
+        if (val && val.toLowerCase() !== targetVal && !results.has(val)) {
+          results.add(val);
+          if (results.size >= 3) break;
+        }
+      }
+    }
+
+    // 策略 3: 使用靜態高頻詞彙補齊
+    if (results.size < 3) {
+      const fbList = (mode === 'en' ? fallbackEn : fallbackZh).sort(() => 0.5 - Math.random());
+      for (const fb of fbList) {
+        if (fb.toLowerCase() !== targetVal && !results.has(fb)) {
+          results.add(fb);
+          if (results.size >= 3) break;
+        }
+      }
+    }
+
+    return Array.from(results).slice(0, 3);
+  },
+
+  /**
    * 生成客製化測驗考卷
    */
   generateQuiz() {
     const allAvailable = this.getCurrentSourceList();
     const selectedWords = allAvailable.filter(w => this.selectedWordIds.has(w.id));
 
-    if (selectedWords.length < 2) {
-      alert("請至少勾選 2 個單字才能組成題目與選項！");
+    if (selectedWords.length === 0) {
+      alert("請至少勾選 1 個單字才能開始測驗！");
       return;
     }
 
@@ -293,8 +364,7 @@ const CustomQuizModule = {
 
     // 建立題目清單
     this.activeQuiz = quizPool.map((wordObj, idx) => {
-      // 隨機選一種勾選的題型
-      const qType = selectedTypes[Math.floor(Math.random() * selectedTypes.length)];
+      const qType = selectedTypes[idx % selectedTypes.length];
       return this.buildQuestionItem(wordObj, qType, allAvailable, idx);
     });
 
@@ -302,12 +372,13 @@ const CustomQuizModule = {
     this.startQuizSession();
   },
 
+  /**
+   * 智慧建構單一考題 (支援字詞雙向翻譯與多種題型)
+   */
   buildQuestionItem(targetWord, qType, allWords, index) {
-    // 挑選 3 個干擾項
-    const distractors = allWords
-      .filter(w => w.word !== targetWord.word)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 3);
+    // 舊版題型轉譯相容
+    if (qType === 'def_to_word') qType = 'trans_zh_to_en';
+    if (qType === 'listen_image') qType = 'listen_quiz';
 
     const questionItem = {
       index: index + 1,
@@ -316,52 +387,112 @@ const CustomQuizModule = {
       image: targetWord.imageUrl || null,
       answered: false,
       userAnswer: null,
-      isCorrect: false
+      isCorrect: false,
+      heroType: null
     };
 
-    if (qType === 'image_to_word') {
-      questionItem.typeLabel = '🖼️ 看圖選單字';
-      questionItem.stem = '觀察上方圖片與中文釋義，選出正確的英文單字：';
-      questionItem.substem = `中文釋義：${targetWord.definition}`;
-      // 四個單字選項
-      const options = [targetWord.word, ...distractors.map(d => d.word)].sort(() => 0.5 - Math.random());
-      questionItem.options = options;
+    // 1. 字詞翻譯：看英選中 (English -> Chinese)
+    if (qType === 'trans_en_to_zh') {
+      const distractors = this.getHighQualityDistractors(targetWord, 'zh', allWords);
+      questionItem.typeLabel = '🌐 字詞翻譯・看英選中';
+      questionItem.heroType = 'en_to_zh';
+      questionItem.heroWord = targetWord.word;
+      questionItem.heroPhonetic = targetWord.phonetic || '';
+      questionItem.heroPos = targetWord.pos || 'n.';
+      questionItem.stem = '請觀察題目單字，從下列選項中選出正確的中文釋義：';
+      questionItem.substem = targetWord.englishDef ? `English Definition: ${targetWord.englishDef}` : '';
+      questionItem.options = [targetWord.definition, ...distractors].sort(() => 0.5 - Math.random());
+      questionItem.answer = targetWord.definition;
+      questionItem.autoPlayAudio = true;
+    }
+    // 2. 字詞翻譯：看中選英 (Chinese -> English)
+    else if (qType === 'trans_zh_to_en') {
+      const distractors = this.getHighQualityDistractors(targetWord, 'en', allWords);
+      questionItem.typeLabel = '🇹🇼 字詞翻譯・看中選英';
+      questionItem.heroType = 'zh_to_en';
+      questionItem.heroWord = targetWord.definition;
+      questionItem.heroPhonetic = '';
+      questionItem.heroPos = targetWord.pos ? `${targetWord.pos} 詞性` : '';
+      questionItem.stem = '請觀察題目中文釋義，從下列選項中選出對應的英文單字：';
+      questionItem.substem = targetWord.category ? `分類領域：${targetWord.category}` : '';
+      questionItem.options = [targetWord.word, ...distractors].sort(() => 0.5 - Math.random());
       questionItem.answer = targetWord.word;
-    } 
+      questionItem.autoPlayAudio = false;
+    }
+    // 3. 看圖識字選詞 (Image Recognition)
+    else if (qType === 'image_to_word') {
+      const distractors = this.getHighQualityDistractors(targetWord, 'en', allWords);
+      questionItem.typeLabel = '🖼️ 看圖識字選詞';
+      questionItem.stem = '請觀察情境圖片與關鍵線索，選出最相符的英文單字：';
+      questionItem.substem = `中文釋義提示：${targetWord.definition} (${targetWord.pos || ''})`;
+      questionItem.options = [targetWord.word, ...distractors].sort(() => 0.5 - Math.random());
+      questionItem.answer = targetWord.word;
+    }
+    // 4. 看提示拼字挑戰 (Spelling Challenge)
     else if (qType === 'spelling') {
-      questionItem.typeLabel = '⌨️ 看圖拼字挑戰';
-      questionItem.stem = '觀察圖片與提示，拼寫出完整的英文單字：';
-      questionItem.substem = `中文釋義：${targetWord.definition} (${targetWord.pos || ''})`;
-      questionItem.answer = targetWord.word;
-    }
-    else if (qType === 'def_to_word') {
-      questionItem.typeLabel = '🔠 釋義四選一';
-      questionItem.stem = `根據釋義「${targetWord.definition}」，請選出對應的英文單字：`;
-      questionItem.substem = targetWord.englishDef ? `English: ${targetWord.englishDef}` : '';
-      const options = [targetWord.word, ...distractors.map(d => d.word)].sort(() => 0.5 - Math.random());
-      questionItem.options = options;
-      questionItem.answer = targetWord.word;
-    }
-    else if (qType === 'listen_image') {
-      questionItem.typeLabel = '🎧 看圖聽音選詞';
-      questionItem.stem = '點擊發音按鈕並結合情境圖片，選出正確的單字：';
-      questionItem.substem = `中文提示：${targetWord.definition}`;
-      const options = [targetWord.word, ...distractors.map(d => d.word)].sort(() => 0.5 - Math.random());
-      questionItem.options = options;
+      questionItem.typeLabel = '⌨️ 看提示拼字挑戰';
+      questionItem.stem = '請根據中文定義與音標，在下方輸入框拼寫出完整英文單字：';
+      questionItem.substem = `中文釋義：${targetWord.definition} (${targetWord.pos || ''}) ${targetWord.phonetic ? '・' + targetWord.phonetic : ''}`;
       questionItem.answer = targetWord.word;
       questionItem.autoPlayAudio = true;
     }
+    // 5. 情境例句克漏字 (Sentence Cloze)
     else if (qType === 'sentence_cloze') {
+      const distractors = this.getHighQualityDistractors(targetWord, 'en', allWords);
       questionItem.typeLabel = '📝 情境例句克漏字';
-      const rawExample = targetWord.example || `We must ______ this strategy carefully.`;
-      // 將單字挖空
+      questionItem.heroType = 'cloze';
+      const rawExample = targetWord.example || `The team must ______ this critical plan effectively.`;
       const regex = new RegExp(`\\b${targetWord.word}\\b`, 'gi');
       const clozeSentence = rawExample.replace(regex, '________');
-      questionItem.stem = '請根據句意與圖片情境，選出最適合填入空格的單字：';
+      questionItem.stem = '請根據語意情境與文法，選出最適合填入空格中的單字：';
       questionItem.substem = `"${clozeSentence}"`;
-      const options = [targetWord.word, ...distractors.map(d => d.word)].sort(() => 0.5 - Math.random());
-      questionItem.options = options;
+      questionItem.options = [targetWord.word, ...distractors].sort(() => 0.5 - Math.random());
       questionItem.answer = targetWord.word;
+    }
+    // 6. 聽力真題辨義 (Listening Quiz)
+    else if (qType === 'listen_quiz') {
+      const distractors = this.getHighQualityDistractors(targetWord, 'zh', allWords);
+      questionItem.typeLabel = '🎧 聽力真題辨義';
+      questionItem.heroType = 'listen';
+      questionItem.heroWord = '🎧 播放發音中...';
+      questionItem.stem = '請點擊聆聽道地發音，選出聽到的單字之正確中文釋義：';
+      questionItem.substem = '💡 提示：點擊右側朗讀按鈕可無限制重複聆聽';
+      questionItem.options = [targetWord.definition, ...distractors].sort(() => 0.5 - Math.random());
+      questionItem.answer = targetWord.definition;
+      questionItem.autoPlayAudio = true;
+    }
+    // 7. 同義詞與搭配辨析 (Synonyms & Collocations)
+    else if (qType === 'collocation_synonym') {
+      questionItem.typeLabel = '🔄 同義詞與搭配辨析';
+      questionItem.heroType = 'synonym';
+      questionItem.heroWord = targetWord.word;
+      questionItem.heroPhonetic = targetWord.phonetic || '';
+      questionItem.heroPos = targetWord.pos || '';
+
+      if (targetWord.synonyms && targetWord.synonyms.length > 0) {
+        const correctSyn = targetWord.synonyms[0];
+        const distractors = this.getHighQualityDistractors(targetWord, 'en', allWords);
+        questionItem.stem = `請選出與單字【${targetWord.word}】語意最相近的同義詞：`;
+        questionItem.substem = `中文釋義：${targetWord.definition}`;
+        questionItem.options = [correctSyn, ...distractors].sort(() => 0.5 - Math.random());
+        questionItem.answer = correctSyn;
+      } else if (targetWord.collocations && targetWord.collocations.length > 0) {
+        const colloc = targetWord.collocations[0];
+        const regex = new RegExp(`\\b${targetWord.word}\\b`, 'gi');
+        const collocBlank = colloc.replace(regex, '________');
+        const distractors = this.getHighQualityDistractors(targetWord, 'en', allWords);
+        questionItem.stem = '請選出最常見的道地搭配詞 (Collocation)：';
+        questionItem.substem = `搭配片語：${collocBlank} (定義: ${targetWord.definition})`;
+        questionItem.options = [targetWord.word, ...distractors].sort(() => 0.5 - Math.random());
+        questionItem.answer = targetWord.word;
+      } else {
+        // Fallback to trans_en_to_zh
+        const distractors = this.getHighQualityDistractors(targetWord, 'zh', allWords);
+        questionItem.stem = '請選出該單字的正確中文釋義：';
+        questionItem.substem = targetWord.englishDef ? `English: ${targetWord.englishDef}` : '';
+        questionItem.options = [targetWord.definition, ...distractors].sort(() => 0.5 - Math.random());
+        questionItem.answer = targetWord.definition;
+      }
     }
 
     return questionItem;
@@ -417,10 +548,105 @@ const CustomQuizModule = {
     // 題型徽章
     document.getElementById('cqQTypePill').textContent = q.typeLabel;
 
+    // 單字焦點大卡牌渲染
+    const heroBox = document.getElementById('cqHeroWordBox');
+    const heroBadge = document.getElementById('cqHeroBadge');
+    const heroWord = document.getElementById('cqHeroWord');
+    const heroAudioBtn = document.getElementById('cqHeroAudioBtn');
+    const heroPhonetic = document.getElementById('cqHeroPhonetic');
+    const heroPos = document.getElementById('cqHeroPos');
+
+    if (q.heroType) {
+      if (heroBox) heroBox.style.display = 'block';
+
+      if (q.heroType === 'en_to_zh') {
+        if (heroBox) heroBox.className = 'cq-hero-word-box';
+        if (heroBadge) {
+          heroBadge.className = 'cq-hero-badge';
+          heroBadge.textContent = '🌐 字詞翻譯・看英選中 (選中文釋義)';
+        }
+        if (heroWord) heroWord.textContent = q.heroWord;
+        if (heroPhonetic) {
+          heroPhonetic.style.display = 'inline-block';
+          heroPhonetic.textContent = q.heroPhonetic;
+        }
+        if (heroPos) {
+          heroPos.style.display = 'inline-block';
+          heroPos.textContent = q.heroPos;
+        }
+        if (heroAudioBtn) {
+          heroAudioBtn.style.display = 'inline-flex';
+          heroAudioBtn.innerHTML = '🔊 朗讀發音';
+          heroAudioBtn.onclick = () => SpeechEngine.speak(q.target.word);
+        }
+      } 
+      else if (q.heroType === 'zh_to_en') {
+        if (heroBox) heroBox.className = 'cq-hero-word-box zh-mode';
+        if (heroBadge) {
+          heroBadge.className = 'cq-hero-badge zh-badge';
+          heroBadge.textContent = '🇹🇼 字詞翻譯・看中選英 (選英文單字)';
+        }
+        if (heroWord) heroWord.textContent = q.heroWord;
+        if (heroPhonetic) heroPhonetic.style.display = 'none';
+        if (heroPos) {
+          heroPos.style.display = 'inline-block';
+          heroPos.textContent = q.heroPos;
+        }
+        if (heroAudioBtn) heroAudioBtn.style.display = 'none';
+      }
+      else if (q.heroType === 'listen') {
+        if (heroBox) heroBox.className = 'cq-hero-word-box listen-mode';
+        if (heroBadge) {
+          heroBadge.className = 'cq-hero-badge listen-badge';
+          heroBadge.textContent = '🎧 聽力真題辨義 (純聽力測驗)';
+        }
+        if (heroWord) heroWord.textContent = q.answered ? q.target.word : '🎧 播放發音中...';
+        if (heroPhonetic) {
+          heroPhonetic.style.display = q.answered ? 'inline-block' : 'none';
+          heroPhonetic.textContent = q.target.phonetic || '';
+        }
+        if (heroPos) {
+          heroPos.style.display = 'inline-block';
+          heroPos.textContent = q.target.pos || '';
+        }
+        if (heroAudioBtn) {
+          heroAudioBtn.style.display = 'inline-flex';
+          heroAudioBtn.innerHTML = '🔊 重複播放';
+          heroAudioBtn.onclick = () => SpeechEngine.speak(q.target.word);
+        }
+      }
+      else if (q.heroType === 'synonym') {
+        if (heroBox) heroBox.className = 'cq-hero-word-box';
+        if (heroBadge) {
+          heroBadge.className = 'cq-hero-badge synonym-badge';
+          heroBadge.textContent = '🔄 同義詞與搭配辨析';
+        }
+        if (heroWord) heroWord.textContent = q.heroWord;
+        if (heroPhonetic) {
+          heroPhonetic.style.display = 'inline-block';
+          heroPhonetic.textContent = q.heroPhonetic;
+        }
+        if (heroPos) {
+          heroPos.style.display = 'inline-block';
+          heroPos.textContent = q.heroPos;
+        }
+        if (heroAudioBtn) {
+          heroAudioBtn.style.display = 'inline-flex';
+          heroAudioBtn.innerHTML = '🔊 朗讀發音';
+          heroAudioBtn.onclick = () => SpeechEngine.speak(q.target.word);
+        }
+      }
+      else {
+        if (heroBox) heroBox.style.display = 'none';
+      }
+    } else {
+      if (heroBox) heroBox.style.display = 'none';
+    }
+
     // 圖片渲染
     const imgWrap = document.getElementById('cqQImageWrap');
     const imgTag = document.getElementById('cqQImage');
-    if (q.image) {
+    if (q.image && q.type !== 'trans_en_to_zh' && q.type !== 'trans_zh_to_en') {
       imgTag.src = q.image;
       imgWrap.style.display = 'block';
       imgTag.onclick = () => this.openLightbox(q.image, `${q.target.word} - ${q.target.definition}`);
@@ -428,7 +654,7 @@ const CustomQuizModule = {
       imgWrap.style.display = 'none';
     }
 
-    // 發音按鈕
+    // 頂部小發音按鈕
     const audioBtn = document.getElementById('cqQAudioBtn');
     audioBtn.onclick = () => SpeechEngine.speak(q.target.word);
     if (q.autoPlayAudio) {
@@ -465,9 +691,11 @@ const CustomQuizModule = {
     q.options.forEach((optText, optIdx) => {
       const btn = document.createElement('button');
       btn.className = 'quiz-choice-btn cq-choice-btn';
+      btn.setAttribute('data-choice-idx', optIdx);
       btn.innerHTML = `
         <span class="choice-label">${String.fromCharCode(65 + optIdx)}</span>
         <span class="choice-text">${optText}</span>
+        <span class="choice-kbd-tag">[${optIdx + 1}]</span>
       `;
 
       btn.addEventListener('click', () => {
@@ -481,19 +709,16 @@ const CustomQuizModule = {
 
   setupSpellingQuestion(q) {
     const input = document.getElementById('cqSpellInput');
-    const boxes = document.getElementById('cqSpellBoxes');
     input.value = '';
     input.disabled = false;
     input.focus();
 
-    // 字母格子與提示設定
     const targetWord = q.target.word.trim();
     this.revealedIndices = new Set();
     this.hintsUsedCount = 0;
     this.updateSpellBoxes(targetWord);
     document.getElementById('cqHintsLeft').textContent = this.maxHintsPerQ - this.hintsUsedCount;
 
-    // 即時輸入同步提示格
     input.oninput = () => {
       this.updateSpellBoxes(targetWord, input.value.trim().toLowerCase());
     };
@@ -560,15 +785,26 @@ const CustomQuizModule = {
     q.answered = true;
     q.userAnswer = selectedOpt;
 
-    const isCorrect = (selectedOpt.toLowerCase() === q.answer.toLowerCase());
+    const isCorrect = (selectedOpt.trim().toLowerCase() === q.answer.trim().toLowerCase());
     q.isCorrect = isCorrect;
+
+    // 若是聽力題，答題後揭曉單字文字
+    if (q.heroType === 'listen') {
+      const heroWord = document.getElementById('cqHeroWord');
+      const heroPhonetic = document.getElementById('cqHeroPhonetic');
+      if (heroWord) heroWord.textContent = q.target.word;
+      if (heroPhonetic) {
+        heroPhonetic.style.display = 'inline-block';
+        heroPhonetic.textContent = q.target.phonetic || '';
+      }
+    }
 
     // 高亮選項按鈕
     const optionsGrid = document.getElementById('cqOptionsGrid');
     Array.from(optionsGrid.children).forEach(btn => {
       btn.disabled = true;
-      const text = btn.querySelector('.choice-text').textContent;
-      if (text.toLowerCase() === q.answer.toLowerCase()) {
+      const text = btn.querySelector('.choice-text').textContent.trim();
+      if (text.toLowerCase() === q.answer.trim().toLowerCase()) {
         btn.classList.add('selected-correct');
       }
     });
@@ -633,7 +869,7 @@ const CustomQuizModule = {
       AppState.toggleStarWord(q.target);
       const newStatus = AppState.isWordStarred(q.target.word);
       starBtn.textContent = newStatus ? '⭐ 已在生字本' : '⭐ 加入生字本';
-      showToast(newStatus ? `⭐ 已將【${q.target.word}】加入生字本` : `已移除`);
+      showToast(newStatus ? `⭐ 已將【${q.target.word}】加入生字本` : `已從生字本移除`);
     };
 
     expPanel.style.display = 'block';
@@ -644,7 +880,7 @@ const CustomQuizModule = {
     // 下一題按鈕文字 (最後一題改為查看成績)
     const nextBtn = document.getElementById('btnCqNextQuestion');
     const isLast = (this.currentQIndex === this.activeQuiz.length - 1);
-    nextBtn.textContent = isLast ? '查看測驗成績 🏆' : '下一題 →';
+    nextBtn.textContent = isLast ? '查看測驗成績 🏆 (按 Enter)' : '下一題 → (按 Enter)';
     nextBtn.onclick = () => {
       if (isLast) {
         this.finishQuiz();
@@ -679,11 +915,11 @@ const CustomQuizModule = {
     if (finalAccuracy === 100) {
       iconEl.textContent = '🌟';
       titleEl.textContent = '滿分神人！完美無缺！';
-      subEl.textContent = '您已完全掌握本次所有單字與題型！';
+      subEl.textContent = '您已完全掌握本次所有單字與出題題型！';
     } else if (finalAccuracy >= 80) {
       iconEl.textContent = '🏆';
       titleEl.textContent = '成績優異！表現出色！';
-      subEl.textContent = '單字敏銳度極佳，大考高分近在眼前！';
+      subEl.textContent = '單字敏銳度極佳，大考與檢定高分在握！';
     } else if (finalAccuracy >= 60) {
       iconEl.textContent = '👍';
       titleEl.textContent = '及格通過！持續進步！';
@@ -749,19 +985,20 @@ const CustomQuizModule = {
       });
     });
 
-    // 快捷選取按鈕
+    // 批次選擇按鈕
     document.getElementById('btnCqSelectAll')?.addEventListener('click', () => this.selectAll());
     document.getElementById('btnCqDeselectAll')?.addEventListener('click', () => this.deselectAll());
-    document.getElementById('btnCqRandom5')?.addEventListener('click', () => this.selectRandom(5));
-    document.getElementById('btnCqRandom10')?.addEventListener('click', () => this.selectRandom(10));
+    document.getElementById('btnCqSelectRandom')?.addEventListener('click', () => this.selectRandom(10));
 
     // 題型勾選方塊視覺同步
     document.querySelectorAll('.cq-type-card').forEach(card => {
       const cb = card.querySelector('input[type="checkbox"]');
-      cb.addEventListener('change', () => {
-        card.classList.toggle('active', cb.checked);
-        this.updateSelectionSummary();
-      });
+      if (cb) {
+        cb.addEventListener('change', () => {
+          card.classList.toggle('active', cb.checked);
+          this.updateSelectionSummary();
+        });
+      }
     });
 
     // 開始測驗
@@ -779,184 +1016,89 @@ const CustomQuizModule = {
     document.getElementById('btnCqBackToBuilder')?.addEventListener('click', () => this.exitToBuilder());
 
     // 一鍵錯題加入生字本
-    document.getElementById('btnCqAddAllWrongToStar')?.addEventListener('click', () => {
-      let count = 0;
+    document.getElementById('btnCqAddAllWrong')?.addEventListener('click', () => {
+      if (this.wrongQuestions.length === 0) {
+        showToast("本次測驗無錯題！");
+        return;
+      }
       this.wrongQuestions.forEach(wq => {
         if (!AppState.isWordStarred(wq.target.word)) {
-          AppState.toggleStarWord(wq.target);
-          count++;
+          AppState.addCustomWordToWordbook(wq.target);
         }
       });
-      showToast(`⭐ 已將 ${count} 個錯題單字加入生字本！`);
+      showToast(`⭐ 已將 ${this.wrongQuestions.length} 個錯題全數加入生字本！`);
     });
 
-    // 手動新增單字摺疊表單切換
-    const toggleFormBtn = document.getElementById('btnToggleCustomWordForm');
-    const formPanel = document.getElementById('cqCustomWordPanel');
-    const closeFormBtn = document.getElementById('btnCloseCustomWordPanel');
+    // 鍵盤監聽快捷鍵：1/2/3/4 或 A/B/C/D 作答，Space/Enter 跳下一題
+    window.addEventListener('keydown', (e) => {
+      const runnerScreen = document.getElementById('cqRunnerScreen');
+      if (!runnerScreen || runnerScreen.style.display === 'none') return;
 
-    toggleFormBtn?.addEventListener('click', () => {
-      const isOpen = (formPanel.style.display !== 'none');
-      formPanel.style.display = isOpen ? 'none' : 'block';
-      if (!isOpen) formPanel.scrollIntoView({ behavior: 'smooth' });
-    });
-
-    closeFormBtn?.addEventListener('click', () => {
-      formPanel.style.display = 'none';
-    });
-
-    // 本機圖片上傳預覽
-    const fileInput = document.getElementById('cqFileInput');
-    const imgPreview = document.getElementById('cqNewImagePreview');
-    const urlInput = document.getElementById('cqImageUrlInput');
-
-    fileInput?.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      // 嘗試上傳至伺服器
-      const formData = new FormData();
-      formData.append('image', file);
-
-      try {
-        const res = await fetch('/api/upload_image', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        if (data.success && data.url) {
-          urlInput.value = data.url;
-          imgPreview.innerHTML = `<img src="${data.url}" class="preview-img">`;
-          showToast("📷 本機圖片上傳成功！");
-          return;
-        }
-      } catch (err) {
-        console.warn("Upload to backend failed, falling back to base64 DataURL", err);
-      }
-
-      // 降級 Base64 DataURL
-      const reader = new FileReader();
-      reader.onload = (re) => {
-        urlInput.value = re.target.result;
-        imgPreview.innerHTML = `<img src="${re.target.result}" class="preview-img">`;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // 預覽網址
-    document.getElementById('btnApplyImageUrl')?.addEventListener('click', () => {
-      const url = urlInput.value.trim();
-      if (url) {
-        imgPreview.innerHTML = `<img src="${url}" class="preview-img">`;
-      }
-    });
-
-    // 儲存自訂單字
-    document.getElementById('btnSaveCustomWord')?.addEventListener('click', async () => {
-      const word = document.getElementById('cqInputWord').value.trim();
-      const def = document.getElementById('cqInputDef').value.trim();
-      const phonetic = document.getElementById('cqInputPhonetic').value.trim();
-      const pos = document.getElementById('cqInputPos').value;
-      const example = document.getElementById('cqInputExample').value.trim();
-      const imageUrl = urlInput.value.trim();
-
-      if (!word || !def) {
-        alert("請至少填寫「英文單字」與「中文釋義」！");
+      // 若正專注於文字輸入框且非 Enter，不攔截
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) && e.key !== 'Enter') {
         return;
       }
 
-      const payload = {
-        word,
-        definition: def,
-        phonetic,
-        pos,
-        example,
-        imageUrl,
-        category: '自訂出題'
-      };
+      const q = this.activeQuiz[this.currentQIndex];
+      if (!q) return;
 
-      try {
-        const res = await fetch('/api/vocab/save_custom', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.success && data.data) {
-          this.vocabList = data.data;
+      // 已回答狀態：按 Space 或 Enter 進入下一題
+      if (q.answered) {
+        if (e.code === 'Space' || e.key === 'Enter') {
+          e.preventDefault();
+          const nextBtn = document.getElementById('btnCqNextQuestion');
+          if (nextBtn) nextBtn.click();
         }
-      } catch (e) {
-        // 本地降級
-        this.vocabList.push({
-          id: Date.now(),
-          ...payload
-        });
+        return;
       }
 
-      // 清空表單並關閉
-      document.getElementById('cqInputWord').value = '';
-      document.getElementById('cqInputDef').value = '';
-      document.getElementById('cqInputPhonetic').value = '';
-      document.getElementById('cqInputExample').value = '';
-      urlInput.value = '';
-      imgPreview.innerHTML = '<span class="preview-placeholder">📷 尚未設定圖片</span>';
-      formPanel.style.display = 'none';
+      // 未回答狀態：選擇題按 1/2/3/4 或 A/B/C/D
+      if (q.type !== 'spelling') {
+        let optIdx = -1;
+        const key = e.key.toUpperCase();
+        if (key === '1' || key === 'A') optIdx = 0;
+        else if (key === '2' || key === 'B') optIdx = 1;
+        else if (key === '3' || key === 'C') optIdx = 2;
+        else if (key === '4' || key === 'D') optIdx = 3;
 
-      // 自動選取新增的單字
-      const newWordObj = this.vocabList.find(w => w.word.toLowerCase() === word.toLowerCase());
-      if (newWordObj) this.selectedWordIds.add(newWordObj.id);
-
-      this.renderWordGrid();
-      showToast(`🎉 成功新增自訂單字【${word}】並加入題庫！`);
-    });
-
-    // Lightbox 關閉
-    document.getElementById('btnCqCloseLightbox')?.addEventListener('click', () => this.closeLightbox());
-    document.querySelector('.lightbox-overlay')?.addEventListener('click', () => this.closeLightbox());
-
-    // 更換單字圖片 Modal 事件
-    const modalFileInput = document.getElementById('cqModalFileInput');
-    const modalUrlInput = document.getElementById('cqModalUrlInput');
-    const modalImgPreview = document.getElementById('cqModalImgPreview');
-
-    modalFileInput?.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const formData = new FormData();
-      formData.append('image', file);
-      try {
-        const res = await fetch('/api/upload_image', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        if (data.success && data.url) {
-          modalUrlInput.value = data.url;
-          modalImgPreview.src = data.url;
-          return;
+        if (optIdx >= 0 && optIdx < q.options.length) {
+          e.preventDefault();
+          const optionsGrid = document.getElementById('cqOptionsGrid');
+          const btn = optionsGrid?.children[optIdx];
+          if (btn && !btn.disabled) {
+            btn.click();
+          }
         }
-      } catch (err) {
-        console.warn("Upload failed, fallback to DataURL", err);
       }
-
-      const reader = new FileReader();
-      reader.onload = (re) => {
-        modalUrlInput.value = re.target.result;
-        modalImgPreview.src = re.target.result;
-      };
-      reader.readAsDataURL(file);
     });
 
-    modalUrlInput?.addEventListener('input', (e) => {
-      modalImgPreview.src = e.target.value;
+    // 手動新增單字折疊面板控制
+    document.getElementById('btnToggleCustomWordForm')?.addEventListener('click', () => {
+      const panel = document.getElementById('cqCustomWordPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      if (panel.style.display === 'block') {
+        panel.scrollIntoView({ behavior: 'smooth' });
+      }
     });
 
-    document.getElementById('btnCqCloseChangeImgModal')?.addEventListener('click', () => this.closeChangeImageModal());
-    document.getElementById('btnCqCancelChangeImg')?.addEventListener('click', () => this.closeChangeImageModal());
-    document.getElementById('btnCqSaveChangeImg')?.addEventListener('click', () => {
-      const url = modalUrlInput.value.trim();
-      this.applyModalImage(url);
+    document.getElementById('btnCloseCustomWordPanel')?.addEventListener('click', () => {
+      document.getElementById('cqCustomWordPanel').style.display = 'none';
+    });
+
+    // Lightbox 點擊遮罩關閉
+    document.getElementById('cqLightboxClose')?.addEventListener('click', () => this.closeLightbox());
+    document.getElementById('cqImageLightbox')?.addEventListener('click', (e) => {
+      if (e.target.id === 'cqImageLightbox') this.closeLightbox();
+    });
+
+    // 更換圖片彈窗關閉
+    document.getElementById('cqModalClose')?.addEventListener('click', () => this.closeChangeImageModal());
+    document.getElementById('cqBtnCancelChangeImg')?.addEventListener('click', () => this.closeChangeImageModal());
+
+    // 儲存更換圖片
+    document.getElementById('cqBtnSaveChangeImg')?.addEventListener('click', () => {
+      const input = document.getElementById('cqModalUrlInput');
+      this.applyModalImage(input.value.trim());
     });
   }
 };

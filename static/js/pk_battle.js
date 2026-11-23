@@ -510,6 +510,18 @@ const PKBattleModule = {
     const list = this.activeDeck;
     const target = list[Math.floor(Math.random() * list.length)];
     const distractors = list.filter(w => w.word !== target.word).sort(() => 0.5 - Math.random()).slice(0, 3);
+    const fallbackList = [
+      { word: 'innovation', definition: '創新的、革新的' },
+      { word: 'implement', definition: '實施、貫徹執行' },
+      { word: 'sustainable', definition: '可持續的、永續的' },
+      { word: 'resilient', definition: '適應力強的、堅韌的' },
+      { word: 'perspective', definition: '觀點、視角' }
+    ];
+    while (distractors.length < 3) {
+      const fb = fallbackList.find(f => f.word !== target.word && !distractors.some(d => d.word === f.word));
+      if (fb) distractors.push(fb);
+      else break;
+    }
     
     // 題型隨機：看英選中 (70%) 或 看中選英 (30%)
     const isEnToZh = Math.random() > 0.3;

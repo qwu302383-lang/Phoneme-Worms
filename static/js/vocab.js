@@ -332,7 +332,7 @@ const VocabModule = {
   },
 
   /**
-   * 渲染當前評分測驗題目 (四選一)
+   * 渲染當前評分測驗題目 (支援字詞雙向翻譯：看英選中 / 看中選英)
    */
   renderGradedQuizQuestion() {
     if (this.quizCurrentIndex >= this.quizQuestions.length) {
@@ -343,6 +343,9 @@ const VocabModule = {
     const currentItem = this.quizQuestions[this.quizCurrentIndex];
     const total = this.quizQuestions.length;
     const currentNum = this.quizCurrentIndex + 1;
+
+    // 奇數題考【看英選中】，偶數題考【看中選英】
+    const isEnToZh = (this.quizCurrentIndex % 2 === 0);
 
     // 更新題目序號與即時分數
     const currentNumEl = document.getElementById('vQuizCurrentNum');
@@ -357,34 +360,61 @@ const VocabModule = {
       barFillEl.style.width = `${Math.round(((currentNum - 1) / total) * 100)}%`;
     }
 
-    // 題目單字與音標
+    // 題目單字與音標提示
     const wordEl = document.getElementById('vQuizWord');
     const phoneticEl = document.getElementById('vQuizPhonetic');
-    if (wordEl) wordEl.textContent = currentItem.word;
-    if (phoneticEl) phoneticEl.textContent = currentItem.phonetic || '';
-
-    // 朗讀按鈕綁定
     const audioBtn = document.getElementById('vQuizAudioBtn');
-    if (audioBtn) {
-      audioBtn.onclick = () => SpeechEngine.speak(currentItem.word);
+
+    if (isEnToZh) {
+      if (wordEl) wordEl.textContent = currentItem.word;
+      if (phoneticEl) phoneticEl.textContent = `${currentItem.phonetic || ''} 【看英選中：請選出中文釋義】`;
+      if (audioBtn) {
+        audioBtn.style.display = 'inline-flex';
+        audioBtn.onclick = () => SpeechEngine.speak(currentItem.word);
+      }
+    } else {
+      if (wordEl) wordEl.textContent = currentItem.definition;
+      if (phoneticEl) phoneticEl.textContent = `${currentItem.pos ? '[' + currentItem.pos + '] ' : ''}【看中選英：請選出對應英文單字】`;
+      if (audioBtn) {
+        audioBtn.style.display = 'none';
+      }
     }
 
-    // 產生選項 (1 正確 + 3 隨機干擾項)
-    const otherDefs = this.vocabList
-      .filter(v => v.id !== currentItem.id && v.definition !== currentItem.definition)
-      .map(v => v.definition);
+    // 產生選項 (1 正確 + 3 隨機高品質干擾項)
+    let options = [];
+    let correctAnswer = '';
 
-    const fallbackDefs = [
-      '實踐、執行', '不可或缺的、核心的', '顯著的、引人注目的', '克服、戰勝',
-      '維持、保護', '精準的、精密的', '協調、配合', '促進、助長'
-    ];
-    while (otherDefs.length < 3) {
-      const fb = fallbackDefs[otherDefs.length % fallbackDefs.length];
-      if (!otherDefs.includes(fb) && fb !== currentItem.definition) otherDefs.push(fb);
+    if (isEnToZh) {
+      correctAnswer = currentItem.definition;
+      const otherDefs = this.vocabList
+        .filter(v => v.id !== currentItem.id && v.definition !== currentItem.definition)
+        .map(v => v.definition);
+      const fallbackDefs = [
+        '實踐、執行', '不可或缺的、核心的', '顯著的、引人注目的', '克服、戰勝',
+        '維持、保護', '精準的、精密的', '協調、配合', '促進、助長'
+      ];
+      while (otherDefs.length < 3) {
+        const fb = fallbackDefs[otherDefs.length % fallbackDefs.length];
+        if (!otherDefs.includes(fb) && fb !== correctAnswer) otherDefs.push(fb);
+      }
+      const shuffledOthers = otherDefs.sort(() => 0.5 - Math.random()).slice(0, 3);
+      options = [correctAnswer, ...shuffledOthers].sort(() => 0.5 - Math.random());
+    } else {
+      correctAnswer = currentItem.word;
+      const otherWords = this.vocabList
+        .filter(v => v.id !== currentItem.id && v.word.toLowerCase() !== currentItem.word.toLowerCase())
+        .map(v => v.word);
+      const fallbackWords = [
+        'implement', 'indispensable', 'resilient', 'perspective',
+        'maintain', 'precision', 'coordinate', 'facilitate'
+      ];
+      while (otherWords.length < 3) {
+        const fb = fallbackWords[otherWords.length % fallbackWords.length];
+        if (!otherWords.includes(fb) && fb !== correctAnswer) otherWords.push(fb);
+      }
+      const shuffledOthers = otherWords.sort(() => 0.5 - Math.random()).slice(0, 3);
+      options = [correctAnswer, ...shuffledOthers].sort(() => 0.5 - Math.random());
     }
-
-    const shuffledOthers = otherDefs.sort(() => 0.5 - Math.random()).slice(0, 3);
-    const options = [currentItem.definition, ...shuffledOthers].sort(() => 0.5 - Math.random());
 
     const optionsContainer = document.getElementById('vQuizOptions');
     optionsContainer.innerHTML = '';
@@ -401,16 +431,16 @@ const VocabModule = {
 
     let isAnswered = false;
 
-    options.forEach(opt => {
+    options.forEach((opt, optIdx) => {
       const btn = document.createElement('button');
       btn.className = 'quiz-opt-btn';
-      btn.textContent = opt;
+      btn.innerHTML = `<span style="opacity:0.6; margin-right:0.5rem; font-weight:800;">${String.fromCharCode(65 + optIdx)}.</span> ${opt}`;
 
       btn.onclick = () => {
         if (isAnswered) return;
         isAnswered = true;
 
-        const isCorrect = (opt === currentItem.definition);
+        const isCorrect = (opt.trim().toLowerCase() === correctAnswer.trim().toLowerCase());
         if (isCorrect) {
           this.quizCorrectCount++;
           btn.classList.add('correct');
@@ -419,10 +449,10 @@ const VocabModule = {
         } else {
           this.quizWrongCount++;
           btn.classList.add('incorrect');
-          feedbackBox.innerHTML = `<span style="color:var(--danger); font-weight:700;">❌ 答錯囉！正確釋義是：【${currentItem.definition}】</span>`;
+          feedbackBox.innerHTML = `<span style="color:var(--danger); font-weight:700;">❌ 答錯囉！正確答案是：【${correctAnswer}】</span>`;
           // 高亮正確選項
           Array.from(optionsContainer.children).forEach(child => {
-            if (child.textContent === currentItem.definition) {
+            if (child.textContent.includes(correctAnswer)) {
               child.classList.add('correct');
             }
           });

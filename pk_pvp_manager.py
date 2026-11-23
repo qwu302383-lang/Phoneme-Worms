@@ -299,6 +299,19 @@ class PKPvPManager:
         random.shuffle(distractors)
         distractors = distractors[:3]
 
+        fallback_words = [
+            {"word": "innovation", "definition": "創新的、革新的"},
+            {"word": "implement", "definition": "實施、貫徹執行"},
+            {"word": "sustainable", "definition": "可持續的、永續的"},
+            {"word": "resilient", "definition": "適應力強的、堅韌的"},
+            {"word": "perspective", "definition": "觀點、視角"}
+        ]
+        for fb in fallback_words:
+            if len(distractors) >= 3:
+                break
+            if fb["word"] != target["word"] and not any(d["word"] == fb["word"] for d in distractors):
+                distractors.append(fb)
+
         is_en_to_zh = random.random() > 0.3
         if is_en_to_zh:
             stem = target["word"]
