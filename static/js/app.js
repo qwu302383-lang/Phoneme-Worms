@@ -1,6 +1,76 @@
 /**
  * AppState: 本地存儲與全域狀態管理
  */
+/**
+ * 智慧中英雙向自動分離器
+ * 將混在一起輸入的 "noble 高貴的；貴族的" 或 "workout（尤指體育的）訓練，鍛鍊"
+ * 自動乾淨拆解為純英文單字與純中文釋義，絕不殘留 "自訂詞彙"
+ */
+function smartSplitEnZh(rawWord, rawDef, defaultPos = 'n.') {
+  let word = (rawWord || '').trim();
+  let defin = (rawDef || '').trim();
+
+  const isDummyDef = !defin || ['自訂詞彙', '自訂片語', '圖片識別單字', '圖片識別片語', '自訂單字'].includes(defin);
+  const hasZhInWord = /[\u4e00-\u9fff]/.test(word);
+
+  // 若英文欄位純英文且定義已是有效中文，直接回傳
+  if (!hasZhInWord && !isDummyDef && defin) {
+    return { word, definition: defin, pos: defaultPos };
+  }
+
+  // 合併待解析文字 (若定義為 dummy 則只取 word)
+  const combined = (isDummyDef || !defin) ? word : `${word} ${defin}`;
+
+  // 1. 檢查常見分隔符：- , : / \t — –
+  const delimParts = combined.split(/\s*[\-\:\t\/\—\–\,]+\s*/);
+  if (delimParts.length >= 2 && delimParts[0] && delimParts[1]) {
+    const p1 = delimParts[0].trim();
+    const p2 = delimParts.slice(1).join(' ').trim();
+    const p1HasEn = /[a-zA-Z]/.test(p1) && !/[\u4e00-\u9fff]/.test(p1);
+    const p2HasEn = /[a-zA-Z]/.test(p2) && !/[\u4e00-\u9fff]/.test(p2);
+    if (p1HasEn) {
+      return { word: p1, definition: p2, pos: defaultPos };
+    } else if (p2HasEn) {
+      return { word: p2, definition: p1, pos: defaultPos };
+    }
+  }
+
+  // 2. 匹配開頭英文 + 可選括號/詞性 + 中文釋義 (例如: "noble 高貴的；貴族的" 或 "workout（尤指體育的）訓練，鍛鍊")
+  const m = combined.match(/^([a-zA-Z\s\-\'\.]+?)\s*([（\(][^）\)]*?[）\)])?\s*([\u4e00-\u9fff（].*)$/);
+  if (m) {
+    const enPart = m[1].trim();
+    const bracket = (m[2] || '').trim();
+    let zhPart = (m[3] || '').trim();
+    let detectedPos = defaultPos;
+
+    if (bracket) {
+      const posMatch = bracket.match(/(n|v|adj|adv|prep|conj|pron|phr)\.?/i);
+      if (posMatch) {
+        detectedPos = posMatch[0].toLowerCase();
+        if (!detectedPos.endsWith('.')) detectedPos += '.';
+      } else {
+        zhPart = `${bracket} ${zhPart}`.trim();
+      }
+    }
+    return { word: enPart, definition: zhPart, pos: detectedPos };
+  }
+
+  // 3. 匹配中文在先，英文在後：例如 "高貴的 noble"
+  const mRev = combined.match(/^([\u4e00-\u9fff\s\，\；\、\。\（\）\(\)]+)\s+([a-zA-Z\s\-\'\.]+)$/);
+  if (mRev) {
+    return { word: mRev[2].trim(), definition: mRev[1].trim(), pos: defaultPos };
+  }
+
+  // 4. 若純英文但定義為空或 dummy
+  if (!hasZhInWord) {
+    return { word, definition: isDummyDef ? word : defin, pos: defaultPos };
+  }
+
+  return { word, definition: isDummyDef ? word : defin, pos: defaultPos };
+}
+
+window.smartSplitEnZh = smartSplitEnZh;
+
 const AppState = {
   MASTERED_KEY: 'apex_mastered_words_v1',
   STARRED_KEY: 'apex_starred_words_v1',
@@ -42,7 +112,25 @@ const AppState = {
 
   getStarredWords() {
     try {
-      return JSON.parse(localStorage.getItem(this.STARRED_KEY) || '[]');
+      const list = JSON.parse(localStorage.getItem(this.STARRED_KEY) || '[]');
+      let hasChanges = false;
+      const normalized = list.map(item => {
+        const parsed = smartSplitEnZh(item.word, item.definition, item.pos);
+        if (parsed.word !== item.word || parsed.definition !== item.definition) {
+          hasChanges = true;
+          return {
+            ...item,
+            word: parsed.word,
+            definition: parsed.definition,
+            pos: parsed.pos || item.pos || 'n.'
+          };
+        }
+        return item;
+      });
+      if (hasChanges) {
+        localStorage.setItem(this.STARRED_KEY, JSON.stringify(normalized));
+      }
+      return normalized;
     } catch {
       return [];
     }
@@ -124,7 +212,25 @@ const AppState = {
 
   getPhrases() {
     try {
-      return JSON.parse(localStorage.getItem(this.PHRASES_KEY) || '[]');
+      const list = JSON.parse(localStorage.getItem(this.PHRASES_KEY) || '[]');
+      let hasChanges = false;
+      const normalized = list.map(item => {
+        const parsed = smartSplitEnZh(item.word, item.definition, item.pos || 'phr.');
+        if (parsed.word !== item.word || parsed.definition !== item.definition) {
+          hasChanges = true;
+          return {
+            ...item,
+            word: parsed.word,
+            definition: parsed.definition,
+            pos: parsed.pos || item.pos || 'phr.'
+          };
+        }
+        return item;
+      });
+      if (hasChanges) {
+        localStorage.setItem(this.PHRASES_KEY, JSON.stringify(normalized));
+      }
+      return normalized;
     } catch {
       return [];
     }
@@ -767,22 +873,13 @@ const WordbookModule = {
       lines.forEach(line => {
         const trimmed = line.trim();
         if (!trimmed) return;
-        const match = trimmed.split(/[\-\,\:\t]+/);
-        if (match.length >= 2) {
-          this._addEntry({
-            word: match[0].trim(),
-            definition: match.slice(1).join(' ').trim(),
-            pos: isPhrase ? 'phr.' : 'n.'
-          });
-          count++;
-        } else {
-          this._addEntry({
-            word: trimmed,
-            definition: isPhrase ? '自訂片語' : '自訂詞彙',
-            pos: isPhrase ? 'phr.' : 'n.'
-          });
-          count++;
-        }
+        const parsed = smartSplitEnZh(trimmed, '', isPhrase ? 'phr.' : 'n.');
+        this._addEntry({
+          word: parsed.word,
+          definition: parsed.definition,
+          pos: parsed.pos || (isPhrase ? 'phr.' : 'n.')
+        });
+        count++;
       });
 
       if (count === 0) {

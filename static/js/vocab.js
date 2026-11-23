@@ -340,7 +340,16 @@ const VocabModule = {
       return;
     }
 
-    const currentItem = this.quizQuestions[this.quizCurrentIndex];
+    let currentItem = this.quizQuestions[this.quizCurrentIndex];
+    if (window.smartSplitEnZh) {
+      const parsed = window.smartSplitEnZh(currentItem.word, currentItem.definition, currentItem.pos);
+      currentItem = {
+        ...currentItem,
+        word: parsed.word,
+        definition: parsed.definition,
+        pos: parsed.pos || currentItem.pos || 'n.'
+      };
+    }
     const total = this.quizQuestions.length;
     const currentNum = this.quizCurrentIndex + 1;
 

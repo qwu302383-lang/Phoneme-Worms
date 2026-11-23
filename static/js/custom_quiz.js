@@ -47,22 +47,27 @@ const CustomQuizModule = {
   },
 
   getCurrentSourceList() {
-    if (this.currentSource === 'wordbook') {
-      const starred = AppState.getStarredWords();
-      return starred.map((item, idx) => ({
-        id: `wb_${idx}`,
-        word: item.word,
+    const rawList = (this.currentSource === 'wordbook')
+      ? AppState.getStarredWords().map((item, idx) => ({ ...item, id: `wb_${idx}` }))
+      : this.vocabList;
+
+    return rawList.map(item => {
+      const parsed = window.smartSplitEnZh 
+        ? window.smartSplitEnZh(item.word, item.definition, item.pos)
+        : { word: item.word, definition: item.definition, pos: item.pos };
+      return {
+        ...item,
+        word: parsed.word,
+        definition: parsed.definition,
+        pos: parsed.pos || item.pos || 'n.',
         phonetic: item.phonetic || '',
-        pos: item.pos || '',
-        definition: item.definition || '',
         example: item.example || '',
         exampleTranslation: item.exampleTranslation || '',
         collocations: item.collocations || [],
         synonyms: item.synonyms || [],
         imageUrl: item.imageUrl || ''
-      }));
-    }
-    return this.vocabList;
+      };
+    });
   },
 
   renderWordGrid() {
@@ -269,52 +274,66 @@ const CustomQuizModule = {
    */
   getHighQualityDistractors(targetWord, mode, pool) {
     const allCandidates = (pool && pool.length > 0) ? pool : this.vocabList;
-    const targetVal = (mode === 'en' ? targetWord.word : targetWord.definition).trim().toLowerCase();
+    const cleanTarget = window.smartSplitEnZh 
+      ? window.smartSplitEnZh(targetWord.word, targetWord.definition, targetWord.pos)
+      : { word: targetWord.word, definition: targetWord.definition, pos: targetWord.pos };
 
-    // 備援詞庫 (即使題庫只有 1 個單字也能產生優質干擾項)
+    const targetVal = (mode === 'en' ? cleanTarget.word : cleanTarget.definition).trim().toLowerCase();
+
+    // 備援詞庫 (即使題庫只有 1 個單字也能產生優質干擾項，包含高頻常考單字)
     const fallbackEn = [
+      'noble', 'workout', 'yawn', 'tremble', 'romance', 'reunion', 'endure', 'accuracy',
       'innovation', 'subsequent', 'implement', 'sustainable', 'facilitate',
-      'comprehensive', 'resilient', 'perspective', 'integrity', 'ambiguous',
-      'collaborate', 'advocate', 'coherent', 'prevalent', 'reluctant',
-      'diminish', 'elaborate', 'indispensable', 'meticulous', 'spontaneous'
+      'comprehensive', 'resilient', 'perspective', 'integrity', 'ambiguous'
     ];
     const fallbackZh = [
-      '創新的、革新的', '隨後的、接著的', '實施、貫徹執行', '可持續的、永續的', '促進、使便利',
-      '全面的、包羅萬象的', '堅韌的、適應力強的', '觀點、視角', '正直、誠信', '模稜兩可的、含糊的',
-      '合作、協作', '擁護、倡導', '連貫的、條理分明的', '盛行的、普遍的', '勉強的、不情願的',
-      '減少、減弱', '詳細說明的、精密的', '不可或缺的、核心的', '一絲不苟的、精緻的', '自發的、自然產生的'
+      '高貴的；貴族的', '（尤指體育的）訓練，鍛鍊', '打呵欠', '顫抖', '戀情；浪漫；愛情小說',
+      '團聚，重逢', '忍受，忍耐', '準確性', '創新的、革新的', '隨後的、接著的',
+      '實施、貫徹執行', '可持續的、永續的', '促進、使便利', '全面的、包羅萬象的', '堅韌的、適應力強的'
     ];
 
     const results = new Set();
+    const isDummy = (s) => !s || ['自訂詞彙', '自訂片語', '圖片識別單字', '圖片識別片語', '自訂單字'].includes(s.trim());
 
-    // 優先策略 1: 尋找相同詞性 (pos) 的單字干擾項
-    const samePos = allCandidates.filter(w => 
-      w.pos === targetWord.pos && 
-      w.word.toLowerCase() !== targetWord.word.toLowerCase() &&
-      w.definition !== targetWord.definition
+    // 乾淨化所有候選單字
+    const cleanCandidates = allCandidates.map(c => {
+      const parsed = window.smartSplitEnZh ? window.smartSplitEnZh(c.word, c.definition, c.pos) : c;
+      return { ...c, word: parsed.word, definition: parsed.definition, pos: parsed.pos || c.pos || 'n.' };
+    });
+
+    // 優先策略 1: 尋找相同詞性 (pos) 的單字干擾項 (排除 dummy 詞彙)
+    const samePos = cleanCandidates.filter(w => 
+      w.pos === cleanTarget.pos && 
+      w.word.toLowerCase() !== cleanTarget.word.toLowerCase() &&
+      w.definition !== cleanTarget.definition &&
+      !isDummy(w.definition)
     ).sort(() => 0.5 - Math.random());
 
     for (const item of samePos) {
       const val = (mode === 'en' ? item.word : item.definition).trim();
-      if (val && val.toLowerCase() !== targetVal && !results.has(val)) {
+      if (val && val.toLowerCase() !== targetVal && !results.has(val) && !isDummy(val)) {
         results.add(val);
         if (results.size >= 3) break;
       }
     }
 
-    // 策略 2: 從全體題庫與全域 vocabList 隨機補充
+    // 策略 2: 從全體題庫隨機補充 (排除 dummy 詞彙)
     if (results.size < 3) {
-      const combined = [...allCandidates, ...this.vocabList].sort(() => 0.5 - Math.random());
+      const combined = [...cleanCandidates, ...this.vocabList.map(c => {
+        const p = window.smartSplitEnZh ? window.smartSplitEnZh(c.word, c.definition, c.pos) : c;
+        return { ...c, word: p.word, definition: p.definition, pos: p.pos || 'n.' };
+      })].sort(() => 0.5 - Math.random());
+
       for (const item of combined) {
         const val = (mode === 'en' ? item.word : item.definition).trim();
-        if (val && val.toLowerCase() !== targetVal && !results.has(val)) {
+        if (val && val.toLowerCase() !== targetVal && !results.has(val) && !isDummy(val)) {
           results.add(val);
           if (results.size >= 3) break;
         }
       }
     }
 
-    // 策略 3: 使用靜態高頻詞彙補齊
+    // 策略 3: 使用靜態高頻詞彙補齊 (保證永遠有 3 個相異選項)
     if (results.size < 3) {
       const fbList = (mode === 'en' ? fallbackEn : fallbackZh).sort(() => 0.5 - Math.random());
       for (const fb of fbList) {
@@ -379,6 +398,17 @@ const CustomQuizModule = {
     // 舊版題型轉譯相容
     if (qType === 'def_to_word') qType = 'trans_zh_to_en';
     if (qType === 'listen_image') qType = 'listen_quiz';
+
+    // 確保單字與定義已純淨分離中英文
+    const clean = window.smartSplitEnZh
+      ? window.smartSplitEnZh(targetWord.word, targetWord.definition, targetWord.pos)
+      : { word: targetWord.word, definition: targetWord.definition, pos: targetWord.pos };
+    targetWord = {
+      ...targetWord,
+      word: clean.word,
+      definition: clean.definition,
+      pos: clean.pos || targetWord.pos || 'n.'
+    };
 
     const questionItem = {
       index: index + 1,
@@ -1099,6 +1129,50 @@ const CustomQuizModule = {
     document.getElementById('cqBtnSaveChangeImg')?.addEventListener('click', () => {
       const input = document.getElementById('cqModalUrlInput');
       this.applyModalImage(input.value.trim());
+    });
+
+    // 手動新增自訂單字儲存按鈕
+    document.getElementById('btnSaveCustomWord')?.addEventListener('click', () => {
+      const rawWord = document.getElementById('cqInputWord')?.value.trim();
+      const rawDef = document.getElementById('cqInputDef')?.value.trim();
+      const phonetic = document.getElementById('cqInputPhonetic')?.value.trim();
+      const pos = document.getElementById('cqInputPos')?.value || 'n.';
+      const example = document.getElementById('cqInputExample')?.value.trim();
+      const imageUrl = document.getElementById('cqImageUrlInput')?.value.trim();
+
+      if (!rawWord) {
+        alert("請輸入英文單字！");
+        return;
+      }
+
+      const parsed = window.smartSplitEnZh
+        ? window.smartSplitEnZh(rawWord, rawDef, pos)
+        : { word: rawWord, definition: rawDef || '自訂單字', pos };
+
+      const newWordObj = {
+        word: parsed.word,
+        definition: parsed.definition,
+        pos: parsed.pos || pos,
+        phonetic: phonetic,
+        example: example,
+        imageUrl: imageUrl,
+        dateAdded: new Date().toLocaleDateString()
+      };
+
+      AppState.addCustomWordToWordbook(newWordObj);
+
+      document.getElementById('cqInputWord').value = '';
+      document.getElementById('cqInputDef').value = '';
+      document.getElementById('cqInputPhonetic').value = '';
+      document.getElementById('cqInputExample').value = '';
+      document.getElementById('cqImageUrlInput').value = '';
+      document.getElementById('cqCustomWordPanel').style.display = 'none';
+
+      this.currentSource = 'wordbook';
+      document.querySelectorAll('.cq-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.source === 'wordbook'));
+      this.selectedWordIds.clear();
+      this.renderWordGrid();
+      showToast(`⭐ 已成功收錄【${parsed.word}】並自動分離中英文字詞！`);
     });
   }
 };
