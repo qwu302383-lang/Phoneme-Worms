@@ -211,7 +211,21 @@ const PKBattleModule = {
     try {
       const stored = localStorage.getItem('pw_custom_pk_decks_v1');
       if (stored) {
-        this.customDecks = JSON.parse(stored);
+        let decks = JSON.parse(stored);
+        let hasChanges = false;
+        decks = decks.map(deck => {
+          const cleanWords = (deck.words || []).map(w => {
+            const parsed = window.smartSplitEnZh ? window.smartSplitEnZh(w.word, w.definition, 'n.') : w;
+            if (parsed.word !== w.word || parsed.definition !== w.definition) {
+              hasChanges = true;
+              return { word: parsed.word, definition: parsed.definition };
+            }
+            return w;
+          });
+          return { ...deck, words: cleanWords };
+        });
+        this.customDecks = decks;
+        if (hasChanges) this.saveCustomDecks();
       } else {
         // 預設示範題庫
         this.customDecks = [
@@ -1761,19 +1775,13 @@ const PKBattleModule = {
     lines.forEach(line => {
       const trimmed = line.trim();
       if (!trimmed) return;
-      // 支援多種分隔符號 - / , / 空格
-      const match = trimmed.split(/[\-\,\:\t]+/);
-      if (match.length >= 2) {
-        parsedWords.push({
-          word: match[0].trim(),
-          definition: match.slice(1).join(' ').trim()
-        });
-      } else {
-        parsedWords.push({
-          word: trimmed,
-          definition: '自訂詞彙'
-        });
-      }
+      const parsed = (window.smartSplitEnZh)
+        ? window.smartSplitEnZh(trimmed, '', 'n.')
+        : { word: trimmed, definition: '自訂單字' };
+      parsedWords.push({
+        word: parsed.word,
+        definition: parsed.definition
+      });
     });
 
     if (parsedWords.length < 2) {

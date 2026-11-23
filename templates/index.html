@@ -825,16 +825,19 @@
               </div>
             </div>
 
-            <!-- 批次貼上區 -->
+            <!-- 批次貼上區 (支援智慧中英自動分離) -->
             <div id="wbBatchAddArea" style="display: none;">
               <div class="form-group">
                 <label>批次輸入單字與釋義 (每行一筆) <span class="required">*</span></label>
-                <textarea id="wbBatchText" class="form-input pk-deck-textarea" rows="8" placeholder="每行一筆單字，格式支援：
-serendipity - 偶然發現珍貴事物的機緣
-resilience - 韌性；復原能力
-ubiquitous - 無所不在的
+                <textarea id="wbBatchText" class="form-input pk-deck-textarea" rows="8" placeholder="支援自由格式輸入，系統自動分離中英文：
+noble 高貴的；貴族的
+workout（尤指體育的）訓練，鍛鍊
+yawn 打呵欠
+tremble 顫抖
+apple - 蘋果
+resilience 韌性；復原能力
 ..."></textarea>
-                <span class="upload-tip">💡 提示：使用減號 -、逗號 , 或冒號 : 分隔英文單字與中文解釋，即可一次批次匯入多筆！</span>
+                <span class="upload-tip" style="color: var(--primary); font-weight: 600;">💡 系統已全面支援「智慧中英自動分離」！每行輸入單字與中文（不論使用空格、頓號、括號、破折號或冒號），系統皆會自動分離為乾淨英文與中文釋義，絕不產生「自訂詞彙」！</span>
               </div>
             </div>
 
@@ -1647,13 +1650,13 @@ ubiquitous - 無所不在的
                   <input type="file" id="pkDeckOcrInput" accept="image/*" style="display: none;" onchange="PKBattleModule.handleOcrImageSelected(event)">
                 </div>
               </div>
-              <textarea id="pkNewDeckWordsText" class="form-input pk-deck-textarea" rows="8" placeholder="每行一筆單字，格式支援：
+              <textarea id="pkNewDeckWordsText" class="form-input pk-deck-textarea" rows="8" placeholder="支援自由格式輸入，系統自動分離中英文：
+noble 高貴的；貴族的
+workout（尤指體育的）訓練，鍛鍊
+yawn 打呵欠
 apple - 蘋果
-perseverance - 毅力；堅持不懈
-innovation - 創新；革新
-resilient - 具韌性的
 ..."></textarea>
-              <span class="upload-tip">💡 提示：使用減號 - 、逗號 , 或冒號 : 分隔英文單字與中文解釋，亦可點上方按鈕從個人生字本一鍵匯入！</span>
+              <span class="upload-tip" style="color: var(--primary); font-weight: 600;">💡 提示：支援中英智慧自動分離！每行可直接貼上「單字 中文解釋」（即使無符號），亦可點上方按鈕從生字本一鍵匯入！</span>
             </div>
           </div>
           <div class="modal-footer">

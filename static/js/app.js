@@ -825,28 +825,31 @@ const WordbookModule = {
     const bookName = isPhrase ? '片語本' : '生字本';
 
     if (this.currentAddMode === 'single') {
-      const word = document.getElementById('wbInputWord')?.value.trim();
-      const def = document.getElementById('wbInputDef')?.value.trim();
+      let rawW = document.getElementById('wbInputWord')?.value.trim();
+      let rawD = document.getElementById('wbInputDef')?.value.trim();
       const pos = isPhrase ? 'phr.' : document.getElementById('wbInputPos')?.value;
       const phonetic = document.getElementById('wbInputPhonetic')?.value.trim();
       const example = document.getElementById('wbInputExample')?.value.trim();
       const exampleZh = document.getElementById('wbInputExampleZh')?.value.trim();
 
-      if (!word) {
+      if (!rawW) {
         alert(isPhrase ? '請輸入英文片語！' : '請輸入英文單字！');
         document.getElementById('wbInputWord')?.focus();
         return;
       }
-      if (!def) {
+
+      // 支援在單字欄直接貼上中英混合文字 (如 "noble 高貴的；貴族的") 自動分離
+      const parsed = smartSplitEnZh(rawW, rawD, pos);
+      if (!parsed.definition) {
         alert(isPhrase ? '請輸入片語的中文意思！' : '請輸入中文解釋！');
         document.getElementById('wbInputDef')?.focus();
         return;
       }
 
       this._addEntry({
-        word: word,
-        definition: def,
-        pos: pos,
+        word: parsed.word,
+        definition: parsed.definition,
+        pos: parsed.pos || pos,
         phonetic: phonetic,
         example: example,
         exampleTranslation: exampleZh
@@ -856,8 +859,8 @@ const WordbookModule = {
       renderWordbook();
       if (window.VocabModule && !isPhrase) VocabModule.applyFilter(VocabModule.currentFilter);
       showToast(isPhrase
-        ? `💬 成功新增片語【${word}】至片語本！`
-        : `⭐ 成功新增【${word}】至生字本！（已自動從每日單字卡排除）`);
+        ? `💬 成功新增片語【${parsed.word}】至片語本！`
+        : `⭐ 成功新增【${parsed.word}】至生字本！（已自動分離中英文字詞）`);
 
     } else if (this.currentAddMode === 'batch') {
       const text = document.getElementById('wbBatchText')?.value.trim();
@@ -906,10 +909,11 @@ const WordbookModule = {
         const idx = parseInt(chk.dataset.idx, 10);
         const item = this.ocrDetectedWords[idx];
         if (item && item.word) {
+          const parsed = smartSplitEnZh(item.word, item.definition, isPhrase ? 'phr.' : (item.pos || 'n.'));
           this._addEntry({
-            word: item.word,
-            definition: item.definition || `圖片識別${unit}`,
-            pos: isPhrase ? 'phr.' : (item.pos || 'n.'),
+            word: parsed.word,
+            definition: parsed.definition,
+            pos: parsed.pos || (isPhrase ? 'phr.' : (item.pos || 'n.')),
             phonetic: item.phonetic || '',
             example: item.example || ''
           });
