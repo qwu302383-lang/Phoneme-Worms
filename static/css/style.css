@@ -5179,3 +5179,200 @@ body.theme-dark .quiz-choice-btn.selected-incorrect {
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
 }
+
+/* ==========================================================
+   帳號登入 / 雲端同步
+   ========================================================== */
+.sidebar-account {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card-subtle);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  font: inherit;
+}
+
+.account-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.account-card.logged-in {
+  cursor: default;
+}
+
+.account-card.logged-in:hover {
+  transform: none;
+}
+
+.account-avatar {
+  font-size: 1.15rem;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--primary-light);
+  flex-shrink: 0;
+}
+
+.account-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.account-info strong {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-info small {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.account-chevron {
+  color: var(--text-light);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.account-action-btn {
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.account-action-btn:hover {
+  border-color: var(--danger, #ef4444);
+  color: var(--danger, #ef4444);
+}
+
+/* 生字本 / 片語本 分類頁籤 */
+.wb-kind-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.wb-kind-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.wb-kind-tab:hover {
+  color: var(--text-main);
+}
+
+.wb-kind-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.wb-kind-count {
+  display: inline-block;
+  min-width: 1.4rem;
+  padding: 0 0.4rem;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.wb-sync-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px dashed rgba(99, 102, 241, 0.35);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.wb-card-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.wb-kind-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+/* 登入彈窗 */
+.auth-modal-card {
+  max-width: 430px;
+}
+
+.auth-error {
+  display: none;
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+  font-size: 0.85rem;
+}
+
+.auth-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0.25rem 0 0;
+}
+
+.auth-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  border: none;
+  padding: 1rem 0 0;
+}

@@ -68,6 +68,9 @@
 
       <!-- 側邊欄底部設定區 -->
       <div class="sidebar-footer">
+        <!-- 帳號登入 / 雲端同步狀態 -->
+        <div class="sidebar-account" id="sidebarAccount"></div>
+
         <div class="footer-control-row">
           <div class="voice-selector" title="切換英語發音腔調">
             <span class="voice-label">發音:</span>
@@ -106,6 +109,7 @@
           <span>🐛 Phoneme-Worms</span>
         </div>
         <div class="mobile-actions">
+          <button id="mobileAccountBtn" class="action-btn-sm" title="帳號登入" onclick="AuthModule.mobileAccountClick()">登入</button>
           <button id="mobileThemeToggle" class="action-btn-sm" title="切換主題">🌙</button>
         </div>
       </header>
@@ -712,18 +716,34 @@
       <div class="view-header">
         <div>
           <h2>⭐ 個人生字收藏筆記本</h2>
-          <p class="subtitle">集中管理生詞或手動新增自訂詞彙，支援智慧查詞與隨機抽考（生字本收錄的單字會自動從每日單字卡排除）</p>
+          <p class="subtitle">集中管理生詞與片語，支援智慧查詞、隨機抽考與雲端同步（生字本收錄的單字會自動從每日單字卡排除）</p>
         </div>
         <div class="wordbook-actions">
-          <button class="btn btn-success" id="btnOpenAddWbModal" onclick="WordbookModule.openAddModal()">➕ 手動新增生字</button>
+          <button class="btn btn-success" id="btnOpenAddWbModal" onclick="WordbookModule.openAddModal()">➕ 手動新增單字</button>
           <button class="btn btn-primary" id="btnDrillStarred">🎯 抽考收藏生字</button>
-          <button class="btn btn-outline" id="btnExportWordbook">📥 匯出單字本</button>
-          <button class="btn btn-danger-outline" id="btnClearWordbook">🗑️ 清空所有收藏</button>
+          <button class="btn btn-outline" id="btnExportWordbook">📥 匯出收藏</button>
+          <button class="btn btn-danger-outline" id="btnClearWordbook">🗑️ 清空目前分類</button>
         </div>
       </div>
 
+      <!-- 單字 / 片語 分類切換 -->
+      <div class="wb-kind-tabs">
+        <button type="button" class="wb-kind-tab active" id="wbKindWord" onclick="WordbookModule.switchKind('word')">
+          ⭐ 單字收藏 <span class="wb-kind-count" id="wbWordCount">0</span>
+        </button>
+        <button type="button" class="wb-kind-tab" id="wbKindPhrase" onclick="WordbookModule.switchKind('phrase')">
+          💬 片語收藏 <span class="wb-kind-count" id="wbPhraseCount">0</span>
+        </button>
+      </div>
+
+      <!-- 雲端同步提示（未登入時顯示） -->
+      <div class="wb-sync-hint" id="wbSyncHint">
+        <span>☁️ 目前是訪客模式，收藏只存在這台裝置。登入後會自動存到雲端，換裝置也不怕消失。</span>
+        <button type="button" class="btn btn-sm btn-primary" onclick="AuthModule.openModal('register')">免費註冊 / 登入</button>
+      </div>
+
       <div class="wordbook-search-bar">
-        <input type="text" id="wbSearchInput" class="form-input" placeholder="🔍 搜尋收藏的生字或中文解釋...">
+        <input type="text" id="wbSearchInput" class="form-input" placeholder="🔍 搜尋收藏的單字、片語或中文解釋...">
       </div>
 
       <!-- 生字列表 -->
@@ -731,11 +751,11 @@
       
       <!-- 空狀態提示 -->
       <div class="empty-state" id="wbEmptyState" style="display: none;">
-        <div class="empty-icon">📖</div>
-        <h3>生字本目前是空的！</h3>
-        <p>您可以點擊上方「➕ 手動新增生字」輸入想背的單字，或在單字卡庫與文章閱讀中點擊 ⭐ 星號收藏生詞。</p>
+        <div class="empty-icon" id="wbEmptyIcon">📖</div>
+        <h3 id="wbEmptyTitle">生字本目前是空的！</h3>
+        <p id="wbEmptyDesc">您可以點擊上方「➕ 手動新增單字」輸入想背的單字，或在單字卡庫與文章閱讀中點擊 ⭐ 星號收藏生詞。</p>
         <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem;">
-          <button class="btn btn-success" onclick="WordbookModule.openAddModal()">➕ 立即手動新增</button>
+          <button class="btn btn-success" id="wbEmptyAddBtn" onclick="WordbookModule.openAddModal()">➕ 立即手動新增</button>
           <button class="btn btn-primary" onclick="switchTab('vocab')">前往單字卡庫探索</button>
         </div>
       </div>
@@ -745,7 +765,7 @@
         <div class="modal-overlay" onclick="WordbookModule.closeAddModal()"></div>
         <div class="modal-card modal-card-lg">
           <div class="modal-header">
-            <h4>⭐ 新增單字至個人生字本</h4>
+            <h4 id="wbAddModalTitle">⭐ 新增單字至個人生字本</h4>
             <button class="btn-close-modal" onclick="WordbookModule.closeAddModal()">&times;</button>
           </div>
           <div class="modal-body">
@@ -759,7 +779,7 @@
             <!-- 單筆輸入區 -->
             <div id="wbSingleAddArea">
               <div class="form-group" style="margin-bottom: 1rem;">
-                <label>英文單字 <span class="required">*</span></label>
+                <label id="wbInputWordLabel">英文單字 <span class="required">*</span></label>
                 <div style="display: flex; gap: 0.5rem;">
                   <input type="text" id="wbInputWord" class="form-input" placeholder="例如: serendipity" style="flex: 1;">
                   <button type="button" class="btn btn-outline" id="btnWbLookup" onclick="WordbookModule.autoLookupWord()">
@@ -770,7 +790,7 @@
               </div>
 
               <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                <div class="form-group" style="flex: 1;">
+                <div class="form-group" id="wbPosGroup" style="flex: 1;">
                   <label>詞性 (Part of Speech)</label>
                   <select id="wbInputPos" class="form-input">
                     <option value="n.">n. 名詞</option>
@@ -790,7 +810,7 @@
               </div>
 
               <div class="form-group" style="margin-bottom: 1rem;">
-                <label>中文解釋 (Definition) <span class="required">*</span></label>
+                <label id="wbInputDefLabel">中文解釋 (Definition) <span class="required">*</span></label>
                 <input type="text" id="wbInputDef" class="form-input" placeholder="例如: 偶然發現珍奇事物的機緣；意外收穫">
               </div>
 
@@ -845,7 +865,13 @@ ubiquitous - 無所不在的
               <div id="wbOcrLoading" style="display: none; text-align: center; padding: 2rem;">
                 <div class="ocr-spinner"></div>
                 <p style="font-weight: 700; color: var(--primary-color); margin-top: 1rem;">🤖 Gemini AI 正在深度掃描圖片中的所有單字與中文釋義...</p>
-                <span class="upload-tip">正在提取英文單詞、詞性標註與翻譯，請稍候約 3~5 秒...</span>
+                <span class="upload-tip">正在提取英文單詞、詞性標註與翻譯，請稍候約 3~10 秒...</span>
+              </div>
+
+              <!-- 辨識失敗提示 -->
+              <div id="wbOcrError" style="display: none; margin-top: 1rem; padding: 1rem 1.25rem; border-radius: 12px; background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; text-align: left;">
+                <strong style="display: block; margin-bottom: 0.35rem;">⚠️ 這次辨識沒有成功</strong>
+                <span id="wbOcrErrorText" style="font-size: 0.88rem; white-space: pre-line;"></span>
               </div>
 
               <!-- 辨識結果預覽與勾選清單 -->
@@ -1602,7 +1628,41 @@ resilient - 具韌性的
   <!-- 浮動通知提示 (Toast) -->
   <div id="toast" class="toast-notice"></div>
 
+  <!-- 彈窗：登入 / 註冊帳號 -->
+  <div class="cq-modal" id="authModal" style="display: none;">
+    <div class="modal-overlay" onclick="AuthModule.closeModal()"></div>
+    <div class="modal-card auth-modal-card">
+      <div class="modal-header">
+        <h4 id="authModalTitle">👤 登入帳號</h4>
+        <button class="btn-close-modal" onclick="AuthModule.closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="wb-add-mode-tabs" style="margin-bottom: 1.25rem;">
+          <button type="button" class="wb-tab-btn active" id="authTabLogin" onclick="AuthModule.setMode('login')">🔑 登入</button>
+          <button type="button" class="wb-tab-btn" id="authTabRegister" onclick="AuthModule.setMode('register')">✨ 註冊新帳號</button>
+        </div>
+        <form id="authForm">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>帳號</label>
+            <input type="text" id="authUsername" class="form-input" placeholder="2~24 個字元，可用中文、英文、數字" autocomplete="username" maxlength="24">
+          </div>
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label>密碼</label>
+            <input type="password" id="authPassword" class="form-input" placeholder="至少 4 個字元" autocomplete="current-password">
+          </div>
+          <div id="authError" class="auth-error" style="display: none;"></div>
+          <p class="auth-note">🔒 登入後生字本與片語本會自動同步到伺服器，登入狀態可維持 90 天，換裝置或換瀏覽器都找得回來。</p>
+          <div class="modal-footer auth-modal-footer">
+            <button type="button" class="btn btn-outline" onclick="AuthModule.closeModal()">取消</button>
+            <button type="submit" class="btn btn-primary" id="authSubmitBtn">登入</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- 前端核心 JavaScript 模組 -->
+  <script src="/static/js/auth.js"></script>
   <script src="/static/js/speech.js"></script>
   <script src="/static/js/vocab.js"></script>
   <script src="/static/js/ai_tutor.js"></script>

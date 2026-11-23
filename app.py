@@ -1,13 +1,20 @@
 import os
+import re
 import sys
 import json
+import time
 import base64
 import io
 import logging
-from flask import Flask, request, jsonify, render_template, send_from_directory
+import secrets
+import hashlib
+import threading
+from datetime import timedelta, datetime, timezone
+from flask import Flask, request, jsonify, render_template, send_from_directory, session
+from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 from dotenv import load_dotenv
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageEnhance
 
 # 設定編碼以防止 Windows 繁體中文控制台亂碼
 if sys.platform == "win32":
@@ -39,6 +46,36 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 DATA_DIR = os.path.join(BASE_DIR, "data")
+
+
+def _get_secret_key():
+    """取得 Flask session 簽章金鑰：優先用環境變數，否則在 data/ 產生並持久化。"""
+    env_key = os.getenv("SECRET_KEY") or os.getenv("FLASK_SECRET_KEY")
+    if env_key:
+        return env_key
+    key_path = os.path.join(DATA_DIR, ".secret_key")
+    try:
+        if os.path.exists(key_path):
+            with open(key_path, "r", encoding="utf-8") as f:
+                existing = f.read().strip()
+                if existing:
+                    return existing
+        os.makedirs(DATA_DIR, exist_ok=True)
+        new_key = secrets.token_hex(32)
+        with open(key_path, "w", encoding="utf-8") as f:
+            f.write(new_key)
+        return new_key
+    except Exception as exc:
+        logging.warning(f"Secret key file unavailable, using in-memory key: {exc}")
+        return secrets.token_hex(32)
+
+
+app.secret_key = _get_secret_key()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=timedelta(days=90),
+)
 
 def load_json(filename):
     path = os.path.join(DATA_DIR, filename)
@@ -185,8 +222,9 @@ Be encouraging, professional, and pedagogically insightful.
 
     if GEMINI_API_KEY:
         try:
-            # 支援多個模型版本備援
-            models_to_try = [GEMINI_MODEL, "gemini-2.5-flash", "gemini-1.5-flash", "gemini-3.6-flash"]
+            # 支援多個模型版本備援（優先使用穩定快速的 Lite 模型）
+            models_to_try = [GEMINI_MODEL, "gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash-lite"]
+            models_to_try = list(dict.fromkeys([m for m in models_to_try if m]))
             for model_name in models_to_try:
                 endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
                 
@@ -348,14 +386,116 @@ def robust_json_parse(raw_text):
 # -------------------------------------------------------------
 # AI 多模態視覺 OCR：從圖片中自動識別並萃取所有英文單字與中文釋義
 # -------------------------------------------------------------
+# 依實測穩定度排序：Lite 系列回應快（約 3 秒）且不易壅塞，Flash 系列作為高精度備援。
+OCR_MODEL_CHAIN = [
+    "gemini-3.1-flash-lite",
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-flash-latest",
+]
+
+# 單一模型請求逾時（秒）。Lite 模型正常 3~10 秒內回應，逾時即換下一個模型。
+OCR_REQUEST_TIMEOUT = 45
+
+
+def _build_ocr_models():
+    """建立 OCR 模型嘗試順序：穩定快速的 Lite 優先，.env 指定模型排最後作為補充。"""
+    chain = list(OCR_MODEL_CHAIN)
+    if GEMINI_MODEL and GEMINI_MODEL not in chain:
+        chain.append(GEMINI_MODEL)
+    return chain
+
+
+def _prepare_ocr_image(image_b64):
+    """圖片前處理：修正 EXIF 方向、放大過小的截圖、輕度增強對比與銳利度。
+
+    回傳 (base64_jpeg, mime_type)。小圖放大是關鍵：手機截圖或縮圖上的細字
+    若不放大，模型幾乎無法辨識。
+    """
+    raw_bytes = base64.b64decode(image_b64)
+    img = Image.open(io.BytesIO(raw_bytes))
+    img = ImageOps.exif_transpose(img)
+
+    # 透明背景一律填白，避免轉存 JPEG 後透明區域變黑影響辨識
+    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+        rgba = img.convert("RGBA")
+        canvas = Image.new("RGB", rgba.size, (255, 255, 255))
+        canvas.paste(rgba, mask=rgba.split()[-1])
+        img = canvas
+    elif img.mode not in ("RGB", "L"):
+        img = img.convert("RGB")
+
+    max_side = max(img.width, img.height)
+    # 小圖先放大到約 1600px（最多 3 倍），讓細小字體有足夠像素可供辨識
+    if max_side < 1600:
+        scale = min(3.0, 1600.0 / max_side)
+        if scale > 1.05:
+            new_size = (max(1, int(img.width * scale)), max(1, int(img.height * scale)))
+            img = img.resize(new_size, Image.Resampling.LANCZOS)
+    # 超大圖縮至 2048px 內，兼顧細節與上傳速度
+    if max(img.size) > 2048:
+        img.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
+
+    # 輕度自動對比 + 銳化，提升細字邊緣清晰度（過度處理反而有害）
+    img = ImageOps.autocontrast(img, cutoff=1)
+    img = ImageEnhance.Sharpness(img).enhance(1.4)
+
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=92, optimize=True)
+    return base64.b64encode(buf.getvalue()).decode("utf-8"), "image/jpeg"
+
+
+def _extract_candidate_text(candidate):
+    """從候選回應中取出正式輸出文字（排除 thinking 思考片段）。"""
+    texts = []
+    for part in (candidate.get("content", {}) or {}).get("parts", []) or []:
+        if part.get("thought"):
+            continue
+        text = part.get("text")
+        if text:
+            texts.append(text)
+    return "\n".join(texts).strip()
+
+
+def _normalize_ocr_words(items):
+    """清理辨識結果：去除編號/項目符號、過濾非英文項目、依單字去重。"""
+    cleaned, seen = [], set()
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        word = str(item.get("word", "")).strip()
+        # 去掉 "1." "2)" "•" "-" 等編號與項目符號
+        word = re.sub(r"^[\s\d\.\)\(、•·\-–—:：]+", "", word).strip()
+        if not word or not re.search(r"[A-Za-z]", word):
+            continue
+        key = re.sub(r"\s+", " ", word.lower())
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append({
+            "word": word,
+            "definition": str(item.get("definition") or "").strip(),
+            "pos": str(item.get("pos") or "").strip(),
+            "phonetic": str(item.get("phonetic") or "").strip(),
+        })
+    return cleaned
+
+
 @app.route("/api/ocr/extract_words", methods=["POST"])
 def ocr_extract_words():
-    """使用 Gemini 3.6 Flash / 最新視覺多模態模型全盤精準識別圖片內全部英文單字與中文釋義"""
+    """使用 Gemini 視覺多模態模型精準識別圖片內全部英文單字與中文釋義。
+
+    會依序嘗試多個模型（Lite 優先），遇到 503/429/逾時或辨識為空時自動換下一個，
+    避免單一模型忙碌時整個功能失效。
+    """
     image_b64 = None
     mime_type = "image/jpeg"
+    req_kind = ""
 
     if request.is_json:
         req_data = request.get_json(silent=True) or {}
+        req_kind = str(req_data.get("kind", "") or "").strip().lower()
         raw_b64 = req_data.get("image", "")
         if "base64," in raw_b64:
             header, content = raw_b64.split("base64,", 1)
@@ -382,37 +522,27 @@ def ocr_extract_words():
             "message": "系統未設定 GEMINI_API_KEY，請於 .env 配置後使用！"
         }), 500
 
-    # 圖片預先最佳化：修正相機拍攝 EXIF 方向，並將超大圖等比例縮放至 2048px 內（兼顧頂級辨識細節與極速上傳）
+    # 圖片預先最佳化：修正方向、放大過小的截圖、增強對比與銳利度
     try:
-        raw_bytes = base64.b64decode(image_b64)
-        img = Image.open(io.BytesIO(raw_bytes))
-        img = ImageOps.exif_transpose(img)
-        max_dim = 2048
-        if img.width > max_dim or img.height > max_dim:
-            img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
-        buf = io.BytesIO()
-        if img.mode != "RGB":
-            img = img.convert("RGB")
-        img.save(buf, format="JPEG", quality=90, optimize=True)
-        image_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-        mime_type = "image/jpeg"
+        image_b64, mime_type = _prepare_ocr_image(image_b64)
     except Exception as img_err:
-        logging.warning(f"Image resize / orientation fix skipped: {img_err}")
+        logging.warning(f"Image preprocess skipped: {img_err}")
 
     prompt = """
 You are an expert English lexicographer and high-precision visual OCR recognition engine.
-The user has provided an image containing English vocabulary words (e.g. textbook page, vocabulary list, exam paper, sheet, flashcard set, multi-column glossary, or notes).
+The user has provided an image containing English vocabulary (e.g. textbook page, vocabulary list, exam paper, worksheet, flashcard set, multi-column glossary, or handwritten notes).
 
 EXHAUSTIVE EXTRACTION MANDATE:
-1. Thoroughly scan EVERY single region of the image from top to bottom, including all columns (left column, middle column, right column, sidebars, footnotes, and tables).
-2. You MUST extract 100% of ALL distinct English vocabulary words and phrases visible in the image. Do NOT summarize, skip, truncate, or sample. Capture EVERY SINGLE WORD.
-3. For each vocabulary item, provide:
-   - "word": The clean English word or phrase (strip any numbering like "1.", "2.", "•", or bullet points).
+1. Scan EVERY region of the image from top to bottom, including all columns, sidebars, footnotes, word boxes, "Vocabulary" sections, and tables.
+2. Extract 100% of ALL distinct English vocabulary words and phrases visible. Do NOT summarize, skip, truncate, or sample.
+3. Include words even if they only appear inside example sentences or a reading passage when the image looks like a vocabulary/lesson page. Skip pure grammar labels, page numbers, and publisher names.
+4. For each vocabulary item, provide:
+   - "word": The clean English word or phrase, lowercase unless it is a proper noun (strip numbering like "1.", "2.", "•").
    - "definition": Accurate Traditional Chinese (繁體中文) translation. If Chinese definitions exist in the image, transcribe and clean them; if the image only has English, translate accurately into Traditional Chinese.
    - "pos": Part of speech (e.g., n., v., adj., adv., phr., idiom).
-   - "phonetic": IPA phonetic symbol (e.g., /kəmˈpliːt/).
-4. Keep definitions concise so that ALL words fit without reaching token limits. Do NOT generate lengthy example sentences.
-5. Return ONLY a valid JSON array of objects with NO markdown formatting around it:
+   - "phonetic": IPA phonetic symbol (e.g., /kəmˈpliːt/). Leave as "" if unknown.
+5. Keep each definition short (2-12 Chinese characters). Do NOT generate example sentences.
+6. Return ONLY a valid JSON array of objects with NO markdown formatting:
 [
   {
     "word": "perseverance",
@@ -421,58 +551,374 @@ EXHAUSTIVE EXTRACTION MANDATE:
     "phonetic": "/ˌpɝː.səˈvɪr.əns/"
   }
 ]
-If the image does not contain recognizable English words, return an empty array: [].
+If the image truly contains no English vocabulary, return an empty array: [].
 """
 
-    models_to_try = ["gemini-3.6-flash", "gemini-flash-latest"]
-    if GEMINI_MODEL and GEMINI_MODEL not in models_to_try:
-        models_to_try.insert(0, GEMINI_MODEL)
+    if req_kind == "phrase":
+        prompt += """
+FOCUS MODE: PHRASES (片語).
+The user is building a PHRASE book, not a single-word list.
+- Prioritise multi-word expressions: phrasal verbs (look forward to), collocations (make progress), idioms (once in a blue moon), fixed phrases (in charge of), and prepositional phrases.
+- Keep the whole phrase together in the "word" field (do not split it into separate words).
+- If a section contains only single words, still include them so nothing is missed.
+"""
 
+    models_to_try = _build_ocr_models()
     last_error = ""
-    for model_name in models_to_try:
-        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
-        payload = {
-            "contents": [{
-                "parts": [
-                    {"text": prompt},
-                    {
-                        "inlineData": {
-                            "mimeType": mime_type,
-                            "data": image_b64
+
+    # 兩輪嘗試：第一輪依序跑完所有模型；若全部失敗（例如同時忙碌），稍候再跑一輪
+    for round_idx in range(2):
+        for model_name in models_to_try:
+            endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
+            payload = {
+                "contents": [{
+                    "parts": [
+                        {"text": prompt},
+                        {
+                            "inlineData": {
+                                "mimeType": mime_type,
+                                "data": image_b64
+                            }
                         }
-                    }
-                ]
-            }],
-            "generationConfig": {
-                "temperature": 0.1,
-                "maxOutputTokens": 8192,
-                "responseMimeType": "application/json"
+                    ]
+                }],
+                "generationConfig": {
+                    "temperature": 0.1,
+                    "maxOutputTokens": 8192,
+                    "responseMimeType": "application/json"
+                }
             }
-        }
 
-        try:
-            resp = requests.post(endpoint, json=payload, timeout=75)
-            if resp.status_code == 200:
-                resp_json = resp.json()
-                candidates = resp_json.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    raw_text = parts[0].get("text", "").strip() if parts else ""
-                    parsed = robust_json_parse(raw_text)
-                    word_list = parsed if isinstance(parsed, list) else parsed.get("words", [])
-                    return jsonify({
-                        "success": True,
-                        "words": word_list,
-                        "count": len(word_list),
-                        "model": model_name
-                    })
-            else:
+            try:
+                resp = requests.post(endpoint, json=payload, timeout=OCR_REQUEST_TIMEOUT)
+            except requests.exceptions.Timeout:
+                last_error = f"{model_name} 回應逾時（>{OCR_REQUEST_TIMEOUT}s）"
+                logging.warning(f"OCR model {model_name} timeout")
+                continue
+            except Exception as e:
+                last_error = f"{model_name}: {e}"
+                logging.warning(f"OCR model {model_name} failed: {e}")
+                continue
+
+            if resp.status_code != 200:
                 last_error = f"{model_name} HTTP {resp.status_code}: {resp.text[:120]}"
-        except Exception as e:
-            last_error = str(e)
-            logging.warning(f"OCR model {model_name} failed: {e}")
+                logging.warning(last_error)
+                # 429/503 代表模型忙碌，直接換下一個模型
+                continue
 
-    return jsonify({"success": False, "message": f"AI 圖片辨識失敗: {last_error}"}), 500
+            try:
+                resp_json = resp.json()
+            except Exception:
+                last_error = f"{model_name} 回應格式錯誤"
+                continue
+
+            candidates = resp_json.get("candidates", [])
+            if not candidates:
+                last_error = f"{model_name} 未回傳辨識結果"
+                continue
+
+            raw_text = _extract_candidate_text(candidates[0])
+            parsed = robust_json_parse(raw_text)
+            raw_words = parsed if isinstance(parsed, list) else (parsed.get("words", []) if isinstance(parsed, dict) else [])
+            word_list = _normalize_ocr_words(raw_words)
+
+            if word_list:
+                return jsonify({
+                    "success": True,
+                    "words": word_list,
+                    "count": len(word_list),
+                    "model": model_name
+                })
+
+            # 200 但沒有辨識到單字 → 換下一個模型再試（避免單一模型漏看）
+            last_error = f"{model_name} 未辨識到單字"
+
+        if round_idx == 0:
+            time.sleep(1.5)
+
+    return jsonify({
+        "success": False,
+        "message": "AI 圖片辨識暫時無法完成（模型忙碌或逾時）。請稍等 10~30 秒後再按一次「重新辨識圖片單字」。",
+        "detail": last_error
+    }), 503
+
+
+# -------------------------------------------------------------
+# 使用者帳號與雲端同步（登入後生字本 / 片語本永久保存）
+# -------------------------------------------------------------
+USERS_FILE = os.path.join(DATA_DIR, "users.json")
+USER_DATA_DIR = os.path.join(DATA_DIR, "user_data")
+USERNAME_RE = re.compile(r"^[A-Za-z0-9_\u4e00-\u9fff]{2,24}$")
+MAX_STATE_ITEMS = 5000
+_state_lock = threading.RLock()
+
+
+def _now_iso():
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _atomic_write_json(path, data):
+    """以暫存檔 + os.replace 原子寫入，避免寫到一半損毀。"""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp_path = f"{path}.{os.getpid()}.{threading.get_ident()}.tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp_path, path)
+
+
+def _load_users():
+    with _state_lock:
+        if not os.path.exists(USERS_FILE):
+            return {}
+        try:
+            with open(USERS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data if isinstance(data, dict) else {}
+        except Exception as exc:
+            logging.warning(f"Failed to load users: {exc}")
+            return {}
+
+
+def _save_users(users):
+    with _state_lock:
+        _atomic_write_json(USERS_FILE, users)
+
+
+def _user_state_path(user_key):
+    digest = hashlib.sha256(user_key.encode("utf-8")).hexdigest()[:32]
+    return os.path.join(USER_DATA_DIR, f"{digest}.json")
+
+
+def _user_backup_path(user_key):
+    digest = hashlib.sha256(user_key.encode("utf-8")).hexdigest()[:32]
+    return os.path.join(USER_DATA_DIR, f"{digest}.bak.json")
+
+
+def _empty_state():
+    return {"wordbook": [], "phrases": [], "mastered": [], "stats": {}, "updatedAt": _now_iso()}
+
+
+def _load_user_state(user_key):
+    path = _user_state_path(user_key)
+    if not os.path.exists(path):
+        return _empty_state()
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as exc:
+        logging.warning(f"Failed to load user state: {exc}")
+        return _empty_state()
+    state = _empty_state()
+    if isinstance(data, dict):
+        for field in ("wordbook", "phrases", "mastered"):
+            if isinstance(data.get(field), list):
+                state[field] = data[field]
+        if isinstance(data.get("stats"), dict):
+            state["stats"] = data["stats"]
+        if data.get("updatedAt"):
+            state["updatedAt"] = data["updatedAt"]
+    return state
+
+
+def _clean_entries(items):
+    """清洗單字／片語清單，限制欄位長度與筆數，避免惡意或異常資料。"""
+    cleaned = []
+    if not isinstance(items, list):
+        return cleaned
+    for item in items[:MAX_STATE_ITEMS]:
+        if not isinstance(item, dict):
+            continue
+        word = str(item.get("word", "")).strip()[:200]
+        if not word:
+            continue
+        cleaned.append({
+            "word": word,
+            "phonetic": str(item.get("phonetic") or "")[:120],
+            "pos": str(item.get("pos") or "")[:40],
+            "definition": str(item.get("definition") or "")[:1000],
+            "example": str(item.get("example") or "")[:2000],
+            "exampleTranslation": str(item.get("exampleTranslation") or "")[:2000],
+            "dateAdded": str(item.get("dateAdded") or "")[:40],
+            "kind": str(item.get("kind") or "")[:20],
+        })
+    return cleaned
+
+
+def _merge_entry_lists(existing, incoming):
+    """以單字為鍵合併兩份清單：先保留既有資料，再以非空欄位補上新資料。"""
+    merged, order = {}, []
+    for item in (existing or []) + (incoming or []):
+        if not isinstance(item, dict):
+            continue
+        word = str(item.get("word", "")).strip()
+        if not word:
+            continue
+        key = word.lower()
+        if key not in merged:
+            merged[key] = dict(item)
+            order.append(key)
+            continue
+        base = merged[key]
+        for field, value in item.items():
+            if value not in (None, ""):
+                base[field] = value
+            elif field not in base:
+                base[field] = value
+    return [merged[key] for key in order]
+
+
+def _merge_states(existing, incoming):
+    """合併兩份使用者狀態，確保任何一邊的收藏都不會被覆蓋消失。"""
+    result = _empty_state()
+    result["wordbook"] = _merge_entry_lists(existing.get("wordbook"), incoming.get("wordbook"))
+    result["phrases"] = _merge_entry_lists(existing.get("phrases"), incoming.get("phrases"))
+
+    mastered = []
+    for value in (existing.get("mastered") or []) + (incoming.get("mastered") or []):
+        text = str(value)
+        if text and text not in mastered:
+            mastered.append(text)
+    result["mastered"] = mastered[:MAX_STATE_ITEMS]
+
+    stats = {}
+    for source in (existing.get("stats") or {}, incoming.get("stats") or {}):
+        if not isinstance(source, dict):
+            continue
+        for key, value in source.items():
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                stats[key] = max(stats.get(key, 0), value)
+            elif isinstance(value, str):
+                stats[key] = value
+    result["stats"] = stats
+    result["updatedAt"] = _now_iso()
+    return result
+
+
+def _current_user_key():
+    key = session.get("user")
+    if not key:
+        return None
+    return key if key in _load_users() else None
+
+
+@app.route("/api/auth/register", methods=["POST"])
+def auth_register():
+    data = request.get_json(silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    password = str(data.get("password", ""))
+
+    if not USERNAME_RE.match(username):
+        return jsonify({"success": False, "message": "帳號需為 2~24 個字元（中英文字母、數字或底線）"}), 400
+    if len(password) < 4:
+        return jsonify({"success": False, "message": "密碼至少需要 4 個字元"}), 400
+
+    user_key = username.lower()
+    users = _load_users()
+    if user_key in users:
+        return jsonify({"success": False, "message": "此帳號已被註冊，請直接登入"}), 409
+
+    users[user_key] = {
+        "username": username,
+        "passwordHash": generate_password_hash(password),
+        "createdAt": _now_iso(),
+    }
+    _save_users(users)
+
+    session.permanent = True
+    session["user"] = user_key
+    return jsonify({"success": True, "username": username, "state": _load_user_state(user_key)})
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    data = request.get_json(silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    password = str(data.get("password", ""))
+
+    if not username or not password:
+        return jsonify({"success": False, "message": "請輸入帳號與密碼"}), 400
+
+    user_key = username.lower()
+    user = _load_users().get(user_key)
+    if not user or not check_password_hash(user.get("passwordHash", ""), password):
+        return jsonify({"success": False, "message": "帳號或密碼錯誤"}), 401
+
+    session.permanent = True
+    session["user"] = user_key
+    return jsonify({
+        "success": True,
+        "username": user.get("username", username),
+        "state": _load_user_state(user_key),
+    })
+
+
+@app.route("/api/auth/logout", methods=["POST"])
+def auth_logout():
+    session.clear()
+    return jsonify({"success": True})
+
+
+@app.route("/api/auth/me", methods=["GET"])
+def auth_me():
+    user_key = _current_user_key()
+    if not user_key:
+        return jsonify({"success": True, "loggedIn": False})
+    user = _load_users().get(user_key, {})
+    return jsonify({
+        "success": True,
+        "loggedIn": True,
+        "username": user.get("username", user_key),
+        "state": _load_user_state(user_key),
+    })
+
+
+@app.route("/api/user/state", methods=["GET"])
+def get_user_state():
+    user_key = _current_user_key()
+    if not user_key:
+        return jsonify({"success": False, "message": "請先登入"}), 401
+    return jsonify({"success": True, "state": _load_user_state(user_key)})
+
+
+@app.route("/api/user/state", methods=["PUT"])
+def put_user_state():
+    user_key = _current_user_key()
+    if not user_key:
+        return jsonify({"success": False, "message": "請先登入"}), 401
+
+    data = request.get_json(silent=True) or {}
+    incoming = {
+        "wordbook": _clean_entries(data.get("wordbook")),
+        "phrases": _clean_entries(data.get("phrases")),
+        "mastered": [str(v) for v in (data.get("mastered") or []) if str(v)][:MAX_STATE_ITEMS]
+        if isinstance(data.get("mastered"), list) else [],
+        "stats": data.get("stats") if isinstance(data.get("stats"), dict) else {},
+    }
+    # merge=True：登入 / 首次同步時聯集兩邊資料，避免任何一邊的收藏消失
+    # merge=False（預設）：以本次送出的資料為準，刪除與清空才會真正生效
+    merge_mode = bool(data.get("merge"))
+
+    with _state_lock:
+        existing = _load_user_state(user_key)
+        if merge_mode:
+            new_state = _merge_states(existing, incoming)
+        else:
+            new_state = {
+                "wordbook": incoming["wordbook"],
+                "phrases": incoming["phrases"],
+                "mastered": incoming["mastered"],
+                "stats": incoming["stats"],
+                "updatedAt": _now_iso(),
+            }
+        # 覆寫前先保留上一版備份，誤刪時仍可救回
+        if existing.get("wordbook") or existing.get("phrases"):
+            _atomic_write_json(_user_backup_path(user_key), existing)
+        _atomic_write_json(_user_state_path(user_key), new_state)
+
+    return jsonify({"success": True, "state": new_state, "updatedAt": new_state["updatedAt"]})
+
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5050))

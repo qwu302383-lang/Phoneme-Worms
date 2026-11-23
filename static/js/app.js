@@ -4,9 +4,17 @@
 const AppState = {
   MASTERED_KEY: 'apex_mastered_words_v1',
   STARRED_KEY: 'apex_starred_words_v1',
+  PHRASES_KEY: 'apex_phrases_v1',
   STATS_KEY: 'apex_learning_stats_v1',
   THEME_KEY: 'apex_theme_v1',
   ACCENT_KEY: 'apex_accent_v1',
+
+  /** 收藏變動後通知雲端同步（未登入時為空操作） */
+  notifySync() {
+    if (window.AuthModule && typeof window.AuthModule.schedulePush === 'function') {
+      window.AuthModule.schedulePush();
+    }
+  },
 
   getMasteredIds() {
     try {
@@ -21,6 +29,7 @@ const AppState = {
     if (!list.includes(id)) {
       list.push(id);
       localStorage.setItem(this.MASTERED_KEY, JSON.stringify(list));
+      this.notifySync();
     }
   },
 
@@ -28,6 +37,7 @@ const AppState = {
     let list = this.getMasteredIds();
     list = list.filter(item => item !== id);
     localStorage.setItem(this.MASTERED_KEY, JSON.stringify(list));
+    this.notifySync();
   },
 
   getStarredWords() {
@@ -63,6 +73,7 @@ const AppState = {
     }
     localStorage.setItem(this.STARRED_KEY, JSON.stringify(list));
     this.updateStarredBadge();
+    this.notifySync();
     if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
       window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
     }
@@ -76,6 +87,7 @@ const AppState = {
       list.splice(existingIndex, 1);
       localStorage.setItem(this.STARRED_KEY, JSON.stringify(list));
       this.updateStarredBadge();
+      this.notifySync();
       if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
         window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
       }
@@ -91,6 +103,7 @@ const AppState = {
       });
       localStorage.setItem(this.STARRED_KEY, JSON.stringify(list));
       this.updateStarredBadge();
+      this.notifySync();
       if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
         window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
       }
@@ -101,9 +114,63 @@ const AppState = {
   clearAllStarred() {
     localStorage.removeItem(this.STARRED_KEY);
     this.updateStarredBadge();
+    this.notifySync();
     if (window.DailyPoolModule && window.DailyPoolModule.currentOverview) {
       window.DailyPoolModule.renderDashboardCards(window.DailyPoolModule.currentOverview);
     }
+  },
+
+  /* ---------- 片語收藏 (Phrases) ---------- */
+
+  getPhrases() {
+    try {
+      return JSON.parse(localStorage.getItem(this.PHRASES_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  },
+
+  isPhraseSaved(phrase) {
+    if (!phrase) return false;
+    return this.getPhrases().some(item => item.word.toLowerCase() === phrase.toLowerCase());
+  },
+
+  addCustomPhraseToWordbook(phraseObj) {
+    const list = this.getPhrases();
+    const existingIndex = list.findIndex(item => item.word.toLowerCase() === phraseObj.word.toLowerCase());
+    const newEntry = {
+      word: phraseObj.word.trim(),
+      phonetic: (phraseObj.phonetic || '').trim(),
+      pos: (phraseObj.pos || 'phr.').trim(),
+      definition: (phraseObj.definition || '').trim(),
+      example: (phraseObj.example || '').trim(),
+      exampleTranslation: (phraseObj.exampleTranslation || '').trim(),
+      dateAdded: new Date().toLocaleDateString(),
+      kind: 'phrase'
+    };
+
+    if (existingIndex >= 0) {
+      list[existingIndex] = { ...list[existingIndex], ...newEntry };
+    } else {
+      list.unshift(newEntry);
+    }
+    localStorage.setItem(this.PHRASES_KEY, JSON.stringify(list));
+    this.updateStarredBadge();
+    this.notifySync();
+    return true;
+  },
+
+  removePhrase(phrase) {
+    const list = this.getPhrases().filter(item => item.word.toLowerCase() !== phrase.toLowerCase());
+    localStorage.setItem(this.PHRASES_KEY, JSON.stringify(list));
+    this.updateStarredBadge();
+    this.notifySync();
+  },
+
+  clearAllPhrases() {
+    localStorage.removeItem(this.PHRASES_KEY);
+    this.updateStarredBadge();
+    this.notifySync();
   },
 
   getStats() {
@@ -119,6 +186,7 @@ const AppState = {
     stats.oralCount = (stats.oralCount || 0) + 1;
     localStorage.setItem(this.STATS_KEY, JSON.stringify(stats));
     document.getElementById('statOralSessions').textContent = stats.oralCount;
+    this.notifySync();
   },
 
   incrementQuizFinished() {
@@ -126,6 +194,7 @@ const AppState = {
     stats.quizCount = (stats.quizCount || 0) + 1;
     localStorage.setItem(this.STATS_KEY, JSON.stringify(stats));
     document.getElementById('statQuizFinished').textContent = stats.quizCount;
+    this.notifySync();
   },
 
   DAILY_SCORE_PREFIX: 'apex_daily_vocab_score_',
@@ -148,10 +217,17 @@ const AppState = {
   },
 
   updateStarredBadge() {
+    const wordCount = this.getStarredWords().length;
+    const phraseCount = this.getPhrases().length;
+
     const badge = document.getElementById('starredCountBadge');
-    if (badge) {
-      badge.textContent = this.getStarredWords().length;
-    }
+    if (badge) badge.textContent = wordCount + phraseCount;
+
+    const wbWordCount = document.getElementById('wbWordCount');
+    if (wbWordCount) wbWordCount.textContent = wordCount;
+
+    const wbPhraseCount = document.getElementById('wbPhraseCount');
+    if (wbPhraseCount) wbPhraseCount.textContent = phraseCount;
   }
 };
 
@@ -211,19 +287,43 @@ function renderWordbook(filterText = '') {
   const emptyState = document.getElementById('wbEmptyState');
   if (!grid) return;
 
-  const words = AppState.getStarredWords();
-  const filtered = words.filter(w => 
-    w.word.toLowerCase().includes(filterText.toLowerCase()) || 
+  const kind = (window.WordbookModule && WordbookModule.currentKind) || 'word';
+  const isPhrase = kind === 'phrase';
+  const collection = isPhrase ? AppState.getPhrases() : AppState.getStarredWords();
+
+  // 同步分類頁籤與數量
+  document.getElementById('wbKindWord')?.classList.toggle('active', !isPhrase);
+  document.getElementById('wbKindPhrase')?.classList.toggle('active', isPhrase);
+  AppState.updateStarredBadge();
+
+  const keyword = (filterText || '').toLowerCase();
+  const filtered = collection.filter(w =>
+    (w.word || '').toLowerCase().includes(keyword) ||
     (w.definition && w.definition.includes(filterText))
   );
 
   grid.innerHTML = '';
   if (filtered.length === 0) {
-    emptyState.style.display = 'block';
+    if (emptyState) {
+      emptyState.style.display = 'block';
+      const iconEl = document.getElementById('wbEmptyIcon');
+      const titleEl = document.getElementById('wbEmptyTitle');
+      const descEl = document.getElementById('wbEmptyDesc');
+      const addBtn = document.getElementById('wbEmptyAddBtn');
+      if (iconEl) iconEl.textContent = isPhrase ? '💬' : '📖';
+      if (titleEl) titleEl.textContent = isPhrase ? '片語本目前是空的！' : '生字本目前是空的！';
+      if (descEl) {
+        descEl.textContent = isPhrase
+          ? '點擊上方「➕ 手動新增片語」輸入想背的片語，或使用批次貼上、圖片辨識一次匯入多筆。'
+          : '您可以點擊上方「➕ 手動新增單字」輸入想背的單字，或在單字卡庫與文章閱讀中點擊 ⭐ 星號收藏生詞。';
+      }
+      if (addBtn) addBtn.textContent = isPhrase ? '➕ 立即新增片語' : '➕ 立即手動新增';
+    }
     return;
   }
 
-  emptyState.style.display = 'none';
+  if (emptyState) emptyState.style.display = 'none';
+
   filtered.forEach(item => {
     const card = document.createElement('div');
     card.className = 'wb-card';
@@ -231,24 +331,34 @@ function renderWordbook(filterText = '') {
       <div>
         <div class="wb-card-header">
           <span class="wb-word">${item.word}</span>
-          <button class="card-audio-btn-sm" title="朗讀">🔊</button>
+          <div class="wb-card-tools">
+            ${isPhrase ? '<span class="wb-kind-pill">片語</span>' : ''}
+            <button class="card-audio-btn-sm" title="朗讀">🔊</button>
+          </div>
         </div>
         ${item.phonetic ? `<p class="wb-phonetic">${item.phonetic}</p>` : ''}
         <p class="wb-def">${item.pos ? `<strong>[${item.pos}]</strong> ` : ''}${item.definition}</p>
         ${item.example ? `<p style="font-size:0.85rem; color:var(--text-muted); font-style:italic;">"${item.example}"</p>` : ''}
+        ${item.exampleTranslation ? `<p style="font-size:0.8rem; color:var(--text-muted);">${item.exampleTranslation}</p>` : ''}
       </div>
       <div class="wb-footer">
         <span style="font-size:0.75rem; color:var(--text-light);">收藏於: ${item.dateAdded || '近期'}</span>
-        <button class="btn btn-sm btn-danger-outline btn-remove-wb" title="從生字本刪除">移除</button>
+        <button class="btn btn-sm btn-danger-outline btn-remove-wb" title="${isPhrase ? '從片語本刪除' : '從生字本刪除'}">移除</button>
       </div>
     `;
 
     card.querySelector('.card-audio-btn-sm').onclick = () => SpeechEngine.speak(item.word);
     card.querySelector('.btn-remove-wb').onclick = () => {
-      AppState.toggleStarWord(item);
+      if (isPhrase) {
+        AppState.removePhrase(item.word);
+      } else {
+        AppState.toggleStarWord(item);
+        if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
+      }
       renderWordbook(document.getElementById('wbSearchInput')?.value || '');
-      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
-      showToast(`已從生字本移除【${item.word}】（已自動恢復至每日單字卡）`);
+      showToast(isPhrase
+        ? `已從片語本移除【${item.word}】`
+        : `已從生字本移除【${item.word}】（已自動恢復至每日單字卡）`);
     };
 
     grid.appendChild(card);
@@ -260,12 +370,84 @@ function renderWordbook(filterText = '') {
  */
 const WordbookModule = {
   currentAddMode: 'single', // 'single' | 'batch' | 'ocr'
+  currentKind: 'word',      // 'word' | 'phrase'
   ocrImageBase64: null,
   ocrDetectedWords: [],
+
+  /** 切換生字本 / 片語本分類 */
+  switchKind(kind) {
+    this.currentKind = kind === 'phrase' ? 'phrase' : 'word';
+    const addBtn = document.getElementById('btnOpenAddWbModal');
+    if (addBtn) {
+      addBtn.textContent = this.currentKind === 'phrase' ? '➕ 手動新增片語' : '➕ 手動新增單字';
+    }
+    const drillBtn = document.getElementById('btnDrillStarred');
+    if (drillBtn) {
+      drillBtn.textContent = this.currentKind === 'phrase' ? '🎯 抽考收藏片語' : '🎯 抽考收藏生字';
+    }
+    const search = document.getElementById('wbSearchInput');
+    if (search) {
+      search.placeholder = this.currentKind === 'phrase'
+        ? '🔍 搜尋收藏的片語或中文解釋...'
+        : '🔍 搜尋收藏的單字或中文解釋...';
+    }
+    renderWordbook(search?.value || '');
+  },
+
+  /** 依目前分類更新新增彈窗的文字 */
+  applyAddModalLabels() {
+    const isPhrase = this.currentKind === 'phrase';
+    const title = document.getElementById('wbAddModalTitle');
+    if (title) title.textContent = isPhrase ? '💬 新增片語至片語本' : '⭐ 新增單字至個人生字本';
+
+    const wordLabel = document.getElementById('wbInputWordLabel');
+    if (wordLabel) wordLabel.innerHTML = isPhrase ? '英文片語 <span class="required">*</span>' : '英文單字 <span class="required">*</span>';
+
+    const wordInput = document.getElementById('wbInputWord');
+    if (wordInput) wordInput.placeholder = isPhrase ? '例如: look forward to' : '例如: serendipity';
+
+    const defLabel = document.getElementById('wbInputDefLabel');
+    if (defLabel) defLabel.innerHTML = isPhrase ? '中文意思 (Meaning) <span class="required">*</span>' : '中文解釋 (Definition) <span class="required">*</span>';
+
+    const defInput = document.getElementById('wbInputDef');
+    if (defInput) defInput.placeholder = isPhrase ? '例如: 期待；盼望' : '例如: 偶然發現珍奇事物的機緣；意外收穫';
+
+    const exampleInput = document.getElementById('wbInputExample');
+    if (exampleInput) exampleInput.placeholder = isPhrase ? '例如: I am looking forward to seeing you.' : '例如: Finding this charming book was pure serendipity.';
+
+    // 片語模式不需要詞性與智慧查單字（查詞只支援單字）
+    const posGroup = document.getElementById('wbPosGroup');
+    if (posGroup) posGroup.style.display = isPhrase ? 'none' : 'block';
+
+    const lookupBtn = document.getElementById('btnWbLookup');
+    if (lookupBtn) lookupBtn.style.display = isPhrase ? 'none' : 'inline-flex';
+
+    const singleTip = document.querySelector('#wbSingleAddArea .upload-tip');
+    if (singleTip) {
+      singleTip.textContent = isPhrase
+        ? '💡 提示：輸入完整片語（例如 look forward to）與中文意思即可加入片語本。'
+        : '💡 提示：輸入英文後點擊「智慧查單字」，系統會自動查詢並代入釋義、音標與詞性！';
+    }
+
+    const batchLabel = document.querySelector('#wbBatchAddArea label');
+    if (batchLabel) {
+      batchLabel.innerHTML = isPhrase
+        ? '批次輸入片語與意思 (每行一筆) <span class="required">*</span>'
+        : '批次輸入單字與釋義 (每行一筆) <span class="required">*</span>';
+    }
+
+    const batchText = document.getElementById('wbBatchText');
+    if (batchText) {
+      batchText.placeholder = isPhrase
+        ? '每行一筆片語，格式支援：\nlook forward to - 期待；盼望\nin charge of - 負責\non the verge of - 瀕臨\n...'
+        : '每行一筆單字，格式支援：\nserendipity - 偶然發現珍貴事物的機緣\nresilience - 韌性；復原能力\nubiquitous - 無所不在的\n...';
+    }
+  },
 
   openAddModal() {
     const modal = document.getElementById('addWordbookModal');
     if (!modal) return;
+    this.applyAddModalLabels();
     this.switchAddMode('single');
 
     const inputWord = document.getElementById('wbInputWord');
@@ -304,20 +486,21 @@ const WordbookModule = {
     [tabSingle, tabBatch, tabOcr].forEach(t => t?.classList.remove('active'));
     [areaSingle, areaBatch, areaOcr].forEach(a => { if (a) a.style.display = 'none'; });
 
+    const isPhrase = this.currentKind === 'phrase';
     if (mode === 'single') {
       tabSingle?.classList.add('active');
       if (areaSingle) areaSingle.style.display = 'block';
-      if (confirmBtn) confirmBtn.textContent = '確認新增至生字本';
+      if (confirmBtn) confirmBtn.textContent = isPhrase ? '確認新增至片語本' : '確認新增至生字本';
       document.getElementById('wbInputWord')?.focus();
     } else if (mode === 'batch') {
       tabBatch?.classList.add('active');
       if (areaBatch) areaBatch.style.display = 'block';
-      if (confirmBtn) confirmBtn.textContent = '確認批次匯入至生字本';
+      if (confirmBtn) confirmBtn.textContent = isPhrase ? '確認批次匯入至片語本' : '確認批次匯入至生字本';
       document.getElementById('wbBatchText')?.focus();
     } else if (mode === 'ocr') {
       tabOcr?.classList.add('active');
       if (areaOcr) areaOcr.style.display = 'block';
-      if (confirmBtn) confirmBtn.textContent = '一鍵匯入選取單字至生字本';
+      if (confirmBtn) confirmBtn.textContent = isPhrase ? '一鍵匯入選取片語至片語本' : '一鍵匯入選取單字至生字本';
     }
   },
 
@@ -339,11 +522,13 @@ const WordbookModule = {
       if (fileNameEl) fileNameEl.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
       if (previewArea) previewArea.style.display = 'block';
 
-      // 隱藏前次結果
+      // 隱藏前次結果與錯誤訊息
       const resultArea = document.getElementById('wbOcrResultArea');
       if (resultArea) resultArea.style.display = 'none';
       const loadingEl = document.getElementById('wbOcrLoading');
       if (loadingEl) loadingEl.style.display = 'none';
+      const errorEl = document.getElementById('wbOcrError');
+      if (errorEl) errorEl.style.display = 'none';
 
       showToast('📸 圖片已載入，點擊「開始 AI 辨識」進行萃取！');
     };
@@ -359,7 +544,10 @@ const WordbookModule = {
     const loadingEl = document.getElementById('wbOcrLoading');
     const resultArea = document.getElementById('wbOcrResultArea');
     const scanBtn = document.getElementById('btnStartOcrScan');
+    const errorEl = document.getElementById('wbOcrError');
+    const errorTextEl = document.getElementById('wbOcrErrorText');
 
+    if (errorEl) errorEl.style.display = 'none';
     if (loadingEl) loadingEl.style.display = 'block';
     if (resultArea) resultArea.style.display = 'none';
     if (scanBtn) {
@@ -367,29 +555,43 @@ const WordbookModule = {
       scanBtn.innerHTML = '<span>⏳ Gemini AI 正在掃描圖片所有單字...</span>';
     }
 
+    const showError = (msg) => {
+      if (errorEl) errorEl.style.display = 'block';
+      if (errorTextEl) errorTextEl.textContent = msg;
+      alert(msg);
+    };
+
     try {
       const res = await fetch('/api/ocr/extract_words', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: this.ocrImageBase64 })
+        body: JSON.stringify({ image: this.ocrImageBase64, kind: this.currentKind })
       });
-      const data = await res.json();
+
+      let data = null;
+      try { data = await res.json(); } catch (_) { data = null; }
+
+      if (!data) {
+        showError(`伺服器沒有回傳有效結果（HTTP ${res.status}），請稍後再試一次。`);
+        return;
+      }
 
       if (!data.success) {
-        alert(data.message || '圖片辨識失敗，請確認圖片清晰度後重試！');
+        const detail = data.detail ? `\n\n技術細節：${data.detail}` : '';
+        showError((data.message || '圖片辨識失敗，請確認圖片清晰度後重試！') + detail);
         return;
       }
 
       this.ocrDetectedWords = data.words || [];
       if (this.ocrDetectedWords.length === 0) {
-        alert('未能從圖片中辨識出英文單字，請嘗試上傳字跡更清晰的單字列表或教材頁面！');
+        showError('未能從圖片中辨識出英文單字，請嘗試上傳字跡更清晰的單字列表或教材頁面！');
         return;
       }
 
       this.renderOcrWordsList();
       showToast(`🎉 成功從圖片中萃取出 ${this.ocrDetectedWords.length} 個英文單字！`);
     } catch (e) {
-      alert('辨識請求失敗，請檢查網路連線或稍後再試！');
+      showError('辨識請求失敗，請檢查網路連線或稍後再試！');
     } finally {
       if (loadingEl) loadingEl.style.display = 'none';
       if (scanBtn) {
@@ -412,7 +614,10 @@ const WordbookModule = {
     if (topBtn) topBtn.textContent = label;
     if (btmBtn) btmBtn.textContent = label;
     if (confirmBtn && this.currentAddMode === 'ocr') {
-      confirmBtn.textContent = `確認匯入 ${checked.length} 個單字至生字本`;
+      const isPhrase = this.currentKind === 'phrase';
+      confirmBtn.textContent = isPhrase
+        ? `確認匯入 ${checked.length} 個片語至片語本`
+        : `確認匯入 ${checked.length} 個單字至生字本`;
     }
   },
 
@@ -500,27 +705,39 @@ const WordbookModule = {
     }
   },
 
+  /** 依目前分類（單字 / 片語）選擇要寫入的收藏函式 */
+  _addEntry(entry) {
+    if (this.currentKind === 'phrase') {
+      return AppState.addCustomPhraseToWordbook(entry);
+    }
+    return AppState.addCustomWordToWordbook(entry);
+  },
+
   saveWord() {
+    const isPhrase = this.currentKind === 'phrase';
+    const unit = isPhrase ? '片語' : '單字';
+    const bookName = isPhrase ? '片語本' : '生字本';
+
     if (this.currentAddMode === 'single') {
       const word = document.getElementById('wbInputWord')?.value.trim();
       const def = document.getElementById('wbInputDef')?.value.trim();
-      const pos = document.getElementById('wbInputPos')?.value;
+      const pos = isPhrase ? 'phr.' : document.getElementById('wbInputPos')?.value;
       const phonetic = document.getElementById('wbInputPhonetic')?.value.trim();
       const example = document.getElementById('wbInputExample')?.value.trim();
       const exampleZh = document.getElementById('wbInputExampleZh')?.value.trim();
 
       if (!word) {
-        alert("請輸入英文單字！");
+        alert(isPhrase ? '請輸入英文片語！' : '請輸入英文單字！');
         document.getElementById('wbInputWord')?.focus();
         return;
       }
       if (!def) {
-        alert("請輸入中文解釋！");
+        alert(isPhrase ? '請輸入片語的中文意思！' : '請輸入中文解釋！');
         document.getElementById('wbInputDef')?.focus();
         return;
       }
 
-      AppState.addCustomWordToWordbook({
+      this._addEntry({
         word: word,
         definition: def,
         pos: pos,
@@ -531,13 +748,15 @@ const WordbookModule = {
 
       this.closeAddModal();
       renderWordbook();
-      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
-      showToast(`⭐ 成功新增【${word}】至生字本！（已自動從每日單字卡排除）`);
+      if (window.VocabModule && !isPhrase) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast(isPhrase
+        ? `💬 成功新增片語【${word}】至片語本！`
+        : `⭐ 成功新增【${word}】至生字本！（已自動從每日單字卡排除）`);
 
     } else if (this.currentAddMode === 'batch') {
       const text = document.getElementById('wbBatchText')?.value.trim();
       if (!text) {
-        alert("請輸入至少一筆單字與解釋！");
+        alert(`請輸入至少一筆${unit}與解釋！`);
         document.getElementById('wbBatchText')?.focus();
         return;
       }
@@ -550,36 +769,38 @@ const WordbookModule = {
         if (!trimmed) return;
         const match = trimmed.split(/[\-\,\:\t]+/);
         if (match.length >= 2) {
-          AppState.addCustomWordToWordbook({
+          this._addEntry({
             word: match[0].trim(),
             definition: match.slice(1).join(' ').trim(),
-            pos: 'n.'
+            pos: isPhrase ? 'phr.' : 'n.'
           });
           count++;
         } else {
-          AppState.addCustomWordToWordbook({
+          this._addEntry({
             word: trimmed,
-            definition: '自訂詞彙',
-            pos: 'n.'
+            definition: isPhrase ? '自訂片語' : '自訂詞彙',
+            pos: isPhrase ? 'phr.' : 'n.'
           });
           count++;
         }
       });
 
       if (count === 0) {
-        alert("未解析出任何有效單字！格式如：apple - 蘋果");
+        alert(`未解析出任何有效${unit}！格式如：apple - 蘋果`);
         return;
       }
 
       this.closeAddModal();
       renderWordbook();
-      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
-      showToast(`⭐ 成功批次新增 ${count} 筆單字至個人生字本！（已自動從每日單字卡排除）`);
+      if (window.VocabModule && !isPhrase) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast(isPhrase
+        ? `💬 成功批次新增 ${count} 筆片語至片語本！`
+        : `⭐ 成功批次新增 ${count} 筆單字至個人生字本！（已自動從每日單字卡排除）`);
 
     } else if (this.currentAddMode === 'ocr') {
       const checkedBoxes = document.querySelectorAll('#wbOcrWordsList input[type="checkbox"]:checked');
       if (checkedBoxes.length === 0) {
-        alert("請至少勾選一個要匯入的單字！");
+        alert(`請至少勾選一個要匯入的${unit}！`);
         return;
       }
 
@@ -588,10 +809,10 @@ const WordbookModule = {
         const idx = parseInt(chk.dataset.idx, 10);
         const item = this.ocrDetectedWords[idx];
         if (item && item.word) {
-          AppState.addCustomWordToWordbook({
+          this._addEntry({
             word: item.word,
-            definition: item.definition || '圖片識別詞彙',
-            pos: item.pos || 'n.',
+            definition: item.definition || `圖片識別${unit}`,
+            pos: isPhrase ? 'phr.' : (item.pos || 'n.'),
             phonetic: item.phonetic || '',
             example: item.example || ''
           });
@@ -601,8 +822,10 @@ const WordbookModule = {
 
       this.closeAddModal();
       renderWordbook();
-      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
-      showToast(`⭐ 成功從圖片辨識匯入 ${count} 筆單字至個人生字本！（已自動從每日單字卡排除）`);
+      if (window.VocabModule && !isPhrase) VocabModule.applyFilter(VocabModule.currentFilter);
+      showToast(isPhrase
+        ? `💬 成功從圖片辨識匯入 ${count} 筆片語至片語本！`
+        : `⭐ 成功從圖片辨識匯入 ${count} 筆單字至個人生字本！（已自動從每日單字卡排除）`);
     }
   }
 };
@@ -781,6 +1004,11 @@ window.DailyPoolModule = DailyPoolModule;
 
 // 主程式初始化
 document.addEventListener('DOMContentLoaded', async () => {
+  // 0. 初始化帳號與雲端同步（先同步收藏，再載入其他模組）
+  if (window.AuthModule) {
+    await AuthModule.init();
+  }
+
   // 1. 初始化語音模組
   SpeechEngine.init();
 
@@ -863,39 +1091,47 @@ document.addEventListener('DOMContentLoaded', async () => {
   wbSearch?.addEventListener('input', (e) => renderWordbook(e.target.value));
 
   document.getElementById('btnClearWordbook')?.addEventListener('click', () => {
-    if (confirm("確定要清空生字本中的所有單字嗎？")) {
-      AppState.clearAllStarred();
+    const isPhrase = WordbookModule.currentKind === 'phrase';
+    const label = isPhrase ? '片語本中的所有片語' : '生字本中的所有單字';
+    if (confirm(`確定要清空${label}嗎？`)) {
+      if (isPhrase) {
+        AppState.clearAllPhrases();
+      } else {
+        AppState.clearAllStarred();
+        if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
+      }
       renderWordbook();
-      if (window.VocabModule) VocabModule.applyFilter(VocabModule.currentFilter);
-      showToast("生字本已清空！所有單字已自動恢復至每日單字卡。");
+      showToast(isPhrase ? "片語本已清空！" : "生字本已清空！所有單字已自動恢復至每日單字卡。");
     }
   });
 
   document.getElementById('btnExportWordbook')?.addEventListener('click', () => {
-    const words = AppState.getStarredWords();
-    if (words.length === 0) {
-      alert("生字本目前沒有任何單字可匯出！");
+    const isPhrase = WordbookModule.currentKind === 'phrase';
+    const items = isPhrase ? AppState.getPhrases() : AppState.getStarredWords();
+    if (items.length === 0) {
+      alert(isPhrase ? "片語本目前沒有任何片語可匯出！" : "生字本目前沒有任何單字可匯出！");
       return;
     }
-    const exportText = words.map(w => `${w.word}\t[${w.pos || ''}]\t${w.definition}\t"${w.example || ''}"`).join('\n');
+    const exportText = items.map(w => `${w.word}\t[${w.pos || ''}]\t${w.definition}\t"${w.example || ''}"`).join('\n');
     const blob = new Blob([exportText], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `PhonemeWorms_生字本_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `PhonemeWorms_${isPhrase ? '片語本' : '生字本'}_${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("📥 生字本已成功匯出為純文字檔！");
+    showToast(isPhrase ? "📥 片語本已成功匯出為純文字檔！" : "📥 生字本已成功匯出為純文字檔！");
   });
 
   document.getElementById('btnDrillStarred')?.addEventListener('click', () => {
-    const words = AppState.getStarredWords();
-    if (words.length === 0) {
-      alert("生字本目前沒有單字，請先收藏生字！");
+    const isPhrase = WordbookModule.currentKind === 'phrase';
+    const items = isPhrase ? AppState.getPhrases() : AppState.getStarredWords();
+    if (items.length === 0) {
+      alert(isPhrase ? "片語本目前沒有片語，請先新增片語！" : "生字本目前沒有單字，請先收藏生字！");
       return;
     }
     switchTab('vocab');
-    VocabModule.startQuizMode();
-    showToast("🎯 已切換至單字抽考模式！");
+    VocabModule.startDailyGradedQuiz(items);
+    showToast(isPhrase ? "🎯 已切換至片語抽考模式！" : "🎯 已切換至單字抽考模式！");
   });
 });

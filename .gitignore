@@ -11,6 +11,11 @@ venv/
 # Environment Variables
 .env
 
+# 使用者帳號與個人雲端資料（含密碼雜湊，請勿提交）
+data/users.json
+data/user_data/
+data/.secret_key
+
 # Logs & Temp
 *.log
 .DS_Store
