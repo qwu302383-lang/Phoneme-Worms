@@ -579,77 +579,8 @@
       <div class="header-tag">SYSTEM TOPOLOGY</div>
     </div>
 
-    <div class="arch-container">
-      <!-- Tier 1 -->
-      <div class="arch-layer">
-        <div class="layer-title-box">
-          <div class="layer-name">Client Layer</div>
-          <div class="layer-role">前端客戶端層</div>
-        </div>
-        <div class="layer-items">
-          <div class="tech-pill red-pill"><strong>Single Page App (SPA)</strong> 模組化驅動</div>
-          <div class="tech-pill"><code>app.js</code> 核心視圖路由</div>
-          <div class="tech-pill"><code>custom_quiz.js</code> 測驗工作坊</div>
-          <div class="tech-pill"><code>pk_battle.js</code> 對戰狀態機</div>
-          <div class="tech-pill"><code>vocab.js</code> 生字持久化</div>
-          <div class="tech-pill">Web Speech API (語音發音)</div>
-        </div>
-      </div>
-
-      <!-- Tier 2 -->
-      <div class="arch-layer">
-        <div class="layer-title-box">
-          <div class="layer-name">Gateway & Ops</div>
-          <div class="layer-role">網路與穿透網關</div>
-        </div>
-        <div class="layer-items">
-          <div class="tech-pill blue-pill"><strong>RESTful API</strong> (JSON 協定)</div>
-          <div class="tech-pill">HTTP 輪詢 / 雙向信號 (PK 對戰同步)</div>
-          <div class="tech-pill"><strong>run_tunnel.py</strong> (LocalTunnel / Cloudflare 穿透)</div>
-          <div class="tech-pill">終端機 QR Code 即時生成 (手機秒開)</div>
-        </div>
-      </div>
-
-      <!-- Tier 3 -->
-      <div class="arch-layer">
-        <div class="layer-title-box">
-          <div class="layer-name">Application Core</div>
-          <div class="layer-role">Python Flask 服務核心</div>
-        </div>
-        <div class="layer-items">
-          <div class="tech-pill"><code>app.py</code> 路由與中介軟體</div>
-          <div class="tech-pill red-pill"><strong>DailyContentManager</strong> 每日動態抗重複池輪播</div>
-          <div class="tech-pill blue-pill"><strong>PKPvPManager</strong> 記憶體對戰房間狀態機</div>
-          <div class="tech-pill">JWT / Session 輕量化鑑權</div>
-        </div>
-      </div>
-
-      <!-- Tier 4 -->
-      <div class="arch-layer">
-        <div class="layer-title-box">
-          <div class="layer-name">AI Intelligence</div>
-          <div class="layer-role">Google Cloud AI 服務</div>
-        </div>
-        <div class="layer-items">
-          <div class="tech-pill red-pill"><strong>Gemini 2.5 Flash</strong> 即時雙向 AI 家教語音對話</div>
-          <div class="tech-pill blue-pill"><strong>Gemini 2.5 Pro Vision</strong> 多模態講義單字 OCR 智慧提取</div>
-          <div class="tech-pill">即席造句分析與文法自動診斷</div>
-        </div>
-      </div>
-
-      <!-- Tier 5 -->
-      <div class="arch-layer">
-        <div class="layer-title-box">
-          <div class="layer-name">Data Persistence</div>
-          <div class="layer-role">數據持久化層</div>
-        </div>
-        <div class="layer-items">
-          <div class="tech-pill"><code>vocabulary_expanded.json</code> (6000+ 標準高中核心字庫)</div>
-          <div class="tech-pill"><code>reading_questions.json</code> (閱測題庫)</div>
-          <div class="tech-pill"><code>cloze_questions.json</code> (克漏字題庫)</div>
-          <div class="tech-pill">LocalStorage (個人生字本 / 評分紀錄離線快取)</div>
-        </div>
-      </div>
+    <div style="flex: 1; display: flex; justify-content: center; align-items: center; padding: 4px 0; overflow: hidden;">
+      <img src="phoneme_worms_architecture.png" alt="前後端工作架設圖" style="max-width: 100%; max-height: 530px; object-fit: contain; border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);" />
     </div>
 
     <div class="slide-footer">
