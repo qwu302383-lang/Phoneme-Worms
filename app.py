@@ -10,8 +10,10 @@ import secrets
 import hashlib
 import threading
 from datetime import timedelta, datetime, timezone
-from flask import Flask, request, jsonify, render_template, send_from_directory, session
+from urllib.parse import urlencode
+from flask import Flask, request, jsonify, render_template, send_from_directory, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 import requests
 from dotenv import load_dotenv
 from PIL import Image, ImageOps, ImageEnhance
@@ -45,6 +47,11 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
+# Google 登入（OAuth 2.0）設定
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "").strip()
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "").strip()
+
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 
@@ -76,6 +83,20 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     PERMANENT_SESSION_LIFETIME=timedelta(days=90),
 )
+
+# 部署在 Render 等反向代理後方時，讓 url_for(_external=True) 產生正確的 https 網址
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1, x_for=1)
+
+
+@app.after_request
+def _no_cache_html(response):
+    """HTML 一律不快取，避免使用者看到改版前的舊畫面。"""
+    if response.mimetype == "text/html":
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 
 def load_json(filename):
     path = os.path.join(DATA_DIR, filename)
@@ -858,6 +879,112 @@ def auth_login():
 def auth_logout():
     session.clear()
     return jsonify({"success": True})
+
+
+# -------------------------------------------------------------
+# Google 登入（OAuth 2.0 / OpenID Connect）
+# -------------------------------------------------------------
+def _google_configured():
+    return bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
+
+
+def _google_redirect_uri():
+    if GOOGLE_REDIRECT_URI:
+        return GOOGLE_REDIRECT_URI
+    return url_for("auth_google_callback", _external=True)
+
+
+@app.route("/api/auth/google/start", methods=["GET"])
+def auth_google_start():
+    if not _google_configured():
+        return redirect(url_for("index", auth_error="google_not_configured"))
+
+    state = secrets.token_urlsafe(24)
+    session["oauth_state"] = state
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": _google_redirect_uri(),
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "prompt": "select_account",
+        "include_granted_scopes": "true",
+    }
+    return redirect("https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params))
+
+
+@app.route("/api/auth/google/callback", methods=["GET"])
+def auth_google_callback():
+    if request.args.get("error"):
+        return redirect(url_for("index", auth_error="google_cancelled"))
+
+    expected_state = session.pop("oauth_state", None)
+    if not expected_state or request.args.get("state") != expected_state:
+        return redirect(url_for("index", auth_error="google_state"))
+
+    code = request.args.get("code", "")
+    if not code:
+        return redirect(url_for("index", auth_error="google_no_code"))
+
+    try:
+        token_resp = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "redirect_uri": _google_redirect_uri(),
+                "grant_type": "authorization_code",
+            },
+            timeout=20,
+        )
+        token_data = token_resp.json()
+    except Exception as exc:
+        logging.warning(f"Google token exchange failed: {exc}")
+        return redirect(url_for("index", auth_error="google_token"))
+
+    id_token = token_data.get("id_token")
+    if not id_token:
+        logging.warning(f"Google token response missing id_token: {token_data}")
+        return redirect(url_for("index", auth_error="google_token"))
+
+    # 向 Google 驗證 id_token 的簽章與 audience，避免偽造
+    try:
+        info = requests.get(
+            "https://oauth2.googleapis.com/tokeninfo",
+            params={"id_token": id_token},
+            timeout=20,
+        ).json()
+    except Exception as exc:
+        logging.warning(f"Google tokeninfo failed: {exc}")
+        return redirect(url_for("index", auth_error="google_token"))
+
+    if info.get("aud") != GOOGLE_CLIENT_ID:
+        return redirect(url_for("index", auth_error="google_audience"))
+    if str(info.get("email_verified", "")).lower() not in ("true", "1"):
+        return redirect(url_for("index", auth_error="google_email"))
+
+    sub = info.get("sub")
+    if not sub:
+        return redirect(url_for("index", auth_error="google_token"))
+
+    email = str(info.get("email") or "")[:120]
+    user_key = f"google:{sub}"
+    users = _load_users()
+    if user_key not in users:
+        display = str(info.get("name") or email or "Google 使用者").strip()[:40]
+        users[user_key] = {
+            "username": display,
+            "email": email,
+            "provider": "google",
+            "googleSub": sub,
+            "createdAt": _now_iso(),
+        }
+        _save_users(users)
+
+    session.permanent = True
+    session["user"] = user_key
+    return redirect(url_for("index", login="google"))
 
 
 @app.route("/api/auth/me", methods=["GET"])

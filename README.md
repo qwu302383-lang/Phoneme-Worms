@@ -59,6 +59,19 @@
 - 未登入時仍可使用（資料存在瀏覽器 localStorage），登入後會自動合併本機與雲端資料，兩邊的收藏都不會消失。
 - 密碼以 PBKDF2 雜湊儲存，帳號資料位於 `data/users.json`、個人資料位於 `data/user_data/`（已加入 `.gitignore`）。
 
+### 9. 🔵 Google 帳號登入
+- 登入彈窗最上方提供「使用 Google 帳號登入」，一鍵完成註冊與登入，免記密碼。
+- 使用 OAuth 2.0 / OpenID Connect 授權碼流程，`id_token` 會再向 Google `tokeninfo` 驗證簽章與 audience。
+- 需要在環境變數設定 `GOOGLE_CLIENT_ID` 與 `GOOGLE_CLIENT_SECRET`（本機可寫在 `.env`，雲端請在 Render 的 Environment 設定）。
+- Google Cloud Console 設定步驟：
+  1. 建立專案 → 「API 和服務」→「OAuth 同意畫面」，類型選「外部」，填入應用名稱與授權網域。
+  2. 「憑證」→「建立憑證」→「OAuth 用戶端 ID」，類型選「網頁應用程式」。
+  3. 「已授權的重新導向 URI」加入：
+     - 本機：`http://localhost:5050/api/auth/google/callback`
+     - 雲端：`https://phoneme-worms.onrender.com/api/auth/google/callback`
+  4. 複製用戶端 ID 與密碼，設為 `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`。
+- 若未設定上述變數，點擊 Google 登入會提示「尚未啟用」，不影響帳號密碼登入。
+
 ---
 
 ## 🚀 快速啟動方式

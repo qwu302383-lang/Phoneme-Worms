@@ -18,7 +18,42 @@ const AuthModule = {
       e.preventDefault();
       this.submit();
     });
+    this.handleAuthRedirect();
     await this.refreshSession();
+  },
+
+  /** 處理從 Google 登入導回時的網址參數（?login=google 或 ?auth_error=...） */
+  handleAuthRedirect() {
+    let url;
+    try {
+      url = new URL(window.location.href);
+    } catch (e) {
+      return;
+    }
+    const login = url.searchParams.get('login');
+    const errorCode = url.searchParams.get('auth_error');
+    if (!login && !errorCode) return;
+
+    url.searchParams.delete('login');
+    url.searchParams.delete('auth_error');
+    const clean = url.pathname + (url.search ? url.search : '') + url.hash;
+    window.history.replaceState({}, '', clean);
+
+    if (login === 'google') {
+      showToast('✅ 已使用 Google 帳號登入，收藏已同步到雲端！', 3600);
+      return;
+    }
+
+    const messages = {
+      google_not_configured: '⚠️ Google 登入尚未啟用（管理員需設定 GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET）',
+      google_cancelled: '已取消 Google 登入',
+      google_state: '登入驗證逾時，請再試一次',
+      google_token: 'Google 驗證失敗，請再試一次',
+      google_audience: 'Google 驗證失敗（金鑰不符）',
+      google_email: '此 Google 帳號的信箱尚未驗證',
+      google_no_code: 'Google 未回傳授權碼，請再試一次'
+    };
+    showToast(messages[errorCode] || 'Google 登入失敗，請再試一次', 4200);
   },
 
   /* ---------- 彈窗控制 ---------- */

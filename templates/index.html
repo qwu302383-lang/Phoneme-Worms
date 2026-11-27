@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phoneme-Worms 英語學習平台 | 學測・多益・雅思備考中心</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css?v=20261127a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1683,6 +1683,18 @@ apple - 蘋果
         <button class="btn-close-modal" onclick="AuthModule.closeModal()">&times;</button>
       </div>
       <div class="modal-body">
+        <a class="btn-google" href="/api/auth/google/start">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          <span>使用 Google 帳號登入</span>
+        </a>
+
+        <div class="auth-divider"><span>或使用帳號密碼</span></div>
+
         <div class="wb-add-mode-tabs" style="margin-bottom: 1.25rem;">
           <button type="button" class="wb-tab-btn active" id="authTabLogin" onclick="AuthModule.setMode('login')">🔑 登入</button>
           <button type="button" class="wb-tab-btn" id="authTabRegister" onclick="AuthModule.setMode('register')">✨ 註冊新帳號</button>
@@ -1708,14 +1720,14 @@ apple - 蘋果
   </div>
 
   <!-- 前端核心 JavaScript 模組 -->
-  <script src="/static/js/auth.js"></script>
-  <script src="/static/js/speech.js"></script>
-  <script src="/static/js/vocab.js"></script>
-  <script src="/static/js/ai_tutor.js"></script>
-  <script src="/static/js/reading.js"></script>
-  <script src="/static/js/quiz.js"></script>
-        <script src="/static/js/custom_quiz.js"></script>
-    <script src="/static/js/pk_battle.js"></script>
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/auth.js?v=20261127a"></script>
+  <script src="/static/js/speech.js?v=20261127a"></script>
+  <script src="/static/js/vocab.js?v=20261127a"></script>
+  <script src="/static/js/ai_tutor.js?v=20261127a"></script>
+  <script src="/static/js/reading.js?v=20261127a"></script>
+  <script src="/static/js/quiz.js?v=20261127a"></script>
+        <script src="/static/js/custom_quiz.js?v=20261127a"></script>
+    <script src="/static/js/pk_battle.js?v=20261127a"></script>
+  <script src="/static/js/app.js?v=20261127a"></script>
 </body>
 </html>

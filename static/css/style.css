@@ -5569,3 +5569,54 @@ body.theme-dark .quiz-choice-btn.selected-incorrect {
   color: var(--primary);
   border-color: var(--primary);
 }
+
+/* Google 登入按鈕 */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-color);
+  background: #ffffff;
+  color: #3c4043;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-google:hover {
+  background: #f8f9fa;
+  border-color: #dadce0;
+  box-shadow: 0 2px 8px rgba(60, 64, 67, 0.18);
+  transform: translateY(-1px);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.1rem 0 0.9rem;
+  color: var(--text-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+
+/* 深色模式下的 Google 按鈕 */
+body.theme-dark .btn-google {
+  background: #ffffff;
+  color: #202124;
+}
