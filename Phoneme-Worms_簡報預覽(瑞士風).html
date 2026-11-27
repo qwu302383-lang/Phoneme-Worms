@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phoneme-Worms 平台功能與前後端架構簡報 (瑞士國際主義風格)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg-main: #F8FAFC;
+    --card-bg: #FFFFFF;
+    --border: #E2E8F0;
+    --border-dark: #CBD5E1;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    --swiss-red: #E11D48;
+    --swiss-blue: #2563EB;
+    --swiss-emerald: #059669;
+    --swiss-amber: #D97706;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: #0F172A;
+    font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Presentation Stage */
+  #viewport {
+    width: 1333px;
+    height: 750px;
+    max-width: 96vw;
+    max-height: 90vh;
+    aspect-ratio: 16 / 9;
+    background: #FFFFFF;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .slide {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    display: none;
+    flex-direction: column;
+    padding: 48px 56px;
+    background: #FFFFFF;
+  }
+  .slide.active {
+    display: flex;
+  }
+
+  /* Swiss Grid Header */
+  .slide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--text-primary);
+    padding-bottom: 14px;
+    margin-bottom: 28px;
+  }
+  .header-left {
+    display: flex;
+    flex-direction: column;
+  }
+  .slide-category {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--swiss-red);
+    margin-bottom: 4px;
+  }
+  .slide-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .slide-sub {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .header-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 2px;
+    color: var(--text-secondary);
+  }
+
+  /* Footer bar */
+  .slide-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 56px;
+    right: 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Layout Utilities */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* Card */
+  .swiss-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--text-primary);
+    padding: 18px 20px;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+  }
+  .swiss-card.red-accent { border-left-color: var(--swiss-red); }
+  .swiss-card.blue-accent { border-left-color: var(--swiss-blue); }
+  .swiss-card.green-accent { border-left-color: var(--swiss-emerald); }
+  .swiss-card.amber-accent { border-left-color: var(--swiss-amber); }
+
+  .card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .card-desc {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  /* Slide 1: Cover */
+  .cover-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+  .cover-bar {
+    width: 60px;
+    height: 8px;
+    background: var(--swiss-red);
+    margin-bottom: 24px;
+  }
+  .cover-title {
+    font-size: 54px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    color: var(--text-primary);
+  }
+  .cover-title span {
+    color: var(--swiss-red);
+  }
+  .cover-desc {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 18px;
+    max-width: 820px;
+    line-height: 1.5;
+  }
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 2px solid var(--text-primary);
+    padding-top: 24px;
+    gap: 20px;
+  }
+  .meta-item label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .meta-item span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Architecture Diagram (Slide 6) */
+  .arch-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .arch-layer {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    border: 1px solid var(--border);
+    background: #FFFFFF;
+  }
+  .layer-title-box {
+    background: var(--bg-main);
+    border-right: 2px solid var(--border-dark);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .layer-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .layer-role {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .layer-items {
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    background: #FFFFFF;
+  }
+  .tech-pill {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .tech-pill strong {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+  .tech-pill.red-pill {
+    background: #FFF1F2;
+    border-color: #FECDD3;
+    color: #BE123C;
+  }
+  .tech-pill.blue-pill {
+    background: #EFF6FF;
+    border-color: #BFDBFE;
+    color: #1D4ED8;
+  }
+
+  /* Floating Control Nav */
+  #nav-bar {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(30, 41, 59, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 8px 18px;
+    border-radius: 40px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+  .nav-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: #FFFFFF;
+  }
+  .nav-counter {
+    color: #94A3B8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .nav-info {
+    color: #CBD5E1;
+    font-size: 12px;
+    border-left: 1px solid rgba(255,255,255,0.2);
+    padding-left: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div id="viewport">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active" id="slide-1">
+    <div class="cover-container">
+      <div>
+        <div class="cover-bar"></div>
+        <div style="font-size:13px; font-weight:800; letter-spacing:2px; color:var(--text-muted); margin-bottom:12px;">SYSTEM ARCHITECTURE & PRODUCT SPECIFICATION</div>
+        <h1 class="cover-title">Phoneme-Worms <span>🐛</span><br>全端架構與智慧學習平台規格</h1>
+        <p class="cover-desc">
+          結合認知科學記憶曲線、雙向智慧分詞 NLP 引擎、即時多人對戰遊戲化與 Google Gemini 多模態 AI 的新一代英語教育工程系統。
+        </p>
+      </div>
+
+      <div class="cover-meta-grid">
+        <div class="meta-item">
+          <label>REPOSITORY</label>
+          <span>qwu302383-lang/Phoneme-Worms</span>
+        </div>
+        <div class="meta-item">
+          <label>TECH STACK</label>
+          <span>Flask 3 + ES6 + Gemini 2.5</span>
+        </div>
+        <div class="meta-item">
+          <label>DESIGN SYSTEM</label>
+          <span>Swiss Typographic Style (16:9)</span>
+        </div>
+        <div class="meta-item">
+          <label>VERSION</label>
+          <span>v2.4 Production Release</span>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 01 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: EXECUTIVE SUMMARY -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">OVERVIEW & PRINCIPLES</div>
+        <div class="slide-title">產品核心定位與三大工程原則</div>
+        <div class="slide-sub">解決傳統單字記憶痛點：打破枯燥被動背誦，構建主動沉浸式閉環</div>
+      </div>
+      <div class="header-tag">CORE PHILOSOPHY</div>
+    </div>
+
+    <div class="grid-3" style="margin-top: 10px;">
+      <div class="swiss-card red-accent">
+        <div class="card-num">01 / COGNITIVE RETENTION</div>
+        <div class="card-title">艾賓浩斯抗遺忘記憶池</div>
+        <div class="card-desc">
+          每日單字卡、閱讀測驗與克漏字自動動態換池。嚴格排他演算法確保「個人生字本」中已掌握之單詞不重複注入每日卡池，達成真正的邊際效益最大化。
+        </div>
+      </div>
+
+      <div class="swiss-card blue-accent">
+        <div class="card-num">02 / GAMIFIED COMBAT</div>
+        <div class="card-title">即時雙人對戰競技場</div>
+        <div class="card-desc">
+          以單字答題連擊觸發英雄主動技能。首創 4 大職業角色（疾風劍士 Aria、光耀守護者 Leon、虛空賢者 Seraphina、燃魂術士 Ignis），實現高張力社交化學習。
+        </div>
+      </div>
+
+      <div class="swiss-card green-accent">
+        <div class="card-num">03 / NLP INTELLIGENCE</div>
+        <div class="card-title">智慧雙向正規化 NLP 引擎</div>
+        <div class="card-desc">
+          支援相機 OCR 截圖、多格式文字剪貼簿輸入。自動解析中英文括號、詞性標籤（n./v./adj.）並智慧分割題目與釋義，杜絕人工排版成本。
+        </div>
+      </div>
+    </div>
+
+    <div class="swiss-card" style="margin-top: 24px; border-left-color: var(--text-primary); background: #FFFFFF;">
+      <div class="card-num">SYSTEM DESIGN METRICS</div>
+      <div class="card-title" style="font-size:14px; margin-bottom:4px;">零重載 SPA 體驗 + 邊緣行動連線支援</div>
+      <div class="card-desc" style="font-size:12px;">
+        前端使用原生現代 ES6+ 模組化驅動，搭配 Web Speech API 離線語音合成；後端提供輕量化 Python Flask 服務與 LocalTunnel / Cloudflare 穿透工具，掃碼即用。
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 02 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: FUNCTIONAL MATRIX -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">FUNCTIONAL MATRIX</div>
+        <div class="slide-title">全方位功能生態矩陣 (8 大功能模組)</div>
+        <div class="slide-sub">涵蓋認知輸入、互動測驗、多人競技到 AI 深度輔導的全鏈條閉環</div>
+      </div>
+      <div class="header-tag">8 CORE MODULES</div>
+    </div>
+
+    <div class="grid-4" style="gap: 16px;">
+      <div class="swiss-card red-accent">
+        <div class="card-num">F01</div>
+        <div class="card-title" style="font-size:15px;">每日單字卡</div>
+        <div class="card-desc">日期種子動態輪播，防重複演算法，結合高解析例句配圖與真人口音發音。</div>
+      </div>
+      <div class="swiss-card blue-accent">
+        <div class="card-num">F02</div>
+        <div class="card-title" style="font-size:15px;">智能評分系統</div>
+        <div class="card-desc">單字學習後自動無縫銜接測驗，即時雷達評級與錯題沉澱生字本。</div>
+      </div>
+      <div class="swiss-card">
+        <div class="card-num">F03</div>
+        <div class="card-title" style="font-size:15px;">自訂測驗工作坊</div>
+        <div class="card-desc">看英選中、看中選英、鍵盤快捷鍵 (1-4/ABCD)，動態生成干擾項。</div>
+      </div>
+      <div class="swiss-card amber-accent">
+        <div class="card-num">F04</div>
+        <div class="card-title" style="font-size:15px;">PK 即時對戰</div>
+        <div class="card-desc">6 碼房間即時配對，血量/盾牌/狂暴機制，職業技能逆轉戰局。</div>
+      </div>
+      <div class="swiss-card green-accent">
+        <div class="card-num">F05</div>
+        <div class="card-title" style="font-size:15px;">閱讀測驗模組</div>
+        <div class="card-desc">依題庫自動每日換池，長文段落閱讀、劃詞即查與理解題組。</div>
+      </div>
+      <div class="swiss-card">
+        <div class="card-num">F06</div>
+        <div class="card-title" style="font-size:15px;">克漏字填空</div>
+        <div class="card-desc">語境上下文線索填空，文法時態檢驗與智能即時反饋解析。</div>
+      </div>
+      <div class="swiss-card red-accent">
+        <div class="card-num">F07</div>
+        <div class="card-title" style="font-size:15px;">Gemini AI 家教</div>
+        <div class="card-desc">即時雙向語音對話，即席造句糾錯與上下文深度延伸解讀。</div>
+      </div>
+      <div class="swiss-card blue-accent">
+        <div class="card-num">F08</div>
+        <div class="card-title" style="font-size:15px;">多模態 Vision OCR</div>
+        <div class="card-desc">拍攝課本講義一鍵辨識提取，智慧過濾雜訊批量建卡。</div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 03 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: QUIZ & HERO CARDS -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">MODULE DETAIL 01</div>
+        <div class="slide-title">自訂測驗工作坊 & 單字卡英雄展示</div>
+        <div class="slide-sub">全新題型出題引擎：徹底解決「自訂詞彙」標籤誤植，實現標準化看英選中/看中選英</div>
+      </div>
+      <div class="header-tag">SMART WORKSHOP</div>
+    </div>
+
+    <div class="grid-2" style="gap: 24px;">
+      <div class="swiss-card red-accent">
+        <div class="card-num">FEATURE SPECIFICATION</div>
+        <div class="card-title">精準出題系統重構</div>
+        <div class="card-desc" style="font-size:13px; line-height:1.7;">
+          <strong>1. 雙向自動出題模式</strong><br>
+          • <strong>看英選中</strong>：大字題幹顯示英文單詞（如 <code>workout</code>），四個選項均為純中文釋義。<br>
+          • <strong>看中選英</strong>：大字題幹顯示純中文釋義（如 <code>訓練，鍛鍊</code>），選項均為純英文單詞。<br><br>
+          <strong>2. 三層干擾項生成器 (Distractor Engine)</strong><br>
+          • 優先層：抽取自訂測驗清單內其他卡片，混淆度最高。<br>
+          • 次級層：抽取使用者個人單字本 (Vocab Notebook)。<br>
+          • 保底層：內建 60+ 高頻常備詞庫，杜絕題庫枯竭產生空白選項。
+        </div>
+      </div>
+
+      <div class="swiss-card blue-accent">
+        <div class="card-num">ENGINEERING HIGHLIGHTS</div>
+        <div class="card-title">NLP 雙向智慧分詞與互動</div>
+        <div class="card-desc" style="font-size:13px; line-height:1.7;">
+          <strong>1. smartSplitEnZh 正規化函式</strong><br>
+          • 採用 Unicode 正則智能辨別英文名詞與中文釋義邊界。<br>
+          • 完整保留如 <code>workout (尤指體育的) 訓練</code> 中括號說明資訊，不發生文字裁切斷裂。<br><br>
+          <strong>2. 全流程鍵盤盲打支援</strong><br>
+          • 題型支援 <code>1 / 2 / 3 / 4</code> 或 <code>A / B / C / D</code> 瞬間作答。<br>
+          • 快捷播放單字真人發音，答題即時動畫回饋。<br><br>
+          <strong>3. 自訂卡片多模態圖片更換</strong><br>
+          • 彈窗提供電腦本地上傳與線上 URL 直連，支援 Esc / 遮罩快速關閉。
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 04 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: PK BATTLE -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">MODULE DETAIL 02</div>
+        <div class="slide-title">即時雙人對戰競技場 (PK Battle Arena)</div>
+        <div class="slide-sub">將單字記憶與格鬥決策融合，四大職業英雄與技能博弈體系</div>
+      </div>
+      <div class="header-tag">GAMIFIED COMBAT</div>
+    </div>
+
+    <div class="grid-4" style="margin-bottom: 20px;">
+      <div class="swiss-card blue-accent">
+        <div class="card-num">CLASS 01</div>
+        <div class="card-title">疾風劍士 Aria</div>
+        <div class="card-desc"><strong>技能：二連斬 (Dual Slash)</strong><br>答對連續發動 2 次傷害打擊，極限壓制對手。</div>
+      </div>
+      <div class="swiss-card amber-accent">
+        <div class="card-num">CLASS 02</div>
+        <div class="card-title">光耀守護 Leon</div>
+        <div class="card-desc"><strong>技能：神聖壁壘 (Holy Aegis)</strong><br>產生高額生命吸收護盾，抵禦敵方致死打擊。</div>
+      </div>
+      <div class="swiss-card green-accent">
+        <div class="card-num">CLASS 03</div>
+        <div class="card-title">虛空賢者 Seraphina</div>
+        <div class="card-desc"><strong>技能：時間扭曲 (Time Warp)</strong><br>延長自身作答時限 50%，凍結對手連擊加成。</div>
+      </div>
+      <div class="swiss-card red-accent">
+        <div class="card-num">CLASS 04</div>
+        <div class="card-title">燃魂術士 Ignis</div>
+        <div class="card-desc"><strong>技能：地獄火球 (Hellfire)</strong><br>累積答對層數發動無視防禦真實燃燒爆發傷害。</div>
+      </div>
+    </div>
+
+    <div class="swiss-card" style="border-left-color: var(--swiss-red); background: var(--bg-main);">
+      <div class="card-num">NETWORKING & COMBAT PIPELINE</div>
+      <div class="card-title" style="font-size:14px;">房間代碼配對與戰鬥決策循環</div>
+      <div class="card-desc" style="font-size:12.5px; line-height:1.6;">
+        玩家透過 6 碼自訂房間號瞬間建立對戰室，支援跨設備局域網與穿透連線。作答採用倒數計時與連擊倍率計算：答對速度越快，技能充能進度條越快；連續答對累積狂暴點數。
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 05 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: FULL-STACK ARCHITECTURE -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">SYSTEM ARCHITECTURE</div>
+        <div class="slide-title">前後端工作架設圖 (Full-Stack Architecture)</div>
+        <div class="slide-sub">高內聚、低耦合的分層架構：從客戶端響應到 AI 多模態與邊緣穿透部署</div>
+      </div>
+      <div class="header-tag">SYSTEM TOPOLOGY</div>
+    </div>
+
+    <div class="arch-container">
+      <!-- Tier 1 -->
+      <div class="arch-layer">
+        <div class="layer-title-box">
+          <div class="layer-name">Client Layer</div>
+          <div class="layer-role">前端客戶端層</div>
+        </div>
+        <div class="layer-items">
+          <div class="tech-pill red-pill"><strong>Single Page App (SPA)</strong> 模組化驅動</div>
+          <div class="tech-pill"><code>app.js</code> 核心視圖路由</div>
+          <div class="tech-pill"><code>custom_quiz.js</code> 測驗工作坊</div>
+          <div class="tech-pill"><code>pk_battle.js</code> 對戰狀態機</div>
+          <div class="tech-pill"><code>vocab.js</code> 生字持久化</div>
+          <div class="tech-pill">Web Speech API (語音發音)</div>
+        </div>
+      </div>
+
+      <!-- Tier 2 -->
+      <div class="arch-layer">
+        <div class="layer-title-box">
+          <div class="layer-name">Gateway & Ops</div>
+          <div class="layer-role">網路與穿透網關</div>
+        </div>
+        <div class="layer-items">
+          <div class="tech-pill blue-pill"><strong>RESTful API</strong> (JSON 協定)</div>
+          <div class="tech-pill">HTTP 輪詢 / 雙向信號 (PK 對戰同步)</div>
+          <div class="tech-pill"><strong>run_tunnel.py</strong> (LocalTunnel / Cloudflare 穿透)</div>
+          <div class="tech-pill">終端機 QR Code 即時生成 (手機秒開)</div>
+        </div>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="arch-layer">
+        <div class="layer-title-box">
+          <div class="layer-name">Application Core</div>
+          <div class="layer-role">Python Flask 服務核心</div>
+        </div>
+        <div class="layer-items">
+          <div class="tech-pill"><code>app.py</code> 路由與中介軟體</div>
+          <div class="tech-pill red-pill"><strong>DailyContentManager</strong> 每日動態抗重複池輪播</div>
+          <div class="tech-pill blue-pill"><strong>PKPvPManager</strong> 記憶體對戰房間狀態機</div>
+          <div class="tech-pill">JWT / Session 輕量化鑑權</div>
+        </div>
+      </div>
+
+      <!-- Tier 4 -->
+      <div class="arch-layer">
+        <div class="layer-title-box">
+          <div class="layer-name">AI Intelligence</div>
+          <div class="layer-role">Google Cloud AI 服務</div>
+        </div>
+        <div class="layer-items">
+          <div class="tech-pill red-pill"><strong>Gemini 2.5 Flash</strong> 即時雙向 AI 家教語音對話</div>
+          <div class="tech-pill blue-pill"><strong>Gemini 2.5 Pro Vision</strong> 多模態講義單字 OCR 智慧提取</div>
+          <div class="tech-pill">即席造句分析與文法自動診斷</div>
+        </div>
+      </div>
+
+      <!-- Tier 5 -->
+      <div class="arch-layer">
+        <div class="layer-title-box">
+          <div class="layer-name">Data Persistence</div>
+          <div class="layer-role">數據持久化層</div>
+        </div>
+        <div class="layer-items">
+          <div class="tech-pill"><code>vocabulary_expanded.json</code> (6000+ 標準高中核心字庫)</div>
+          <div class="tech-pill"><code>reading_questions.json</code> (閱測題庫)</div>
+          <div class="tech-pill"><code>cloze_questions.json</code> (克漏字題庫)</div>
+          <div class="tech-pill">LocalStorage (個人生字本 / 評分紀錄離線快取)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 06 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: DATA PIPELINES -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">DATA FLOW & WORKFLOWS</div>
+        <div class="slide-title">核心業務數據管線與狀態流轉</div>
+        <div class="slide-sub">以三條高可靠工作流貫穿用戶學習全歷程</div>
+      </div>
+      <div class="header-tag">PIPELINE DESIGN</div>
+    </div>
+
+    <div class="grid-3" style="margin-top: 10px;">
+      <div class="swiss-card red-accent">
+        <div class="card-num">WORKFLOW 01</div>
+        <div class="card-title">NLP 批量匯入流</div>
+        <div class="card-desc" style="font-size:12.5px; line-height:1.7;">
+          <strong>1. 多源輸入</strong>：文字剪貼簿或 Vision OCR 上傳。<br>
+          <strong>2. 正規化過濾</strong>：去除空行與雜訊，執行 <code>smartSplitEnZh</code> 雙向切割。<br>
+          <strong>3. 卡片渲染</strong>：生成可選取之預覽網格，支援個別替換配圖。<br>
+          <strong>4. 一鍵沉澱</strong>：批量匯入個人生字庫並排除於日課池外。
+        </div>
+      </div>
+
+      <div class="swiss-card blue-accent">
+        <div class="card-num">WORKFLOW 02</div>
+        <div class="card-title">每日防重複輪播流</div>
+        <div class="card-desc" style="font-size:12.5px; line-height:1.7;">
+          <strong>1. 日期哈希種子</strong>：依自然日生成不可預測隨機種子。<br>
+          <strong>2. 差集計算</strong>：<code>池 = 總題庫 - 個人生字本 - 本週已讀</code>。<br>
+          <strong>3. 多題型同步分發</strong>：單字卡、閱讀測驗、克漏字三模組同步換池。<br>
+          <strong>4. 隔日 00:00 自動歸檔</strong>：推進下一循環。
+        </div>
+      </div>
+
+      <div class="swiss-card green-accent">
+        <div class="card-num">WORKFLOW 03</div>
+        <div class="card-title">多人對戰狀態機流</div>
+        <div class="card-desc" style="font-size:12.5px; line-height:1.7;">
+          <strong>1. 創房 / 加入</strong>：6 碼房間註冊與雙方角色鎖定。<br>
+          <strong>2. 題目廣播</strong>：後端同步下發相同題幹與時限。<br>
+          <strong>3. 傷害結算</strong>：作答耗時 + 連擊倍率 + 職業技能乘積。<br>
+          <strong>4. 廣播血量</strong>：勝負判定與經驗值回饋獎勵。
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 07 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: DEPLOYMENT & CLOUD OPS -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">DEPLOYMENT & OPERATIONS</div>
+        <div class="slide-title">工程部署與邊緣運維架構</div>
+        <div class="slide-sub">兼具雲端高可用性與本地快速行動裝置調試能力</div>
+      </div>
+      <div class="header-tag">PRODUCTION READY</div>
+    </div>
+
+    <div class="grid-2" style="gap: 24px; margin-top: 10px;">
+      <div class="swiss-card blue-accent">
+        <div class="card-num">CLOUD PRODUCTION</div>
+        <div class="card-title">Render Cloud PaaS 容器化部署</div>
+        <div class="card-desc" style="font-size:13px; line-height:1.7;">
+          • <strong>設定檔案</strong>：<code>render.yaml</code> 自動化構建規範與 <code>Procfile</code>。<br>
+          • <strong>WSGI 伺服器</strong>：Gunicorn 高效能非同步並行處理。<br>
+          • <strong>CI/CD 整合</strong>：GitHub <code>main</code> 分支 Push 觸發零停機自動佈署。<br>
+          • <strong>全域安全</strong>：自動配置 HTTPS TLS 憑證與 CORS 安全防護標頭。
+        </div>
+      </div>
+
+      <div class="swiss-card amber-accent">
+        <div class="card-num">LOCAL & EDGE TESTING</div>
+        <div class="card-title">一鍵行動穿透與終端 QR Code (run_tunnel.py)</div>
+        <div class="card-desc" style="font-size:13px; line-height:1.7;">
+          • <strong>一鍵啟動</strong>：<code>python run_tunnel.py</code> 自動調度後端與內網穿透。<br>
+          • <strong>雙管道容災</strong>：優先嘗試 LocalTunnel，遇阻自動轉接 Cloudflare Tunnel。<br>
+          • <strong>終端機 ASCII QR Code</strong>：手機相機掃描終端畫面，免輸入長網址即刻在真實手機瀏覽器展開 PK 對戰。
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 08 / 09</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: CONCLUSION & BREAKTHROUGHS -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <div class="header-left">
+        <div class="slide-category">SUMMARY & MILESTONES</div>
+        <div class="slide-title">技術成果總結與核心競爭力</div>
+        <div class="slide-sub">從工具型應用蛻變為全功能現代化智慧學習平台</div>
+      </div>
+      <div class="header-tag">CONCLUSION</div>
+    </div>
+
+    <div class="grid-4" style="margin-top: 10px;">
+      <div class="swiss-card red-accent">
+        <div class="card-num">BREAKTHROUGH 01</div>
+        <div class="card-title">嚴格排他抗重複</div>
+        <div class="card-desc">徹底隔絕已掌握單字，每日三個不同模組同步輪替，杜絕枯燥體驗。</div>
+      </div>
+      <div class="swiss-card blue-accent">
+        <div class="card-num">BREAKTHROUGH 02</div>
+        <div class="card-title">雙向出題高智力</div>
+        <div class="card-desc">智慧分詞分流中英題幹與釋義，三層干擾項杜絕破題可能。</div>
+      </div>
+      <div class="swiss-card green-accent">
+        <div class="card-num">BREAKTHROUGH 03</div>
+        <div class="card-title">多人競技遊戲化</div>
+        <div class="card-desc">職業技能與連擊計時博弈，建立自發性高頻率複習誘因。</div>
+      </div>
+      <div class="swiss-card amber-accent">
+        <div class="card-num">BREAKTHROUGH 04</div>
+        <div class="card-title">多模態 AI 全覆蓋</div>
+        <div class="card-desc">實體講義 OCR 秒速匯入 + Gemini 雙向口語對話導師輔導。</div>
+      </div>
+    </div>
+
+    <div class="swiss-card" style="margin-top: 24px; border-left-color: var(--swiss-red); background: #FFFFFF;">
+      <div class="card-num">GITHUB VERIFIED REPOSITORY</div>
+      <div class="card-title" style="font-size:14px; margin-bottom:4px;">程式碼庫開源結構完整，一鍵拉取即可運行</div>
+      <div class="card-desc" style="font-size:12px;">
+        Repository: <code>https://github.com/qwu302383-lang/Phoneme-Worms</code> | Branch: <code>main</code>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>PHONEME-WORMS SYSTEM BRIEFING</span>
+      <span>PAGE 09 / 09</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation Controls -->
+<div id="nav-bar">
+  <button class="nav-btn" onclick="prevSlide()">◀ 上一頁</button>
+  <span class="nav-counter" id="slide-num">01 / 09</span>
+  <button class="nav-btn" onclick="nextSlide()">下一頁 ▶</button>
+  <button class="nav-btn" onclick="toggleFullScreen()">⛶ 全螢幕</button>
+  <span class="nav-info">支援鍵盤 ← / → 或 空白鍵 / Enter 翻頁</span>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 9;
+
+  function showSlide(index) {
+    if (index < 1) index = 1;
+    if (index > totalSlides) index = totalSlides;
+    currentSlide = index;
+
+    for (let i = 1; i <= totalSlides; i++) {
+      const el = document.getElementById(`slide-${i}`);
+      if (el) {
+        if (i === currentSlide) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      }
+    }
+    document.getElementById('slide-num').innerText = `${String(currentSlide).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+  }
+
+  function nextSlide() {
+    if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+  }
+
+  function prevSlide() {
+    if (currentSlide > 1) showSlide(currentSlide - 1);
+  }
+
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+      nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+      prevSlide();
+    } else if (e.key === 'Home') {
+      showSlide(1);
+    } else if (e.key === 'End') {
+      showSlide(totalSlides);
+    }
+  });
+</script>
+
+</body>
+</html>
